@@ -1,0 +1,339 @@
+
+body{font-family:Arial;background:#f4f1e8;margin:0;text-align:center}
+
+.logo {
+  width: 35%;
+  max-width: 160px;   /* keeps it from getting huge on desktop */
+  margin: 10px auto;
+  display: block;
+}
+
+/* Base button style (wood sign look) */
+button {
+  display: block;
+  width: 80%;
+  margin: 10px auto;
+  padding: 14px;
+
+  font-size: 17px;
+  color: white;
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(#a47148, #8b5a2b);
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+
+  text-align: center;
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+}
+
+.card{
+ background:white;margin:10px;padding:10px;border-radius:12px;
+ box-shadow:0 2px 6px rgba(0,0,0,0.2);
+}
+
+.pin{
+  position:absolute;
+  width:14px;
+  height:14px;
+  background:red;
+  border-radius:50%;
+  transform: translate(-50%, -50%);
+}
+
+.zone{
+  position: absolute;
+  background: rgba(0,0,0,0); /* invisible */
+}
+
+/* horizontal button groups */
+.row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px auto;
+  width: 80%;              /* keeps group centered */
+}
+
+/* Make buttons share space evenly but keep wood style */
+.row button {
+  flex: 1;
+  margin: 0;               /* remove vertical stacking margin */
+  width: auto;             /* override block width */
+}
+
+/* spacing below main menu */
+.content-spacer {
+  height: 20px;
+}
+
+.menu {
+  margin-bottom: 20px;     /* space before content */
+}
+
+#map {
+  position: relative;
+  width: 96%;
+  margin: 0 auto;
+  height: 400px;
+
+  background-image: url('/static/map.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  background-color: #ddd;   /* fallback so you can see container */
+
+  border-radius: 12px;
+  overflow: hidden;
+
+  border: 3px solid #8b5a2b;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.sponsor {
+  text-align: center;
+}
+
+.sponsor-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+/* Alert toggle state */
+.alert-btn.active {
+  background: linear-gradient(#2e7d32, #1b5e20); /* dark green */
+}
+
+.sponsor-name {
+  display: block;
+  margin-top: 6px;
+}
+
+.subtitle {
+  font-size: 18px;
+  font-weight: bold;
+  color: #5a4a3f;
+  margin-top: -5px;
+  margin-bottom: 10px;
+}
+
+.card.active-event {
+  border: 2px solid #2e7d32;
+  background: #f1f8f4;
+}
+
+.alert-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.poi-popup{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.2);
+
+  z-index: 999;
+}
+
+.poi-content{
+  position: absolute;   /* ✅ REQUIRED for tap positioning */
+
+  background: white;
+  padding: 5px;
+  border-radius: 3px;
+
+  max-width: 55px;      /* ✅ better for small popups */
+  width: auto;          /* ✅ prevents stretching across screen */
+  word-wrap: break-word;
+
+  box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+}
+
+@keyframes popIn{
+  from { transform: translate(-50%, -100%) scale(0.9); opacity: 0; }
+  to   { transform: translate(-50%, -110%) scale(1); opacity: 1; }
+}
+
+.poi-content h3{
+  font-size: 0.25em;
+}
+
+.poi-content p{
+  font-size: 0.25em;
+}
+
+.icon-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:14px;                 /* was 18px */
+  width:85%;                /* slightly narrower */
+  max-width:380px;          /* tighter layout */
+  margin:15px auto;
+}
+
+.icon-card img{
+  width:68px;               /* was 80px */
+  height:68px;
+}
+
+.icon-card div{
+  margin-top:4px;           /* tighter spacing */
+  font-size:15px;
+}
+
+.logo-center img{
+  width:76px;
+  height:76px;
+}
+
+.icon-card {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.icon-card img {
+  pointer-events: none;        /* 🔴 KEY FIX */
+  -webkit-user-drag: none;
+}
+
+.ios-note {
+  background: #fff8e1;
+  border: 2px dashed #c8a96a;
+}
+
+/* Footer logo */
+#footerLogo {
+  width: 100%;
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+#footerLogo img {
+  width: 60px;              /* small size */
+  opacity: 0.85;
+}
+
+#footerLogo img:active {
+  transform: scale(0.95);
+}
+
+.footer-text {
+  font-size: 8px;        /* ~8pt equivalent on mobile */
+  color: #777;
+  margin-top: 5px;
+}
+
+.icon-card {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.static-page {
+  text-align: left;
+  line-height: 1.2;
+}
+
+.card.changed-event {
+  background: #fff8dc;   /* light yellow */
+  border: 2px solid #e6c200;
+}
+
+.card.cancelled-event {
+  background: #fdecea;   /* light red */
+  border: 2px solid #d32f2f;
+}
+
+
+.ui-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 14px;
+  margin-bottom: 14px;
+
+  border-radius: 14px;
+  background: #ffffff;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* LEFT IMAGE */
+.ui-card-media {
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* RIGHT CONTENT */
+.ui-card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  text-align: left;
+}
+
+/* TITLE */
+.ui-card-title {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 2px;
+}
+
+/* BODY TEXT */
+.ui-card-body {
+  font-size: 0.95rem;
+  margin-top: 2px;
+}
+
+/* PRESERVE EMPTY LINE */
+.ui-card-body:empty {
+  height: 0.6em;
+}
+
+/* BUTTON AREA */
+.ui-card-actions {
+  margin-top: 8px;
+}
+
+/* BUTTON */
+.alert-btn {
+  background: #9c6b30;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ui-card.no-media {
+  padding-left: 16px;
+}
+
+.ui-card.no-media .ui-card-media {
+  display: none;
+}
+

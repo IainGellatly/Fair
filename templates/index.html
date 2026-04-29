@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/styles.css">
+<link rel="icon" type="image/png" href="/static/favicon.png">
+    <title>Wayne County Fair</title>
+
+</head>
+<body>
+
+<img src="/static/logo.webp" class="logo" alt="logo"/>
+
+<br>
+
+<div class="subtitle">
+  Monday Aug 10th - Sunday Aug 16th, 2026
+</div>
+
+<!-- GRID -->
+<div class="icon-grid">
+
+  <!-- ROW 1 -->
+  <div class="icon-card" data-page="today">
+    <img src="/static/icons/menu/today.webp" alt="today">
+    <div>Today</div>
+  </div>
+
+  <div class="icon-card" data-page="map">
+    <img src="/static/icons/menu/map.webp" alt="map">
+    <div>Map</div>
+  </div>
+
+  <div class="icon-card" data-page="calendar">
+    <img src="/static/icons/menu/calendar.webp" alt="calendar">
+    <div>Calendar</div>
+  </div>
+
+  <!-- ROW 2 -->
+  <div class="icon-card" data-page="food">
+    <img src="/static/icons/menu/food.webp" alt="food">
+    <div>Food</div>
+  </div>
+
+  <div class="icon-card" data-page="music">
+    <img src="/static/icons/menu/music.webp" alt="music">
+    <div>Music</div>
+  </div>
+
+  <div class="icon-card" data-page="grandstand">
+    <img src="/static/icons/menu/grandstand.webp" alt="grandstand">
+    <div>Grandstand</div>
+  </div>
+
+  <!-- ROW 3 -->
+  <div class="icon-card" data-page="midway">
+    <img src="/static/icons/menu/midway.webp" alt="midway">
+    <div>Midway</div>
+  </div>
+
+  <div class="icon-card logo-center">
+    <img src="/static/logo.webp" alt="logo">
+  </div>
+
+  <div class="icon-card" data-page="animals">
+    <img src="/static/icons/menu/animals.webp" alt="animals">
+    <div>Animals</div>
+  </div>
+
+  <!-- ROW 4 -->
+  <div class="icon-card" data-page="sponsors">
+    <img src="/static/icons/menu/sponsors.webp" alt="sponsor">
+    <div>Sponsors</div>
+  </div>
+
+  <div class="icon-card" data-page="exhibits">
+    <img src="/static/icons/menu/exhibits.webp" alt="exhibits">
+    <div>Exhibits</div>
+  </div>
+
+  <div class="icon-card" data-page="business">
+    <img src="/static/icons/menu/business.webp" alt="business">
+    <div>Business</div>
+  </div>
+
+<!-- ROW 5 -->
+<div class="icon-card" data-page="firstaid">
+  <img src="/static/icons/menu/firstaid.webp" alt="first aid">
+  <div>First Aid</div>
+</div>
+
+<div class="icon-card" data-page="more">
+  <img src="/static/icons/menu/more.webp" alt="more">
+  <div>More</div>
+</div>
+
+<div class="icon-card" data-page="facilities">
+  <img src="/static/icons/menu/facilities.webp" alt="facilities">
+  <div>Facilities</div>
+</div>
+
+<!-- ROW 6 (HIDDEN BY DEFAULT) -->
+<div class="icon-card more-row" data-page="tickets" style="display:none;">
+  <img src="/static/icons/menu/tickets.webp" alt="tickets">
+  <div>Tickets</div>
+</div>
+
+<div class="icon-card more-row" data-page="faqs" style="display:none;">
+  <img src="/static/icons/menu/faqs.webp" alt="faqs">
+  <div>FAQs</div>
+</div>
+
+<div class="icon-card more-row" data-page="about" style="display:none;">
+  <img src="/static/icons/menu/about.webp" alt="about">
+  <div>About</div>
+</div>
+</div>
+
+<!-- CONTENT AREA -->
+<div id="content"></div>
+
+<script src="/static/app.js"></script>
+
+<div id="footerLogo">
+  <img src="/static/logo.webp" alt="Fair Logo" onclick="goHome()" />
+    <div class="footer-text">Copyright 2026 Retro Gear Laboratories LLC</div>
+</div>
+
+
+</body>
+</html>
