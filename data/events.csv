@@ -1,0 +1,176 @@
+type,name,description,icon,location,price,start_time,end_time,duration_hrs,status,featured
+Judging,Grange Booth Judging,,fair.webp,Grange Booth,Free,2026-08-10 10:00:00,2026-08-10 11:00:00,1,scheduled,0
+Judging,Open Class Food Judging,,fair.webp,Floral Hall,Free,2026-08-10 11:00:00,2026-08-10 12:00:00,1,scheduled,0
+General,Special of the Day Grange,,fair.webp,Grange Booth,Free,2026-08-10 12:00:00,2026-08-10 16:00:00,4,scheduled,0
+Grandstand,NYS Harness Racing,,fair.webp,Grandstand,Free,2026-08-10 12:00:00,2026-08-10 13:00:00,1,scheduled,0
+Show,4-H Poultry Show,,fair.webp,4-H Building,Free,2026-08-10 12:00:00,2026-08-10 13:00:00,1,scheduled,0
+Judging,Open Flower Show Judging,,fair.webp,Floral Hall,Free,2026-08-10 12:00:00,2026-08-10 13:00:00,1,scheduled,0
+Ceremony,Opening Ceremonies,,fair.webp,Floral Hall,Free,2026-08-10 13:00:00,2026-08-10 14:00:00,1,scheduled,0
+Sale,Open Class Baked Food Sale,,fair.webp,Floral Hall,Free,2026-08-10 14:00:00,2026-08-10 18:00:00,4,scheduled,0
+Music,James Draudt,Guitar Solo,fair.webp,Floral Hall Back Porch,Free,2026-08-10 17:00:00,2026-08-10 19:00:00,2,scheduled,0
+Judging,4-H Flower/Vegetable Judging,,fair.webp,4-H Building,Free,2026-08-10 17:00:00,2026-08-10 18:30:00,1.5,scheduled,0
+Grandstand,NYS Sanctioned Horse Pull,,fair.webp,Grandstand,Free,2026-08-10 17:30:00,2026-08-10 19:00:00,1.5,scheduled,0
+Judging,Open Vegetable Judging,,fair.webp,Floral Hall,Free,2026-08-10 19:00:00,2026-08-10 20:00:00,1,scheduled,0
+Contest,Grease Pole Qualifications,,fair.webp,Floral Hall,Free,2026-08-10 19:00:00,2026-08-10 20:00:00,1,scheduled,0
+Music,Friar Tuck Band,,fair.webp,Entertainment Alley,Free,2026-08-10 19:00:00,2026-08-10 21:30:00,2.5,scheduled,0
+Show,4-H Mini/Driving Horse Show,,fair.webp,Grandstand,Free,2026-08-11 10:00:00,2026-08-11 11:30:00,1.5,scheduled,0
+Show,4-H Goat Show,,fair.webp,4-H Building,Free,2026-08-11 11:00:00,2026-08-11 12:30:00,1.5,scheduled,0
+General,Special of the Day Grange Booth,,fair.webp,Grange Booth,Free,2026-08-11 11:00:00,2026-08-11 15:00:00,4,scheduled,0
+Meeting,Stockholder Meet & Greet,,fair.webp,Floral Hall,Free,2026-08-11 11:00:00,2026-08-11 12:00:00,1,scheduled,0
+Show,4-H Rabbit & Cavy Show,,fair.webp,4-H Building,Free,2026-08-11 13:00:00,2026-08-11 14:00:00,1,scheduled,0
+Game,Spin to Win Wheel,,fair.webp,Commercial Building #1,Free,2026-08-11 13:00:00,2026-08-11 17:00:00,4,scheduled,0
+Music,Innisfree Celtic Music Ensemble ,Music Ensemble,fair.webp,Floral Hall Back Porch,Free,2026-08-11 13:00:00,2026-08-11 15:00:00,2,scheduled,0
+Show,Open Draft Horse Show,,fair.webp,Grandstand,Free,2026-08-11 14:00:00,2026-08-11 15:00:00,1,scheduled,0
+Contest,Open Beef Showmanship,,fair.webp,Cattle Barn,Free,2026-08-11 14:00:00,2026-08-11 15:00:00,1,scheduled,0
+Show,Open Beef Show,,fair.webp,Cattle Barn,Free,2026-08-11 15:00:00,2026-08-11 16:00:00,1,scheduled,0
+Exhibit,Gladiolus Show Opens to Public,,fair.webp,Floral Hall,Free,2026-08-11 15:00:00,2026-08-11 19:00:00,4,scheduled,0
+General,Sensory Friendly Hours,,fair.webp,Sensory Tent,Free,2026-08-11 16:00:00,2026-08-11 18:00:00,2,scheduled,0
+Activities,CCE Day Activities,,fair.webp,Cattle Barn,Free,2026-08-11 16:00:00,2026-08-11 19:00:00,3,scheduled,0
+Show,4-H Dog Show,,fair.webp,4-H Building,Free,2026-08-11 17:00:00,2026-08-11 18:00:00,1,scheduled,0
+Music,Anthony Blood,Guitar Solo,fair.webp,Floral Hall Back Porch,Free,2026-08-11 17:00:00,2026-08-11 19:00:00,2,scheduled,0
+Rides,RIDES OPEN,,fair.webp,Midway,Visit Ticket Booth,2026-08-11 18:00:00,2026-08-11 23:00:00,5,scheduled,0
+Meeting,CCE Board Meeting,,fair.webp,Floral Hall,Free,2026-08-11 18:15:00,2026-08-11 19:15:00,1,scheduled,0
+Judging,WC Fair Pie Contest Judging,,fair.webp,Floral Hall,Free,2026-08-11 18:30:00,2026-08-11 19:30:00,1,scheduled,0
+Grandstand,Empire State Pullers Tractor Pull,,fair.webp,Grandstand,$15/person,2026-08-11 19:00:00,2026-08-11 21:00:00,2,scheduled,0
+Judging,Open Fruit Judging,,fair.webp,Floral Hall,Free,2026-08-11 19:30:00,2026-08-11 20:30:00,1,scheduled,0
+Auction,Pie Contest Auction,,fair.webp,Floral Hall,Free,2026-08-11 19:30:00,2026-08-11 20:30:00,1,scheduled,0
+Music,Cruel Summer Band Tribute to Taylor Swift,,fair.webp,Entertainment Alley,$6 Beer,2026-08-11 19:30:00,2026-08-11 22:00:00,2.5,scheduled,0
+Show,4-H English Horse Show,,fair.webp,Horse Stables,Free,2026-08-12 10:00:00,2026-08-12 11:30:00,1.5,scheduled,0
+Show,4-H Dairy Cattle Show,,fair.webp,Cattle Barn,Free,2026-08-12 10:00:00,2026-08-12 11:30:00,1.5,scheduled,0
+Contest,Egg Drop Contest,,fair.webp,Floral Hall,Free,2026-08-12 11:00:00,2026-08-12 12:00:00,1,scheduled,0
+Safety,Sheriff Child Safety Seat Check,,fair.webp,Floral Hall,Free,2026-08-12 11:00:00,2026-08-12 13:00:00,2,scheduled,0
+General,Special of the Day,,fair.webp,Grange Booth,Free,2026-08-12 12:00:00,2026-08-12 16:00:00,4,scheduled,0
+Judging,Open Fairy Garden Show Judging,,fair.webp,4-H Building,Free,2026-08-12 12:00:00,2026-08-12 13:00:00,1,scheduled,0
+Contest,Youth Coloring Contest Royalty,,fair.webp,Floral Hall,Free,2026-08-12 12:00:00,2026-08-12 16:00:00,4,scheduled,0
+Rides,RIDES OPEN,,fair.webp,Midway,Visit Ticket Booth,2026-08-12 13:00:00,2026-08-12 18:00:00,5,scheduled,0
+Rides,Ride Bracelet Special,,fair.webp,Midway,$25,2026-08-12 13:00:00,2026-08-12 14:00:00,1,scheduled,0
+Contest,Watermelon Eating Contest,,fair.webp,Entertainment Alley,Free,2026-08-12 13:00:00,2026-08-12 14:00:00,1,scheduled,0
+General,Sensory Friendly Hours,,fair.webp,Sensory Tent,Free,2026-08-12 13:00:00,2026-08-12 14:00:00,1,scheduled,0
+Contest,Youth Corn Eatin' Competition,,fair.webp,Entertainment Alley,Free,2026-08-12 14:00:00,2026-08-12 15:00:00,1,scheduled,0
+Show,4-H Beef Show,,fair.webp,Cattle Barn,Free,2026-08-12 15:00:00,2026-08-12 16:30:00,1.5,scheduled,0
+Show,Fairy Garden Show,,fair.webp,4-H Building,Free,2026-08-12 15:00:00,2026-08-12 16:00:00,1,scheduled,0
+Show,Open Rabbit/Cavy Show,,fair.webp,TBD,Free,2026-08-12 16:00:00,2026-08-12 17:00:00,1,scheduled,0
+Activities,CCE Day Activities,,fair.webp,TBD,Free,2026-08-12 16:00:00,2026-08-12 17:00:00,1,scheduled,0
+Music,Honey & Vinegar,Country Music,fair.webp,Floral Hall Back Porch,Free,2026-08-12 17:00:00,2026-08-12 19:00:00,2,scheduled,0
+Game,Spin to Win Wheel,,fair.webp,Commercial Building #1,Free,2026-08-12 18:00:00,2026-08-12 22:00:00,4,scheduled,0
+Music,Red 7 - Band,,fair.webp,Entertainment Alley,$6 Beer,2026-08-12 19:00:00,2026-08-12 20:30:00,1.5,scheduled,0
+Contest,Grease Pole Qualifications,,fair.webp,Floral Hall,Free,2026-08-12 19:00:00,2026-08-12 20:00:00,1,scheduled,0
+Grandstand,Figure 8 Racing,,fair.webp,Grandstand,$15/person,2026-08-12 19:00:00,2026-08-12 20:00:00,1,scheduled,0
+Music,Claudia Hoyser - musician,,fair.webp,Entertainment Alley,$6 Beer,2026-08-12 21:00:00,2026-08-12 23:00:00,2,scheduled,0
+Show,4-H Western Horse Show,,fair.webp,Horse Stables,Free,2026-08-13 10:00:00,2026-08-13 11:30:00,1.5,scheduled,0
+Food,Chicken BBQ Grange Booth,,fair.webp,Grange Booth,TBD,2026-08-13 12:00:00,2026-08-13 14:00:00,2,scheduled,0
+Show,4-H and Open Sheep Show,,fair.webp,4-H Building,Free,2026-08-13 12:00:00,2026-08-13 13:30:00,1.5,scheduled,0
+Judging,Open Flower Show Judging,,fair.webp,Floral Hall,Free,2026-08-13 12:00:00,2026-08-13 13:00:00,1,scheduled,0
+Show,4-H and Open Swine Show,,fair.webp,Cattle Barn,Free,2026-08-13 15:00:00,2026-08-13 16:30:00,1.5,scheduled,0
+Rides,RIDES OPEN,,fair.webp,Midway,Visit Ticket Booth,2026-08-13 17:00:00,2026-08-13 18:00:00,1,scheduled,0
+Activities,CCE Day Activities,,fair.webp,TBD,Free,2026-08-13 16:00:00,2026-08-13 20:00:00,4,scheduled,0
+Event,Our Tasting Event,,fair.webp,Entertainment Alley,$15,2026-08-13 17:00:00,2026-08-13 19:30:00,2.5,scheduled,0
+Music,Dave Turner,Country Music,fair.webp,Floral Hall Back Porch,Free,2026-08-13 17:00:00,2026-08-13 19:00:00,2,scheduled,0
+Contest,Celebrity Goat Milking Contest,,fair.webp,Floral Hall,Free,2026-08-13 18:00:00,2026-08-13 19:00:00,1,scheduled,0
+Grandstand,Wayne County Fair Rodeo Branding,,fair.webp,Grandstand,Free,2026-08-13 18:00:00,2026-08-13 19:00:00,1,scheduled,0
+Game,Spin to Win Wheel,,fair.webp,Commercial Building #1,Free,2026-08-13 19:00:00,2026-08-13 23:00:00,4,scheduled,0
+Contest,Beat the Beast Bull Riders Tour,,fair.webp,Grandstand,$15,2026-08-13 19:00:00,2026-08-13 21:00:00,2,scheduled,0
+Music,Zac Brown Tribute Band ZBTB,,fair.webp,Entertainment Alley,Free,2026-08-13 20:30:00,2026-08-13 23:30:00,3,scheduled,0
+Show,Open Dairy Show,,fair.webp,Cattle Barn,Free,2026-08-14 09:00:00,2026-08-14 10:00:00,1,scheduled,0
+Show,4-H Gymkhana Horse Show,,fair.webp,4-H Building,Free,2026-08-14 10:00:00,2026-08-14 11:30:00,1.5,scheduled,0
+General,Special of the Day,,fair.webp,Grange Booth,Free,2026-08-14 12:00:00,2026-08-14 16:00:00,4,scheduled,0
+Judging,Open Dahlia Show Judging,,fair.webp,Floral Hall,Free,2026-08-14 12:00:00,2026-08-14 13:00:00,1,scheduled,0
+Contest,4-H Milk & Cookie Contest,,fair.webp,Cattle Barn,Free,2026-08-14 13:00:00,2026-08-14 14:30:00,1.5,scheduled,0
+Rides,RIDES OPEN,,fair.webp,Midway,Visit Ticket Booth,2026-08-14 17:00:00,2026-08-14 23:00:00,6,scheduled,0
+Activities,CCE Day Activities,,fair.webp,TBD,Free,2026-08-14 16:00:00,2026-08-14 17:00:00,1,scheduled,0
+Show,Wayne County Fair Open Barrel Racing,,fair.webp,Grandstand,Free,2026-08-14 17:00:00,2026-08-14 18:30:00,1.5,scheduled,0
+Demo,Wayne County Sheriff K-9 Demo,,fair.webp,Floral Hall,Free,2026-08-14 17:00:00,2026-08-14 18:30:00,1.5,scheduled,0
+Music,Andrew Young ,Country Music,fair.webp,Floral Hall Back Porch,Free,2026-08-14 17:00:00,2026-08-14 19:00:00,2,scheduled,0
+Auction,4-H Livestock Auction,,fair.webp,4-H Building,Free,2026-08-14 17:30:00,2026-08-14 19:00:00,1.5,scheduled,0
+Show,Open Gaming Horse Show,,fair.webp,Horse Stables,Free,2026-08-14 17:30:00,2026-08-14 18:30:00,1,scheduled,0
+Game,Spin to Win Wheel,,fair.webp,Commercial Building #1,Free,2026-08-14 18:00:00,2026-08-14 19:00:00,1,scheduled,0
+Contest,Grease Pole Qualifications,,fair.webp,Floral Hall,Free,2026-08-14 19:00:00,2026-08-14 20:00:00,1,scheduled,0
+Dance,Round/Square Dancing-Dave Jacobs,,fair.webp,Entertainment Alley,Free,2026-08-14 19:00:00,2026-08-14 20:30:00,1.5,scheduled,0
+Grandstand,Demolition Derby,,fair.webp,Grandstand,$15/person,2026-08-14 19:00:00,2026-08-14 21:00:00,2,scheduled,0
+Music,M80s Band,,fair.webp,Entertainment Alley,$6 Beer,2026-08-14 20:30:00,2026-08-14 23:00:00,2.5,scheduled,0
+Contest,Talent Showcase Contest,,fair.webp,Entertainment Alley,Free,2026-08-15 09:00:00,2026-08-15 10:00:00,1,scheduled,0
+Show,Open Dressage Horse Show,,fair.webp,Grandstand,Free,2026-08-15 09:00:00,2026-08-15 10:00:00,1,scheduled,0
+Show,Open Dairy Goat Show,,fair.webp,Cattle Barn,Free,2026-08-15 09:00:00,2026-08-15 10:00:00,1,scheduled,0
+Grandstand,Central NY Garden Tractor Pull,,fair.webp,Grandstand,Free,2026-08-15 10:00:00,2026-08-15 12:00:00,2,scheduled,0
+Contest,4-H Large Animal Super Showmanship,,fair.webp,4-H Building,Free,2026-08-15 11:00:00,2026-08-15 12:30:00,1.5,scheduled,0
+Food,Chicken BBQ,,fair.webp,Grange Booth,Free,2026-08-15 12:00:00,2026-08-15 13:00:00,1,scheduled,0
+Contest,Veggie Races,,fair.webp,Floral Hall,Free,2026-08-15 12:00:00,2026-08-15 12:30:00,0.5,scheduled,0
+Rides,RIDES OPEN,,fair.webp,Midway,Visit Ticket Booth,2026-08-15 13:00:00,2026-08-15 23:00:00,10,scheduled,0
+Rides,Ride Bracelet Special,,fair.webp,Midway,$25/person,2026-08-15 13:00:00,2026-08-15 23:00:00,10,scheduled,0
+Game,Spin to Win Wheel,,fair.webp,Commercial Building #1,Free,2026-08-15 13:00:00,2026-08-15 14:00:00,1,scheduled,0
+Music,Wayne Community Band Concert,,fair.webp,Entertainment Alley,Free,2026-08-15 13:00:00,2026-08-15 14:00:00,1,scheduled,0
+Contest,4-H Small Animal Super Showmanship,,fair.webp,4-H Building,Free,2026-08-15 14:00:00,2026-08-15 15:30:00,1.5,scheduled,0
+Contest,Mullet & Facial Hair Competition,,fair.webp,Entertainment Alley,Free,2026-08-15 14:30:00,2026-08-15 15:30:00,1,scheduled,0
+Parade,Wayne County Fair Parade,,fair.webp,Main Street to Fair,Free,2026-08-15 16:00:00,2026-08-15 17:30:00,1.5,scheduled,0
+Music,Davey Allen ,Country Music,fair.webp,Floral Hall Back Porch,Free,2026-08-15 18:00:00,2026-08-15 20:00:00,2,scheduled,0
+Show,Open Miniature Horse Show,,fair.webp,Grandstand,Free,2026-08-15 17:00:00,2026-08-15 18:00:00,1,scheduled,0
+Contest,Adult Corn Eatin' Competition,,fair.webp,Entertainment Alley,Free,2026-08-15 18:00:00,2026-08-15 19:00:00,1,scheduled,0
+Demo,Wayne County Sheriff K-9 Demo,,fair.webp,Floral Hall,Free,2026-08-15 18:30:00,2026-08-15 20:00:00,1.5,scheduled,0
+Event,Black Cat Hell Driver Stunt Show,,fair.webp,Grandstand,$15/person,2026-08-15 19:00:00,2026-08-15 20:00:00,1,scheduled,0
+Music,State Line - Band,,fair.webp,Entertainment Alley,$6 Beer,2026-08-15 20:30:00,2026-08-15 22:00:00,1.5,scheduled,0
+Show,Pleasure /Trail Open Horse Show,,fair.webp,Grandstand,Free,2026-08-16 09:00:00,2026-08-16 10:00:00,1,scheduled,0
+Show,Open Meat Goat Show,,fair.webp,Cattle Barn,Free,2026-08-16 09:00:00,2026-08-16 10:00:00,1,scheduled,0
+Show,4-H Costume Class,,fair.webp,4-H Building,Free,2026-08-16 10:00:00,2026-08-16 11:00:00,1,scheduled,0
+Contest,Youth Pedal Tractor Pull,,fair.webp,Grandstand,Free,2026-08-16 11:00:00,2026-08-16 12:00:00,1,scheduled,0
+Award,4-H Herdsmanship Award,,fair.webp,4-H Building,Free,2026-08-16 11:00:00,2026-08-16 12:00:00,1,scheduled,0
+Contest,Bed Races,,fair.webp,TBD,Free,2026-08-16 12:00:00,2026-08-16 13:00:00,1,scheduled,0
+Contest,Youth Coloring Contest Royalty,,fair.webp,4-H Building,Free,2026-08-16 12:00:00,2026-08-16 13:00:00,1,scheduled,0
+Music,Worthy Duncan,Country Music,fair.webp,Floral Hall Back Porch,Free,2026-08-16 13:00:00,2026-08-16 15:00:00,2,scheduled,0
+Rides,Ride Bracelet Special,,fair.webp,Midway,$25/person,2026-08-16 13:00:00,2026-08-16 14:00:00,1,scheduled,0
+Rides,RIDES OPEN,,fair.webp,Midway,Visit Ticket Booth,2026-08-16 13:00:00,2026-08-16 14:00:00,1,scheduled,0
+Contest,Grease Pole Finals,,fair.webp,Floral Hall,Free,2026-08-16 13:00:00,2026-08-16 14:00:00,1,scheduled,0
+Grandstand,Demolition Derby,,fair.webp,Grandstand,$15/person,2026-08-16 15:00:00,2026-08-16 16:00:00,1,scheduled,0
+General,All Animal Exhibits Close,,fair.webp,Cattle Barn,Free,2026-08-16 16:00:00,2026-08-16 17:00:00,1,scheduled,0
+Exhibit,"Animal, Flower, Fruit & Vegetable Exhibits",,fair.webp,Floral Hall,Free,2026-08-10 10:00:00,2026-08-10 22:00:00,12,scheduled,0
+Exhibit,"Animal, Flower, Fruit & Vegetable Exhibits",,fair.webp,Floral Hall,Free,2026-08-11 10:00:00,2026-08-11 22:00:00,12,scheduled,0
+Exhibit,"Animal, Flower, Fruit & Vegetable Exhibits",,fair.webp,Floral Hall,Free,2026-08-12 10:00:00,2026-08-12 22:00:00,12,scheduled,0
+Exhibit,"Animal, Flower, Fruit & Vegetable Exhibits",,fair.webp,Floral Hall,Free,2026-08-13 10:00:00,2026-08-13 22:00:00,12,scheduled,0
+Exhibit,"Animal, Flower, Fruit & Vegetable Exhibits",,fair.webp,Floral Hall,Free,2026-08-14 10:00:00,2026-08-14 22:00:00,12,scheduled,0
+Exhibit,"Animal, Flower, Fruit & Vegetable Exhibits",,fair.webp,Floral Hall,Free,2026-08-15 10:00:00,2026-08-15 22:00:00,12,scheduled,0
+Exhibit,"Animal, Flower, Fruit & Vegetable Exhibits",,fair.webp,Floral Hall,Free,2026-08-16 10:00:00,2026-08-16 22:00:00,12,scheduled,0
+Exhibit,Home Arts Department Exhibits,,fair.webp,Floral Hall Annex,Free,2026-08-10 10:00:00,2026-08-10 22:00:00,12,scheduled,0
+Exhibit,Home Arts Department Exhibits,,fair.webp,Floral Hall Annex,Free,2026-08-11 10:00:00,2026-08-11 22:00:00,12,scheduled,0
+Exhibit,Home Arts Department Exhibits,,fair.webp,Floral Hall Annex,Free,2026-08-12 10:00:00,2026-08-12 22:00:00,12,scheduled,0
+Exhibit,Home Arts Department Exhibits,,fair.webp,Floral Hall Annex,Free,2026-08-13 10:00:00,2026-08-13 22:00:00,12,scheduled,0
+Exhibit,Home Arts Department Exhibits,,fair.webp,Floral Hall Annex,Free,2026-08-14 10:00:00,2026-08-14 22:00:00,12,scheduled,0
+Exhibit,Home Arts Department Exhibits,,fair.webp,Floral Hall Annex,Free,2026-08-15 10:00:00,2026-08-15 22:00:00,12,scheduled,0
+Exhibit,Home Arts Department Exhibits,,fair.webp,Floral Hall Annex,Free,2026-08-16 10:00:00,2026-08-16 22:00:00,12,scheduled,0
+Exhibit,4-H Youth Building Exhibits & Crafts,,fair.webp,4-H Building,Free,2026-08-10 10:00:00,2026-08-10 14:00:00,4,scheduled,0
+Exhibit,4-H Youth Building Exhibits & Crafts,,fair.webp,4-H Building,Free,2026-08-11 10:00:00,2026-08-11 14:00:00,4,scheduled,0
+Exhibit,4-H Youth Building Exhibits & Crafts,,fair.webp,4-H Building,Free,2026-08-12 10:00:00,2026-08-12 14:00:00,4,scheduled,0
+Exhibit,4-H Youth Building Exhibits & Crafts,,fair.webp,4-H Building,Free,2026-08-13 10:00:00,2026-08-13 14:00:00,4,scheduled,0
+Exhibit,4-H Youth Building Exhibits & Crafts,,fair.webp,4-H Building,Free,2026-08-14 10:00:00,2026-08-14 14:00:00,4,scheduled,0
+Exhibit,4-H Youth Building Exhibits & Crafts,,fair.webp,4-H Building,Free,2026-08-15 10:00:00,2026-08-15 14:00:00,4,scheduled,0
+Exhibit,4-H Youth Building Exhibits & Crafts,,fair.webp,4-H Building,Free,2026-08-16 10:00:00,2026-08-16 14:00:00,4,scheduled,0
+Exhibit,Wayne County Sheriff Operation Safe Child,Child IDs,fair.webp,Floral Hall,Free,2026-08-10 10:00:00,2026-08-10 22:00:00,12,scheduled,0
+Exhibit,Wayne County Sheriff Operation Safe Child,Child IDs,fair.webp,Floral Hall,Free,2026-08-11 10:00:00,2026-08-11 22:00:00,12,scheduled,0
+Exhibit,Wayne County Sheriff Operation Safe Child,Child IDs,fair.webp,Floral Hall,Free,2026-08-12 10:00:00,2026-08-12 22:00:00,12,scheduled,0
+Exhibit,Wayne County Sheriff Operation Safe Child,Child IDs,fair.webp,Floral Hall,Free,2026-08-13 10:00:00,2026-08-13 22:00:00,12,scheduled,0
+Exhibit,Wayne County Sheriff Operation Safe Child,Child IDs,fair.webp,Floral Hall,Free,2026-08-14 10:00:00,2026-08-14 22:00:00,12,scheduled,0
+Exhibit,Wayne County Sheriff Operation Safe Child,Child IDs,fair.webp,Floral Hall,Free,2026-08-15 10:00:00,2026-08-15 22:00:00,12,scheduled,0
+Exhibit,Wayne County Sheriff Operation Safe Child,Child IDs,fair.webp,Floral Hall,Free,2026-08-16 10:00:00,2026-08-16 22:00:00,12,scheduled,0
+Food,Beer Garden Open,ID and wrist strap required,fair.webp,Entertainment Alley,$6 Beer,2026-08-10 17:00:00,2026-08-10 23:00:00,6,scheduled,0
+Food,Beer Garden Open,ID and wrist strap required,fair.webp,Entertainment Alley,$6 Beer,2026-08-11 17:00:00,2026-08-11 23:00:00,6,scheduled,0
+Food,Beer Garden Open,ID and wrist strap required,fair.webp,Entertainment Alley,$6 Beer,2026-08-12 17:00:00,2026-08-12 23:00:00,6,scheduled,0
+Food,Beer Garden Open,ID and wrist strap required,fair.webp,Entertainment Alley,$6 Beer,2026-08-13 17:00:00,2026-08-13 23:00:00,6,scheduled,0
+Food,Beer Garden Open,ID and wrist strap required,fair.webp,Entertainment Alley,$6 Beer,2026-08-14 17:00:00,2026-08-15 00:00:00,7,scheduled,0
+Food,Beer Garden Open,ID and wrist strap required,fair.webp,Entertainment Alley,$6 Beer,2026-08-15 17:00:00,2026-08-16 00:00:00,7,scheduled,0
+Rides,Horse Drawn Wagon Rides ,,fair.webp,Main Gate,Free,2026-08-11 12:00:00,2026-08-11 16:00:00,4,scheduled,0
+Rides,Horse Drawn Wagon Rides ,,fair.webp,Main Gate,Free,2026-08-12 12:00:00,2026-08-12 16:00:00,4,scheduled,0
+Rides,Horse Drawn Wagon Rides ,,fair.webp,Main Gate,Free,2026-08-13 12:00:00,2026-08-13 16:00:00,4,scheduled,0
+Rides,Horse Drawn Wagon Rides ,,fair.webp,Main Gate,Free,2026-08-14 12:00:00,2026-08-14 16:00:00,4,scheduled,0
+Rides,Horse Drawn Wagon Rides ,,fair.webp,Main Gate,Free,2026-08-15 12:00:00,2026-08-15 16:00:00,4,scheduled,0
+Rides,Horse Drawn Wagon Rides ,,fair.webp,Main Gate,Free,2026-08-16 12:00:00,2026-08-16 16:00:00,4,scheduled,0
+Show,The Flying Wallendas Aerial Act,,fair.webp,Midway,Free,2026-08-11 14:00:00,2026-08-11 15:00:00,1,changed,0
+Show,The Flying Wallendas Aerial Act,,fair.webp,Midway,Free,2026-08-12 14:00:00,2026-08-12 15:00:00,1,changed,0
+Show,The Flying Wallendas Aerial Act,,fair.webp,Midway,Free,2026-08-13 14:00:00,2026-08-13 15:00:00,1,changed,0
+Show,The Flying Wallendas Aerial Act,,fair.webp,Midway,Free,2026-08-14 14:00:00,2026-08-14 15:00:00,1,changed,0
+Show,The Flying Wallendas Aerial Act,,fair.webp,Midway,Free,2026-08-15 14:00:00,2026-08-15 15:00:00,1,changed,0
+Show,The Flying Wallendas Aerial Act,,fair.webp,Midway,Free,2026-08-16 14:00:00,2026-08-16 15:00:00,1,changed,0
+Exhibit,Example Cancelled Event,,fair.webp,Floral Hall,Free,2026-08-10 12:30:00,2026-08-10 13:30:00,1,cancelled,0
+Exhibit,Example Cancelled Event,,fair.webp,Floral Hall,Free,2026-08-11 12:30:00,2026-08-11 13:30:00,1,cancelled,0
+Exhibit,Example Cancelled Event,,fair.webp,Floral Hall,Free,2026-08-12 12:30:00,2026-08-12 13:30:00,1,cancelled,0
+Exhibit,Example Cancelled Event,,fair.webp,Floral Hall,Free,2026-08-13 12:30:00,2026-08-13 13:30:00,1,cancelled,0
+Exhibit,Example Cancelled Event,,fair.webp,Floral Hall,Free,2026-08-14 12:30:00,2026-08-14 13:30:00,1,cancelled,0
+Exhibit,Example Cancelled Event,,fair.webp,Floral Hall,Free,2026-08-15 12:30:00,2026-08-15 13:30:00,1,cancelled,0
+Exhibit,Example Cancelled Event,,fair.webp,Floral Hall,Free,2026-08-16 12:30:00,2026-08-16 13:30:00,1,cancelled,0

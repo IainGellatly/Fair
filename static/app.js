@@ -114,6 +114,138 @@ async function loadTenants(type){
   }
 }
 
+// ---------------- SPONSORS LOADER ----------------
+async function loadSponsors(){
+
+  const content = document.getElementById("content");
+
+  try {
+    const res = await fetch(`/api/sponsors`);
+    const data = await res.json();
+
+    let h = `<h2>Sponsors</h2>`;
+
+    data.forEach(item => {
+
+      const iconPath = item.icon
+        ? `/static/icons/${item.icon}`
+        : null;
+
+      h += `
+        <div class="ui-card">
+
+          ${iconPath ? `
+            <div class="ui-card-media">
+              <img src="${iconPath}" />
+            </div>
+          ` : ``}
+
+          <div class="ui-card-content">
+            <div class="ui-card-title">${item.name}</div>
+
+            ${renderLine(item.description)}
+
+            <div class="ui-card-body"></div>
+
+            <div class="ui-card-body"><b>${item.tier || ''}</b></div>
+
+          </div>
+
+        </div>
+      `;
+    });
+
+    content.innerHTML = h;
+    scrollToContent();
+
+  } catch (err){
+    content.innerHTML = `<div class="card">Error loading sponsors</div>`;
+  }
+}
+
+// ---------------- EVENTS LOADER ----------------
+async function loadEvents(type){
+
+  const content = document.getElementById("content");
+
+  try {
+
+    const url = type
+      ? `/api/events/${type}`
+      : `/api/events`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    let h = '';
+    let currentDay = '';
+
+    data.forEach(item => {
+
+      // ---------------- GROUP BY DAY ----------------
+      if (item.day_date !== currentDay){
+        currentDay = item.day_date;
+
+        h += `<h2 style="margin-top:20px;"><b>${currentDay}</b></h2>`;
+      }
+
+      // ---------------- ICON ----------------
+      const iconPath = item.icon
+        ? `/static/icons/${item.icon}`
+        : null;
+
+      // ---------------- CARD COLOR LOGIC ----------------
+      let bgStyle = '';
+
+      if (item.status === 'cancelled'){
+        bgStyle = 'style="background:#fdecea;"'; // light red
+      }
+      else if (item.status === 'rescheduled'){
+        bgStyle = 'style="background:#fff8dc;"'; // light yellow
+      }
+      else if (item.featured == 1){
+        bgStyle = 'style="background:#f4e7d3;"'; // light brown
+      }
+
+      // ---------------- TIME RANGE ----------------
+      const timeRange = item.start_time && item.end_time
+        ? `${item.start_time} - ${item.end_time}`
+        : '';
+
+      h += `
+        <div class="ui-card" ${bgStyle}>
+
+          ${iconPath ? `
+            <div class="ui-card-media">
+              <img src="${iconPath}" />
+            </div>
+          ` : ``}
+
+          <div class="ui-card-content">
+            <div class="ui-card-title">${item.name}</div>
+
+            ${renderLine(item.description)}
+
+            <div class="ui-card-body"><b>${item.price || ''}</b></div>
+
+            ${renderLine(item.location)}
+
+            ${renderLine(timeRange)}
+
+          </div>
+
+        </div>
+      `;
+    });
+
+    content.innerHTML = h;
+    scrollToContent();
+
+  } catch (err){
+    content.innerHTML = `<div class="card">Error loading events</div>`;
+  }
+}
+
 // ---------------- PAGE ROUTER ----------------
 async function loadPage(page){
 
@@ -163,6 +295,28 @@ async function loadPage(page){
     loadTenants(tenantMap[page]);
     return;
   }
+
+  // ---------------- SPONSORS ----------------
+  if (page === "sponsors"){
+    loadSponsors();
+    return;
+  }
+
+// ---------------- EVENTS PAGES ----------------
+if (page === "music"){
+  loadEvents("music");
+  return;
+}
+
+if (page === "grandstand"){
+  loadEvents("grandstand");
+  return;
+}
+
+if (page === "calendar"){
+  loadEvents(); // no type = full calendar
+  return;
+}
 
   // ---------------- EVERYTHING ELSE (DISABLED FOR NOW) ----------------
   const content = document.getElementById("content");
