@@ -79,7 +79,7 @@ button:active {
   position: relative;
   width: 96%;
   margin: 0 auto;
-  height: 400px;
+  height: 536px;
 
   background-image: url('/static/map.jpg');
   background-repeat: no-repeat;

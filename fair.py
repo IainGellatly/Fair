@@ -219,7 +219,8 @@ async def get_events(event_type: str | None = None):
                 description, 
                 location, 
                 icon, 
-                price, 
+                price,
+                status, 
                 featured,
                 date_format(start_time, "%l:%i %p") as start_time,
                 date_format(end_time, "%l:%i %p") as end_time,
@@ -292,4 +293,4 @@ async def test_notify():
 if __name__ == "__main__":
 
     log.info('starting web server')
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host=SERVER_HOST, port=SERVER_PORT)
