@@ -794,15 +794,17 @@ async function loadTodayEvents(){
 
       let statusLine = '';
 
-      if (diffMin <= 90 && diffMin > 0){
-        statusLine = `Event starts in ${diffMin} minutes`;
-      }
-      else if (now >= start && now <= end){
-        statusLine = 'Happening Now';
-        bgStyle = 'style="background:#e8f5e9; border:2px solid #2e7d32;"';
-      }
-      else if (now > end){
-        statusLine = 'Ended';
+      if (item.status !== 'cancelled') {
+        if (diffMin <= 90 && diffMin > 0){
+          statusLine = `Event starts in ${diffMin} minutes`;
+        }
+        else if (now >= start && now <= end){
+          statusLine = 'Happening Now';
+          bgStyle = 'style="background:#e8f5e9; border:2px solid #2e7d32;"';
+        }
+        else if (now > end){
+          statusLine = 'Ended';
+        }
       }
 
       // ---------- ALERT BUTTON RULES ----------

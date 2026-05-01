@@ -384,3 +384,32 @@ button:active {
 .push-action button {
   width: 140px;
 }
+
+/* 🔥 FORCE TRUE 3-COLUMN LAYOUT */
+.push-card {
+  flex-wrap: nowrap;              /* ✅ overrides ui-card wrap */
+  align-items: center;
+}
+
+/* LEFT: title */
+.push-title {
+  flex: 0 0 110px;               /* fixed width column */
+  font-weight: bold;
+  font-size: 1.3rem;
+}
+
+/* MIDDLE: text */
+.push-text {
+  flex: 1;                       /* fills remaining space */
+  text-align: left;
+}
+
+/* RIGHT: button */
+.push-action {
+  flex: 0 0 auto;                /* stays right */
+}
+
+/* keep button contained */
+.push-action button {
+  width: 140px;
+}

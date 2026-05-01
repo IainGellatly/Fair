@@ -31,8 +31,10 @@ self.addEventListener('push', function(event) {
       await self.registration.showNotification(title, {
         body: body,
         icon: '/static/logo.png',
+        badge: '/static/logo.png',
         vibrate: [200, 100, 200, 100, 200],
         tag: "fair-alert",
+        requireInteraction: true,
         renotify: true
       });
 

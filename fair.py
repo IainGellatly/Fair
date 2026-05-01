@@ -116,7 +116,7 @@ async def send_push_one(alert):
     aud = f"{parsed.scheme}://{parsed.netloc}"
     vapid = Vapid.from_pem(VAPID_PRIVATE_KEY.encode())
 
-    log.info(f'sending notification sub_id: {sub_id}, event_id: {event_id}')
+    log.info(f'send push notify sub_id:{sub_id}, event_id:{event_id}')
 
     try:
 
@@ -134,17 +134,19 @@ async def send_push_one(alert):
             content_encoding="aes128gcm",
             headers={
                 "TTL": "60",
-                "Urgency": "normal"}
+                "Urgency": "high"}
         )
 
     except WebPushException as err:
 
-        log.error(f"Push failed: {err}")
+        log.error(f"push notify failed: {err}")
 
-        if err.response and err.response.status_code == 410:
+        if err.response.status_code == 410:
+
+            log.info(f'delete old subscription for sub_id:{sub_id}')
 
             del_sql = f'''
-                delete from subscriptions where endpoint = {end_pt};
+                delete from subscriptions where subscription_id = {sub_id};
             '''
             await run_cmd(del_sql)
 
@@ -278,11 +280,11 @@ async def subscribe(request: Request):
         where endpoint = "{end_pt}";
     '''
     rows = await get_data(id_sql)
-    log.info(f'select id_sql = {id_sql}')
-    log.info(f'select id rows = {rows}')
+#    log.info(f'select id_sql = {id_sql}')
+#    log.info(f'select id rows = {rows}')
     sub_id = rows[0].get('subscription_id') if rows else 0
 
-    log.info(f'extracted sub_id = {sub_id}')
+    log.info(f'add subscriber sub_id:{sub_id}')
 
     return sub_id
 
@@ -304,7 +306,7 @@ async def get_alerts(sub_id: int):
 @app.post("/api/alerts/add/{sub_id}/{event_id}")
 async def add_alert(sub_id: int, event_id: int):
 
-    log.info(f'adding alert for sub_id:{sub_id}, event_id: {event_id}')
+    log.info(f'add alert sub_id:{sub_id}, event_id:{event_id}')
 
     event_sql = f"""
         select 
@@ -331,7 +333,7 @@ async def add_alert(sub_id: int, event_id: int):
 @app.post("/api/alerts/remove/{sub_id}/{event_id}")
 async def remove_alert(sub_id: int, event_id: int):
 
-    log.info(f'removing alert for sub_id:{sub_id}, event_id: {event_id}')
+    log.info(f'remove alert sub_id:{sub_id}, event_id:{event_id}')
 
     del_sql = f"""
         delete from alerts where
