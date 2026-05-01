@@ -1,6 +1,6 @@
 import asyncio
 import asyncmy
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from contextlib import asynccontextmanager
@@ -59,7 +59,7 @@ async def lifespan(app: FastAPI):
     global pool
     pool = await asyncmy.create_pool(
         host="localhost",
-        user="root",
+        user="admin",
         password="FanTab12345!",
         db="fairdb",
         minsize=1,
@@ -91,7 +91,8 @@ async def get_data(qry):
 
 async def run_cmd(cmd):
     async with pool.acquire() as conn:
-        await conn.execute(cmd)
+        async with conn.cursor() as cursor:
+            await cursor.execute(cmd)
 
 # --------- PUSH NOTIFICATION ----------------
 async def send_push_one(alert):
@@ -207,14 +208,15 @@ async def get_events(event_type: str | None = None):
     where_cl = ''
     if event_type == 'today':
 
-        where_cl = 'where date(start_time) = "2026-08-12"'
+        where_cl = 'where date(start_time) = curdate()'
 
     elif event_type is not None:
 
         where_cl = f'where type = "{event_type}"'
 
     sql = f'''
-            select 
+            select
+                event_id, 
                 name, 
                 description, 
                 location, 
@@ -224,13 +226,72 @@ async def get_events(event_type: str | None = None):
                 featured,
                 date_format(start_time, "%l:%i %p") as start_time,
                 date_format(end_time, "%l:%i %p") as end_time,
-                date_format(start_time, "%W, %b %D") as day_date
+                date_format(start_time, "%W, %b %D") as day_date,
+                start_time as start_datetime,
+                end_time as end_datetime
             from events 
             {where_cl} 
             order by events.start_time;
         '''
     rows = await get_data(sql)
     return rows
+
+@app.post("/api/get_sub_id")
+async def get_subscription_id(request: Request):
+
+    data = await request.json()
+    end_pt = data.get("endpoint")
+
+    id_sql = f'''
+        select subscription_id 
+        from subscriptions 
+        where endpoint = "{end_pt}";
+    '''
+    rows = await get_data(id_sql)
+
+    return rows[0].get('subscription_id') if rows else 0
+
+@app.post("/api/subscribe")
+async def subscribe(request: Request):
+    data = await request.json()
+    end_pt = data.get('endpoint')
+    p256dh = data.get('keys').get('p256dh')
+    auth = data.get('keys').get('auth')
+
+    del_sql = f'delete from subscriptions where endpoint = "{end_pt}"'
+    await run_cmd(del_sql)
+
+    ins_sql = f'''
+        insert into subscriptions 
+        (endpoint, p256dh, auth) 
+        values ("{end_pt}", "{p256dh}", "{auth}");
+        '''
+    await run_cmd(ins_sql)
+
+    id_sql = f'''
+        select subscription_id 
+        from subscriptions 
+        where endpoint = "{end_pt}";
+    '''
+    rows = await get_data(id_sql)
+    sub_id = rows[0].get('subscription_id') if rows else 0
+
+    return sub_id
+
+
+@app.get("/api/alerts/{sub_id}")
+async def get_alerts(sub_id: int):
+
+    get_sql = f"""
+        select event_id
+        from alerts
+        where subscription_id = {sub_id}
+        and alert_sent = 0;
+        """
+    rows = await get_data(get_sql)
+
+    return [r["event_id"] for r in rows]
+
 
 @app.post("/api/alerts/add/{sub_id}/{event_id}")
 async def add_alert(sub_id: int, event_id: int):
@@ -247,11 +308,12 @@ async def add_alert(sub_id: int, event_id: int):
     rows = await get_data(event_sql)
     send_at = rows[0].get('send_at')
     event_name = rows[0].get('name')
+    msg = f'{event_name} starts soon'
     alert_sql = f"""
         insert into alerts 
             (subscription_id, event_id, send_at, message)
         values 
-            ({sub_id}, {event_id}, {send_at}, {event_name})
+            ({sub_id}, {event_id}, {send_at}, {msg})
         on duplicate key update subscription_id = subscription_id;
         """
     await run_cmd(alert_sql)

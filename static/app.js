@@ -1,3 +1,25 @@
+const VAPID_PUBLIC_KEY = "BPAr2_PD2PGYvI0EsANa5gCXJ6z_hupiV6Bjdt7jxMaL_0D_QFdF-PbP3wDDNBM8PNzvbWRQegM9WH0yOyDVJ00";
+
+let subscriptionId = 0;
+let pushAuthorized = false;
+let alertSet = new Set();
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+
 // ---------------- SERVICE WORKER ----------------
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
@@ -202,7 +224,7 @@ async function loadEvents(type){
         if (item.status === 'cancelled'){
           bgStyle = 'style="background:#fdecea; border:2px solid #c62828;"'; // dark red
         }
-        else if (item.status === 'rescheduled'){
+        else if (item.status === 'changed'){
           bgStyle = 'style="background:#fff8dc; border:2px solid #e6c200;"'; // dark yellow
         }
         else if (item.featured == 1){
@@ -558,6 +580,12 @@ if (page === "map"){
   return;
 }
 
+// -------------- TODAY ----------------
+if (page === "today"){
+  loadTodayEvents();
+  return;
+}
+
   // ---------------- EVERYTHING ELSE (DISABLED FOR NOW) ----------------
   const content = document.getElementById("content");
   content.innerHTML = `
@@ -580,3 +608,287 @@ document.querySelectorAll(".icon-card").forEach(card => {
 
 // Disable long-press context menu (mobile UX)
 document.addEventListener("contextmenu", e => e.preventDefault());
+
+//------------ TODAY EVENTS AND NOTIFICATIONS -------------
+async function initSubscription(){
+
+  try {
+
+    if (!('serviceWorker' in navigator)) return;
+
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+
+    if (!sub) return;
+
+    const endpoint = sub.endpoint;
+
+    const res = await fetch('/api/get_sub_id', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ endpoint })
+    });
+
+    const id = Number(await res.json());
+
+    if (id > 0){
+      subscriptionId = id;
+      pushAuthorized = true;
+
+      const a = await fetch(`/api/alerts/${subscriptionId}`);
+      const ids = await a.json();
+      alertSet = new Set(ids);
+    }
+
+  } catch (err){
+    console.error("initSubscription failed:", err);
+    // 🔥 DO NOT THROW — fail silently
+  }
+}
+
+
+async function subscribeUser(){
+
+  try {
+
+    const reg = await navigator.serviceWorker.ready;
+
+    // 🔥 STEP 1: check existing subscription
+    let sub = await reg.pushManager.getSubscription();
+
+    // 🔥 STEP 2: only create if missing
+    if (!sub){
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+
+    console.log("SUB OBJECT:", sub);
+
+    const json = sub.toJSON();
+
+    const payload = {
+      endpoint: sub.endpoint,
+      keys: {
+        p256dh: json.keys.p256dh,
+        auth: json.keys.auth
+      }
+    };
+
+    console.log("PAYLOAD:", payload);
+
+    const res = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+
+    const result = await res.json();
+    console.log("SERVER RESPONSE:", result);
+
+    subscriptionId = Number(result);
+
+    // 🔥 IMPORTANT: only mark authorized if backend succeeded
+    if (subscriptionId > 0){
+      pushAuthorized = true;
+    } else {
+      throw new Error("Subscription not saved on server");
+    }
+
+    // reload alerts
+    const a = await fetch(`/api/alerts/${subscriptionId}`);
+    const ids = await a.json();
+    alertSet = new Set(ids);
+
+    // 🔥 FORCE UI refresh
+    loadTodayEvents();
+
+  } catch (err){
+    console.error("SUBSCRIBE FAILED:", err);
+    alert("Subscription failed. Try again.");
+  }
+}
+
+function renderPushCard(){
+
+  if (pushAuthorized) return '';
+
+  return `
+    <div class="ui-card">
+      <div class="ui-card-title">Stay Updated</div>
+      <div class="ui-card-body">
+        Enable notifications to get alerts before events start.
+      </div>
+      <div class="ui-card-body">
+        <button class="btn-brown" onclick="subscribeUser()">
+          Enable Notifications
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+async function loadTodayEvents(){
+
+  const content = document.getElementById("content");
+
+  try {
+
+    // 🔥 ENSURE subscription + alerts are ready
+    if (!pushAuthorized && subscriptionId === 0){
+      await initSubscription();
+    }
+
+    const res = await fetch('/api/events/today');
+
+    if (!res.ok){
+        console.error("Events API failed:", res.status);
+        content.innerHTML = `<div class="card">Error loading today's events</div>`;
+        return;
+    }
+
+    const data = await res.json();
+
+    let h = renderPushCard();
+
+    const now = new Date();
+    let currentDay = '';
+
+    data.forEach(item => {
+
+        if (item.day_date !== currentDay){
+          currentDay = item.day_date;
+
+          h += `<h2 style="margin-top:20px;"><b>${currentDay}</b></h2>`;
+        }
+
+      const iconPath = item.icon
+        ? `/static/icons/${item.icon}`
+        : null;
+
+      let bgStyle = '';
+
+      // ---------- BASE STATUS (unchanged logic) ----------
+      if (item.status === 'cancelled'){
+        bgStyle = 'style="background:#fdecea; border:2px solid #c62828;"';
+      }
+      else if (item.status === 'changed'){
+        bgStyle = 'style="background:#fff8dc; border:2px solid #e6c200;"';
+      }
+      else if (item.featured == 1){
+        bgStyle = 'style="background:#f4e7d3; border:2px solid #8b5a2b;"';
+      }
+
+      // ---------- REAL TIME CALC ----------
+      const start = new Date(item.start_datetime);
+      const end = new Date(item.end_datetime);
+
+      const diffMin = Math.floor((start - now) / 60000);
+
+      let statusLine = '';
+
+      if (diffMin <= 90 && diffMin > 0){
+        statusLine = `Event starts in ${diffMin} minutes`;
+      }
+      else if (now >= start && now <= end){
+        statusLine = 'Happening Now';
+        bgStyle = 'style="background:#e8f5e9; border:2px solid #2e7d32;"';
+      }
+      else if (now > end){
+        statusLine = 'Ended';
+      }
+
+      // ---------- ALERT BUTTON RULES ----------
+      let showButton = false;
+
+      if (
+          pushAuthorized &&
+          diffMin > 10 &&
+          now < start &&
+          item.status !== 'cancelled'
+      ){
+        showButton = true;
+      }
+
+      const hasAlert = alertSet.has(item.event_id);
+
+      const timeRange = `${item.start_time} - ${item.end_time}`;
+
+      h += `
+        <div class="ui-card" ${bgStyle}>
+
+          ${iconPath ? `
+            <div class="ui-card-media">
+              <img src="${iconPath}" />
+            </div>
+          ` : ``}
+
+          <div class="ui-card-content">
+
+            <div class="ui-card-title">${item.name}</div>
+
+            ${renderLine(item.description)}
+            <div class="ui-card-body"><b>${item.price || ''}</b></div>
+            ${renderLine(item.location)}
+            ${renderLine(timeRange)}
+
+            ${statusLine ? `
+              <div class="ui-card-body"><b>${statusLine}</b></div>
+            ` : ''}
+
+            ${showButton ? `
+              <div class="ui-card-body">
+                <button
+                  class="${hasAlert ? 'btn-green' : 'btn-brown'}"
+                  onclick="toggleAlert(${item.event_id}, this)">
+                  ${hasAlert ? 'Remove Alert' : 'Alert Me'}
+                </button>
+              </div>
+            ` : ''}
+
+          </div>
+
+        </div>
+      `;
+    });
+
+    content.innerHTML = h;
+    scrollToContent();
+
+  } catch (err) {
+    console.error("loadTodayEvents error:", err);
+    content.innerHTML = `<div class="card">Error loading today's events</div>`;
+  }
+}
+
+async function toggleAlert(eventId, btn){
+
+if (!subscriptionId || subscriptionId === 0){
+    alert("Enable notifications first");
+    return;
+  }
+
+  const hasAlert = alertSet.has(eventId);
+
+  if (!hasAlert){
+
+    await fetch(`/api/alerts/add/${subscriptionId}/${eventId}`, {method:'POST'});
+
+    alertSet.add(eventId);
+    btn.innerText = "Remove Alert";
+    btn.classList.remove("btn-brown");
+    btn.classList.add("btn-green");
+
+  } else {
+
+    await fetch(`/api/alerts/remove/${subscriptionId}/${eventId}`, {method:'POST'});
+
+    alertSet.delete(eventId);
+    btn.innerText = "Alert Me";
+    btn.classList.remove("btn-green");
+    btn.classList.add("btn-brown");
+  }
+}
+
+initSubscription().catch(() => {});

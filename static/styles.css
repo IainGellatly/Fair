@@ -337,3 +337,8 @@ button:active {
   display: none;
 }
 
+.ui-card-body button {
+  width: auto;
+  max-width: 160px;
+  white-space: normal;
+}
