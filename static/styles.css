@@ -315,7 +315,16 @@ button:active {
 }
 
 /* BUTTON AREA */
+.ui-card {
+  display: flex;
+  align-items: flex-start;   /* 🔥 key fix for icon alignment */
+  flex-wrap: wrap;           /* 🔥 allows button to drop below */
+}
+
 .ui-card-actions {
+  width: 96%;
+  display: flex;
+  justify-content: center;
   margin-top: 8px;
 }
 
@@ -324,13 +333,13 @@ button:active {
   background: #9c6b30;
   color: white;
   border: none;
-  padding: 8px 14px;
+  padding: 8px 8px;
   border-radius: 8px;
   cursor: pointer;
 }
 
 .ui-card.no-media {
-  padding-left: 16px;
+  padding-left: 8px;
 }
 
 .ui-card.no-media .ui-card-media {
@@ -339,6 +348,39 @@ button:active {
 
 .ui-card-body button {
   width: auto;
-  max-width: 160px;
+  max-width: 140px;
   white-space: normal;
+}
+
+/* PUSH CARD LAYOUT */
+.push-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* LEFT COLUMN */
+.push-title {
+  font-weight: bold;
+  font-size: 1.3rem;
+  min-width: 110px;
+}
+
+/* MIDDLE COLUMN */
+.push-text {
+  flex: 1;
+  text-align: left;
+  font-size: 1rem;
+}
+
+/* RIGHT COLUMN */
+.push-action {
+  display: flex;
+  justify-content: center;
+}
+
+/* FIX BUTTON WIDTH INSIDE PUSH CARD */
+.push-action button {
+  width: 140px;
 }

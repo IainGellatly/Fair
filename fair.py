@@ -63,7 +63,8 @@ async def lifespan(app: FastAPI):
         password="FanTab12345!",
         db="fairdb",
         minsize=1,
-        maxsize=10
+        maxsize=10,
+        autocommit=True
     )
 
     asyncio.create_task(alert_scheduler())
@@ -93,6 +94,7 @@ async def run_cmd(cmd):
     async with pool.acquire() as conn:
         async with conn.cursor() as cursor:
             await cursor.execute(cmd)
+        await conn.commit()
 
 # --------- PUSH NOTIFICATION ----------------
 async def send_push_one(alert):
@@ -268,13 +270,19 @@ async def subscribe(request: Request):
         '''
     await run_cmd(ins_sql)
 
+    log.info(f'insert endpt ins_sql = {ins_sql}')
+
     id_sql = f'''
         select subscription_id 
         from subscriptions 
         where endpoint = "{end_pt}";
     '''
     rows = await get_data(id_sql)
+    log.info(f'select id_sql = {id_sql}')
+    log.info(f'select id rows = {rows}')
     sub_id = rows[0].get('subscription_id') if rows else 0
+
+    log.info(f'extracted sub_id = {sub_id}')
 
     return sub_id
 
@@ -309,13 +317,13 @@ async def add_alert(sub_id: int, event_id: int):
     send_at = rows[0].get('send_at')
     event_name = rows[0].get('name')
     msg = f'{event_name} starts soon'
-    alert_sql = f"""
+    alert_sql = f'''
         insert into alerts 
             (subscription_id, event_id, send_at, message)
         values 
-            ({sub_id}, {event_id}, {send_at}, {msg})
+            ({sub_id}, {event_id}, "{send_at}", "{msg}")
         on duplicate key update subscription_id = subscription_id;
-        """
+        '''
     await run_cmd(alert_sql)
 
     return {"status": "added"}

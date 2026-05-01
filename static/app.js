@@ -715,16 +715,22 @@ function renderPushCard(){
   if (pushAuthorized) return '';
 
   return `
-    <div class="ui-card">
-      <div class="ui-card-title">Stay Updated</div>
-      <div class="ui-card-body">
-        Enable notifications to get alerts before events start.
+    <div class="ui-card push-card">
+
+      <div class="push-title">
+        Stay Updated
       </div>
-      <div class="ui-card-body">
-        <button class="btn-brown" onclick="subscribeUser()">
+
+      <div class="push-text">
+        Tap Enable Notifications. If blocked, check browser settings.
+      </div>
+
+      <div class="push-action">
+        <button class="alert-btn" onclick="subscribeUser()">
           Enable Notifications
         </button>
       </div>
+
     </div>
   `;
 }
@@ -815,32 +821,32 @@ async function loadTodayEvents(){
 
       const timeRange = `${item.start_time} - ${item.end_time}`;
 
-      h += `
-        <div class="ui-card" ${bgStyle}>
+        h += `
+          <div class="ui-card" ${bgStyle}>
 
-          ${iconPath ? `
-            <div class="ui-card-media">
-              <img src="${iconPath}" />
+            ${iconPath ? `
+              <div class="ui-card-media">
+                <img src="${iconPath}" />
+              </div>
+            ` : ``}
+
+            <div class="ui-card-content">
+              <div class="ui-card-title">${item.name}</div>
+
+              ${renderLine(item.description)}
+              <div class="ui-card-body"><b>${item.price || ''}</b></div>
+              ${renderLine(item.location)}
+              ${renderLine(timeRange)}
+
+              ${statusLine ? `
+                <div class="ui-card-body"><b>${statusLine}</b></div>
+              ` : ''}
             </div>
-          ` : ``}
-
-          <div class="ui-card-content">
-
-            <div class="ui-card-title">${item.name}</div>
-
-            ${renderLine(item.description)}
-            <div class="ui-card-body"><b>${item.price || ''}</b></div>
-            ${renderLine(item.location)}
-            ${renderLine(timeRange)}
-
-            ${statusLine ? `
-              <div class="ui-card-body"><b>${statusLine}</b></div>
-            ` : ''}
 
             ${showButton ? `
-              <div class="ui-card-body">
+              <div class="ui-card-actions">
                 <button
-                  class="${hasAlert ? 'btn-green' : 'btn-brown'}"
+                  class="alert-btn ${hasAlert ? 'active' : ''}"
                   onclick="toggleAlert(${item.event_id}, this)">
                   ${hasAlert ? 'Remove Alert' : 'Alert Me'}
                 </button>
@@ -848,9 +854,7 @@ async function loadTodayEvents(){
             ` : ''}
 
           </div>
-
-        </div>
-      `;
+        `;
     });
 
     content.innerHTML = h;
@@ -877,8 +881,7 @@ if (!subscriptionId || subscriptionId === 0){
 
     alertSet.add(eventId);
     btn.innerText = "Remove Alert";
-    btn.classList.remove("btn-brown");
-    btn.classList.add("btn-green");
+    btn.classList.add("active");
 
   } else {
 
@@ -886,8 +889,7 @@ if (!subscriptionId || subscriptionId === 0){
 
     alertSet.delete(eventId);
     btn.innerText = "Alert Me";
-    btn.classList.remove("btn-green");
-    btn.classList.add("btn-brown");
+    btn.classList.remove("active");
   }
 }
 
