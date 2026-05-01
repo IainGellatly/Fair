@@ -183,7 +183,7 @@ async def mark_alert_sent(alert):
 async def alert_scheduler():
     while True:
 
-        log.info('checking alerts to push notify')
+        log.info('checking alerts')
 
         ready_alerts = await get_ready_alerts()
         if ready_alerts:

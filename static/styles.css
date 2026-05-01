@@ -413,3 +413,12 @@ button:active {
 .push-action button {
   width: 140px;
 }
+
+.ios-note .push-text {
+  font-weight: 500;
+}
+
+/* Fix install button width inside push card */
+.push-action button {
+  width: 140px;
+}

@@ -1,5 +1,12 @@
 const VAPID_PUBLIC_KEY = "BPAr2_PD2PGYvI0EsANa5gCXJ6z_hupiV6Bjdt7jxMaL_0D_QFdF-PbP3wDDNBM8PNzvbWRQegM9WH0yOyDVJ00";
 
+// --------- PLATFORM DETECTION ----------
+const isApple = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+  || window.navigator.standalone === true;
+
+let todayRefreshTimer = null;
+
 let subscriptionId = 0;
 let pushAuthorized = false;
 let alertSet = new Set();
@@ -19,6 +26,15 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
+function showInstallInstructions(){
+  alert(
+    "To install:\n\n" +
+    "1. Tap the Share icon (square with arrow)\n" +
+    "2. Select 'Add to Home Screen'\n" +
+    "3. Open the app from your home screen\n" +
+    "4. Then enable notifications"
+  );
+}
 
 // ---------------- SERVICE WORKER ----------------
 if ('serviceWorker' in navigator) {
@@ -505,6 +521,11 @@ function showMap(){
 // ---------------- PAGE ROUTER ----------------
 async function loadPage(page){
 
+    if (todayRefreshTimer){
+      clearInterval(todayRefreshTimer);
+      todayRefreshTimer = null;
+    }
+
   // 🔴 Preserve "More row" behavior
   if (page !== "more"){
     const isMoreRowButton = document.querySelector(
@@ -649,6 +670,12 @@ async function initSubscription(){
 
 async function subscribeUser(){
 
+    // 🍎 block invalid Apple usage
+    if (isApple && !isStandalone){
+      alert("Install the app first: Share → Add to Home Screen");
+      return;
+    }
+
   try {
 
     const reg = await navigator.serviceWorker.ready;
@@ -712,8 +739,32 @@ async function subscribeUser(){
 
 function renderPushCard(){
 
+  // already subscribed → no card
   if (pushAuthorized) return '';
 
+    if (isApple && !isStandalone){
+      return `
+        <div class="ui-card push-card ios-note">
+
+          <div class="push-title">
+            Stay Updated
+          </div>
+
+          <div class="push-text">
+            Install this app to enable notifications.
+          </div>
+
+          <div class="push-action">
+            <button class="alert-btn" onclick="showInstallInstructions()">
+              Install App
+            </button>
+          </div>
+
+        </div>
+      `;
+    }
+
+  // ✅ Normal case (Android OR iOS installed)
   return `
     <div class="ui-card push-card">
 
@@ -735,9 +786,18 @@ function renderPushCard(){
   `;
 }
 
-async function loadTodayEvents(){
+async function loadTodayEvents(preserveScroll = false){
 
-  const content = document.getElementById("content");
+    const content = document.getElementById("content");
+    let scrollPos = 0;
+    if (preserveScroll){
+      scrollPos = window.scrollY;
+    }
+
+    // stop any existing timer first
+    if (todayRefreshTimer){
+      clearInterval(todayRefreshTimer);
+    }
 
   try {
 
@@ -866,6 +926,16 @@ async function loadTodayEvents(){
     console.error("loadTodayEvents error:", err);
     content.innerHTML = `<div class="card">Error loading today's events</div>`;
   }
+
+// start auto refresh (once per minute)
+todayRefreshTimer = setInterval(() => {
+  loadTodayEvents(true);   // ✅ preserve scroll on refresh
+}, 60000);
+
+if (preserveScroll){
+  window.scrollTo(0, scrollPos);
+}
+
 }
 
 async function toggleAlert(eventId, btn){
