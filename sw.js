@@ -7,7 +7,6 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('push', function(event) {
-  console.log("SW VERSION TEST 2");
   console.log("PUSH RECEIVED", event);
 
   event.waitUntil((async () => {

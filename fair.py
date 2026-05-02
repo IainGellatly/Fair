@@ -272,7 +272,7 @@ async def subscribe(request: Request):
         '''
     await run_cmd(ins_sql)
 
-    log.info(f'insert endpt ins_sql = {ins_sql}')
+#    log.info(f'insert endpt ins_sql = {ins_sql}')
 
     id_sql = f'''
         select subscription_id 
@@ -284,7 +284,7 @@ async def subscribe(request: Request):
 #    log.info(f'select id rows = {rows}')
     sub_id = rows[0].get('subscription_id') if rows else 0
 
-    log.info(f'add subscriber sub_id:{sub_id}')
+    log.info(f'add subscription sub_id:{sub_id}')
 
     return sub_id
 

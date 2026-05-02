@@ -2,7 +2,7 @@
 body{font-family:Arial;background:#f4f1e8;margin:0;text-align:center}
 
 .logo {
-  width: 35%;
+  width: 30%;
   max-width: 160px;   /* keeps it from getting huge on desktop */
   margin: 10px auto;
   display: block;
@@ -175,20 +175,20 @@ button:active {
 .icon-grid{
   display:grid;
   grid-template-columns:repeat(3, 1fr);
-  gap:14px;                 /* was 18px */
+  gap:12px;                 /* was 18px */
   width:85%;                /* slightly narrower */
   max-width:380px;          /* tighter layout */
-  margin:15px auto;
+  margin:12px auto;
 }
 
 .icon-card img{
-  width:68px;               /* was 80px */
-  height:68px;
+  width:64px;               /* was 80px */
+  height:64px;
 }
 
 .icon-card div{
-  margin-top:4px;           /* tighter spacing */
-  font-size:15px;
+  margin-top:2px;           /* tighter spacing */
+  font-size:14px;
 }
 
 .logo-center img{
@@ -221,7 +221,7 @@ button:active {
 }
 
 #footerLogo img {
-  width: 60px;              /* small size */
+  width: 55px;              /* small size */
   opacity: 0.85;
 }
 
@@ -261,8 +261,8 @@ button:active {
   align-items: center;
   gap: 14px;
 
-  padding: 14px;
-  margin-bottom: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
 
   border-radius: 14px;
   background: #ffffff;
@@ -300,13 +300,13 @@ button:active {
 .ui-card-title {
   font-weight: bold;
   font-size: 1.1rem;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 /* BODY TEXT */
 .ui-card-body {
-  font-size: 0.95rem;
-  margin-top: 2px;
+  font-size: 0.92rem;
+  margin-top: 1px;
 }
 
 /* PRESERVE EMPTY LINE */
@@ -317,7 +317,7 @@ button:active {
 /* BUTTON AREA */
 .ui-card {
   display: flex;
-  align-items: flex-start;   /* 🔥 key fix for icon alignment */
+  align-items: center;       /* 🔥 key fix for icon alignment */
   flex-wrap: wrap;           /* 🔥 allows button to drop below */
 }
 
@@ -325,7 +325,7 @@ button:active {
   width: 96%;
   display: flex;
   justify-content: center;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 /* BUTTON */
@@ -333,8 +333,8 @@ button:active {
   background: #9c6b30;
   color: white;
   border: none;
-  padding: 8px 8px;
-  border-radius: 8px;
+  padding: 6px 8px;
+  border-radius: 7px;
   cursor: pointer;
 }
 
