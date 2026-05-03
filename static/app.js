@@ -412,7 +412,6 @@ function showMap(){
     z.style.height = poi.height + '%';
 
     z.addEventListener('click', (e) => {
-      if (e.clientX === 0 && e.clientY === 0) return;
       showPOIPopup(poi, e);
     });
 
@@ -438,10 +437,23 @@ function showMap(){
     popup.appendChild(content);
     document.body.appendChild(popup);
 
-    let x = event.clientX || 0;
-    let y = event.clientY || 0;
+    let x = 0;
+    let y = 0;
 
-    if (x === 0 && y === 0 && event.target) {
+    // ✅ Normal click
+    if (event.clientX && event.clientY){
+      x = event.clientX;
+      y = event.clientY;
+    }
+
+    // 🍎 iOS touch fallback
+    else if (event.touches && event.touches.length > 0){
+      x = event.touches[0].clientX;
+      y = event.touches[0].clientY;
+    }
+
+    // ✅ Final fallback (center of tapped zone)
+    if (!x || !y){
       const r = event.target.getBoundingClientRect();
       x = r.left + r.width / 2;
       y = r.top + r.height / 2;
@@ -755,7 +767,7 @@ function renderPushCard(){
           </div>
 
           <div class="push-action">
-            <button class="alert-btn" onclick="showInstallInstructions()">
+            <button class="alert-btn" onclick="loadStatic('install_ios')">
               Install App
             </button>
           </div>

@@ -81,7 +81,7 @@ button:active {
   margin: 0 auto;
   height: 536px;
 
-  background-image: url('/static/map.jpg');
+  background-image: url('/static/map.webp');
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -165,11 +165,11 @@ button:active {
 }
 
 .poi-content h3{
-  font-size: 0.25em;
+  font-size: 0.22em;
 }
 
 .poi-content p{
-  font-size: 0.25em;
+  font-size: 0.22em;
 }
 
 .icon-grid{
@@ -422,3 +422,34 @@ button:active {
 .push-action button {
   width: 140px;
 }
+
+.install-guide img {
+  width: 100%;
+  max-width: 300px;
+  margin: 8px auto 16px auto;
+  display: block;
+  border-radius: 8px;
+}
+
+.install-guide p {
+  text-align: left;
+  margin: 6px 0;
+}
+
+.static-page .alert-btn {
+  width: auto;
+  max-width: 180px;
+  padding: 6px 10px;
+}
+
+.poi-content {
+  -webkit-user-select: none;
+  user-select: none;
+
+  -webkit-touch-callout: none;   /* 🍎 stops iOS popup */
+}
+
+.poi-content * {
+  pointer-events: none;
+}
+
