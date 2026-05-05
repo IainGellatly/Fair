@@ -952,28 +952,62 @@ if (preserveScroll){
 
 async function toggleAlert(eventId, btn){
 
-if (!subscriptionId || subscriptionId === 0){
+  if (!subscriptionId || subscriptionId === 0){
     alert("Enable notifications first");
     return;
   }
 
+  // 🔒 prevent double taps
+  if (btn.disabled) return;
+  btn.disabled = true;
+
   const hasAlert = alertSet.has(eventId);
 
+  // ---------- OPTIMISTIC UI UPDATE ----------
   if (!hasAlert){
-
-    await fetch(`/api/alerts/add/${subscriptionId}/${eventId}`, {method:'POST'});
-
     alertSet.add(eventId);
     btn.innerText = "Remove Alert";
     btn.classList.add("active");
-
   } else {
-
-    await fetch(`/api/alerts/remove/${subscriptionId}/${eventId}`, {method:'POST'});
-
     alertSet.delete(eventId);
     btn.innerText = "Alert Me";
     btn.classList.remove("active");
+  }
+
+  try {
+    // ---------- BACKGROUND REQUEST ----------
+    const url = !hasAlert
+      ? `/api/alerts/add/${subscriptionId}/${eventId}`
+      : `/api/alerts/remove/${subscriptionId}/${eventId}`;
+
+    const res = await fetch(url, { method: 'POST' });
+
+    if (!res.ok){
+      throw new Error("Server error");
+    }
+
+  } catch (err){
+
+    console.error("Alert toggle failed:", err);
+
+    // ---------- ROLLBACK UI ----------
+    if (!hasAlert){
+      alertSet.delete(eventId);
+      btn.innerText = "Alert Me";
+      btn.classList.remove("active");
+    } else {
+      alertSet.add(eventId);
+      btn.innerText = "Remove Alert";
+      btn.classList.add("active");
+    }
+
+    alert("Failed to update alert. Try again.");
+
+  } finally {
+    // 🔓 re-enable after short delay (prevents spam taps)
+    setTimeout(() => {
+      btn.disabled = false;
+    }, 1200);
   }
 }
 
