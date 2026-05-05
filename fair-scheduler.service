@@ -1,0 +1,17 @@
+[Unit]
+Description=Fair App Alert Scheduler
+After=network.target
+
+[Service]
+User=admin
+WorkingDirectory=/home/admin/fair
+ExecStart=/home/admin/fair/fair/bin/python3 scheduler.py
+Restart=always
+RestartSec=5
+
+# Important for clean shutdown
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

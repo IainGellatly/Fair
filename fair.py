@@ -1,6 +1,6 @@
 import asyncio
 import asyncmy
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from contextlib import asynccontextmanager
@@ -9,8 +9,10 @@ import uvicorn
 import logging
 from pywebpush import webpush, WebPushException
 import json
+import orjson
 from urllib.parse import urlparse
 from py_vapid import Vapid
+
 
 # ---------------- CONFIG ----------------
 VAPID_PUBLIC_KEY = "BPAr2_PD2PGYvI0EsANa5gCXJ6z_hupiV6Bjdt7jxMaL_0D_QFdF-PbP3wDDNBM8PNzvbWRQegM9WH0yOyDVJ00"
@@ -27,8 +29,14 @@ VAPID_CLAIMS = {
 CLOUD_SERVICE_NAME = 'fair'
 CLOUD_LOGGING_LEVEL = logging.INFO
 CLOUD_LOG_FILE_NAME = 'fair.log'
-SERVER_HOST = '0.0.0.0'
-SERVER_PORT = 8000
+APP_SERVER_HOST = '0.0.0.0'
+APP_SERVER_PORT = 8000
+APP_SERVER_WORKERS = 1
+DB_POOL_PER_WORKER = 8
+DB_HOST = 'localhost'
+DB_NAME = 'fairdb'
+DB_USER = 'admin'
+DB_PASSWORD = 'FanTab12345!'
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -56,18 +64,21 @@ pool: asyncmy.pool.Pool | None = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+
+    log.info('starting app server')
+
     global pool
     pool = await asyncmy.create_pool(
-        host="localhost",
-        user="admin",
-        password="FanTab12345!",
-        db="fairdb",
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DB_NAME,
         minsize=1,
-        maxsize=10,
+        maxsize=DB_POOL_PER_WORKER,
         autocommit=True
     )
 
-    asyncio.create_task(alert_scheduler())
+    # asyncio.create_task(alert_scheduler())
 
     yield
 
@@ -76,25 +87,46 @@ async def lifespan(app: FastAPI):
 
 # -------------- WEB APP -------------------
 app = FastAPI(lifespan=lifespan)
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 def root():
     return FileResponse("templates/index.html")
 
+# -------------- JSON HELPER ---------------
+def json_response(data):
+    return Response(
+        content=orjson.dumps(data),
+        media_type="application/json"
+    )
+
 # ------------ SQL HELPERS -----------------
 async def get_data(qry):
-    async with pool.acquire() as conn:
-        async with conn.cursor(cursor=DictCursor) as cursor:
-            await cursor.execute(qry)
-            results = await cursor.fetchall()
-            return results
+    try:
+
+        async with pool.acquire() as conn:
+            async with conn.cursor(cursor=DictCursor) as cursor:
+                await cursor.execute(qry)
+                results = await cursor.fetchall()
+
+                return results
+
+    except Exception as err:
+
+        log.error(f'get_data error:{err} qry:{qry}')
 
 async def run_cmd(cmd):
-    async with pool.acquire() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(cmd)
-        await conn.commit()
+    try:
+
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                await cursor.execute(cmd)
+            await conn.commit()
+
+    except Exception as err:
+
+        log.error(f'run_cmd error:{err} cmd:{cmd}')
+
 
 # --------- PUSH NOTIFICATION ----------------
 async def send_push_one(alert):
@@ -196,19 +228,24 @@ async def alert_scheduler():
 # ------------- SERVER ENDPOINTS ------------
 @app.get("/api/sponsors")
 async def get_sponsors():
+
     qry = "select * from sponsors order by name;"
     result = await get_data(qry)
-    return result
+
+    return json_response(result)
 
 @app.get('/api/tenants/{ten_type}')
 async def get_tenants(ten_type: str):
+
     sql = f'select * from tenants where type = "{ten_type}" order by name;'
     rows = await get_data(sql)
-    return rows
+
+    return json_response(rows)
 
 @app.get('/api/events')
 @app.get('/api/events/{event_type}')
 async def get_events(event_type: str | None = None):
+
     where_cl = ''
     if event_type == 'today':
 
@@ -238,7 +275,8 @@ async def get_events(event_type: str | None = None):
             order by events.start_time;
         '''
     rows = await get_data(sql)
-    return rows
+
+    return json_response(rows)
 
 @app.post("/api/get_sub_id")
 async def get_subscription_id(request: Request):
@@ -262,13 +300,14 @@ async def subscribe(request: Request):
     p256dh = data.get('keys').get('p256dh')
     auth = data.get('keys').get('auth')
 
-    del_sql = f'delete from subscriptions where endpoint = "{end_pt}"'
-    await run_cmd(del_sql)
-
     ins_sql = f'''
         insert into subscriptions 
-        (endpoint, p256dh, auth) 
-        values ("{end_pt}", "{p256dh}", "{auth}");
+            (endpoint, p256dh, auth) 
+        values 
+            ("{end_pt}", "{p256dh}", "{auth}")
+        on duplicate key update
+            p256dh = values(p256dh),
+            auth = values(auth);
         '''
     await run_cmd(ins_sql)
 
@@ -308,24 +347,17 @@ async def add_alert(sub_id: int, event_id: int):
 
     log.info(f'add alert sub_id:{sub_id}, event_id:{event_id}')
 
-    event_sql = f"""
-        select 
-            name, 
-            date_sub(start_time, interval 10 minute) as send_at
-        from events
-        where event_id = {event_id}; 
-        """
-    rows = await get_data(event_sql)
-    send_at = rows[0].get('send_at')
-    event_name = rows[0].get('name')
-    msg = f'{event_name} starts soon'
-    alert_sql = f'''
-        insert into alerts 
-            (subscription_id, event_id, send_at, message)
-        values 
-            ({sub_id}, {event_id}, "{send_at}", "{msg}")
-        on duplicate key update subscription_id = subscription_id;
-        '''
+    alert_sql = f"""
+    insert into alerts (subscription_id, event_id, send_at, message)
+    select
+        {sub_id},
+        e.event_id,
+        date_sub(e.start_time, interval 10 minute),
+        concat(e.name, ' starts soon')
+    from events e
+    where e.event_id = {event_id}
+    on duplicate key update subscription_id = subscription_id;
+    """
     await run_cmd(alert_sql)
 
     return {"status": "added"}
@@ -362,7 +394,10 @@ async def test_notify():
 
     return {"status": "sent"}
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    log.info('starting web server')
-    uvicorn.run(app, host=SERVER_HOST, port=SERVER_PORT)
+#    log.info('starting web server')
+#    uvicorn.run(app,
+#                host=APP_SERVER_HOST,
+#                port=APP_SERVER_PORT,
+#                workers=APP_SERVER_WORKERS)
