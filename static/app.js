@@ -895,8 +895,19 @@ async function loadTodayEvents(preserveScroll = false){
 
       const timeRange = `${item.start_time} - ${item.end_time}`;
 
-        h += `
-          <div class="ui-card" ${bgStyle}>
+            let scrollTag = '';
+
+            if (item.status !== 'cancelled') {
+              if (now >= start && now <= end){
+                scrollTag = 'data-scroll="now"';
+              }
+              else if (now < start && !scrollTag){
+                scrollTag = 'data-scroll="next"';
+              }
+            }
+
+            h += `
+              <div class="ui-card" ${bgStyle} ${scrollTag}>
 
             ${iconPath ? `
               <div class="ui-card-media">
@@ -932,7 +943,45 @@ async function loadTodayEvents(preserveScroll = false){
     });
 
     content.innerHTML = h;
+
+// 🔥 SMART SCROLL (only on first load + ONLY if subscribed)
+if (!preserveScroll){
+
+  if (pushAuthorized){
+
+    const nowEl = document.querySelector('[data-scroll="now"]');
+    const nextEl = document.querySelector('[data-scroll="next"]');
+
+    function scrollWithOffset(el){
+      const offset = 12;
+
+      const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: y,
+        behavior: 'smooth'
+      });
+    }
+
+    if (nowEl){
+      scrollWithOffset(nowEl);
+    }
+    else if (nextEl){
+      scrollWithOffset(nextEl);
+    }
+    else {
+      scrollToContent(); // fallback
+    }
+
+  } else {
+    // 🔥 NOT subscribed → always show top (push card visible)
     scrollToContent();
+  }
+
+} else {
+  // preserve existing scroll during refresh
+  window.scrollTo(0, scrollPos);
+}
 
   } catch (err) {
     console.error("loadTodayEvents error:", err);
@@ -1012,3 +1061,18 @@ async function toggleAlert(eventId, btn){
 }
 
 initSubscription().catch(() => {});
+
+window.addEventListener("load", () => {
+
+  const params = new URLSearchParams(window.location.search);
+  const page = params.get("page");
+
+  if (page === "today"){
+    loadTodayEvents();
+  } else {
+    // default behavior if you ever add one
+    // loadPage('home');
+  }
+
+});
+

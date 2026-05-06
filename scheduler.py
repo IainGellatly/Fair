@@ -71,29 +71,39 @@ async def run_cmd(cmd):
         log.error(f'run_cmd error:{err} cmd:{cmd}')
 
 # ---------------- PUSH ----------------
-async def send_push_one(alert):
-    sub_id = alert.get('subscription_id')
-    event_id = alert.get('event_id')
-    end_pt = alert.get("endpoint")
+async def send_push_group(alert_group):
+
+    first = alert_group[0]
+
+    sub_id = first.get('subscription_id')
+    end_pt = first.get("endpoint")
 
     parsed = urlparse(end_pt)
     aud = f"{parsed.scheme}://{parsed.netloc}"
     vapid = Vapid.from_pem(VAPID_PRIVATE_KEY.encode())
 
-    log.info(f'send push sub_id:{sub_id}, event_id:{event_id}')
+    # -------- BUILD MESSAGE --------
+    if len(alert_group) == 1:
+        body = first.get("message")
+    else:
+        names = [a["event_name"] for a in alert_group]
+        body = "Starting soon:\n" + "\n".join(f"• {n}" for n in names)
+
+    log.info(f'send push sub_id:{sub_id}, events:{len(alert_group)}')
 
     try:
         webpush(
             {
                 "endpoint": end_pt,
                 "keys": {
-                    "p256dh": alert.get("p256dh"),
-                    "auth": alert.get("auth")
+                    "p256dh": first.get("p256dh"),
+                    "auth": first.get("auth")
                 }
             },
             data=json.dumps({
                 "title": "Starting Soon",
-                "body": alert.get("message")
+                "body": body,
+                "url": "/?page=today"   # 👈 deep link
             }),
             vapid_private_key=vapid,
             vapid_claims={
@@ -108,11 +118,9 @@ async def send_push_one(alert):
         log.error(f"push failed: {err}")
 
         if err.response and err.response.status_code == 429:
-            log.warning("rate limited - retry later")
-            return alert, False
+            return alert_group, False
 
         if err.response and err.response.status_code == 410:
-            log.info(f'delete dead subscription {sub_id}')
             await run_cmd(
                 f'delete from subscriptions where subscription_id = {sub_id}'
             )
@@ -124,48 +132,71 @@ async def get_ready_alerts():
     sql = """
         select 
             s.endpoint, s.p256dh, s.auth,
-            a.message, a.subscription_id, a.event_id
+            a.message, a.subscription_id, a.event_id,
+            e.name as event_name,
+            a.send_at
         from alerts a
         join subscriptions s on a.subscription_id = s.subscription_id
+        join events e on a.event_id = e.event_id
         where a.send_at <= now()
         and a.alert_sent = 0;
     """
     return await get_data(sql)
 
-async def mark_alerts_sent_bulk(successful_alerts):
-    if not successful_alerts:
+async def mark_alerts_sent_bulk(successful_groups):
+
+    if not successful_groups:
         return
 
     values = []
-    for a in successful_alerts:
-        values.append(f"({a['subscription_id']}, {a['event_id']})")
+
+    for group in successful_groups:
+        for a in group:
+            values.append(f"({a['subscription_id']}, {a['event_id']})")
 
     sql = f"""
         update alerts
         set alert_sent = 1
         where (subscription_id, event_id) in ({",".join(values)});
     """
+
     await run_cmd(sql)
 
+def group_alerts(alerts):
+    grouped = {}
+
+    for a in alerts:
+        # group by subscription + minute bucket
+        key = (
+            a["subscription_id"],
+            a["send_at"].strftime("%Y-%m-%d %H:%M")
+        )
+
+        grouped.setdefault(key, []).append(a)
+
+    return grouped
+
 async def process_alerts(alerts):
+
+    grouped = group_alerts(alerts)
+
     sem = asyncio.Semaphore(CONCURRENCY)
 
-    async def send_one(alert):
+    async def send_group(alert_group):
         async with sem:
             try:
-                await send_push_one(alert)
-                return alert, True
+                await send_push_group(alert_group)
+                return alert_group, True
             except Exception as e:
-                log.error(f"send failed sub_id:{alert['subscription_id']} err:{e}")
-                return alert, False
+                log.error(f"send failed sub_id:{alert_group[0]['subscription_id']} err:{e}")
+                return alert_group, False
 
     results = await asyncio.gather(
-        *[send_one(alert) for alert in alerts],
+        *[send_group(group) for group in grouped.values()],
         return_exceptions=False
     )
 
     return results
-
 
 # ---------------- MAIN LOOP ----------------
 async def scheduler_loop():
