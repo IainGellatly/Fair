@@ -453,3 +453,26 @@ button:active {
   pointer-events: none;
 }
 
+.vote-header {
+  font-weight: bold;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.vote-list {
+  display: none;
+}
+
+.vote-list.active {
+  display: block;
+}
+
+.vote-option {
+  padding: 6px;
+  border-bottom: 1px solid #eee;
+}
+
+.vote-option.selected {
+  background: #f4e7d3;
+  border-left: 4px solid #8b5a2b;
+}

@@ -394,6 +394,98 @@ async def test_notify():
 
     return {"status": "sent"}
 
+# ---------------- VOTE --------------------
+@app.post("/api/vote")
+async def submit_vote(request: Request):
+
+    data = await request.json()
+
+    device_id = data.get("device_id")
+    votes = data.get("votes")   # { food: 12, exhibit: 5, business: 9 }
+
+    if not device_id or not votes:
+        return {"status": "error"}
+
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cursor:
+
+            try:
+                await conn.begin()
+
+                for category, tenant_id in votes.items():
+
+                    if not tenant_id:
+                        continue
+
+                    # insert vote (prevents duplicates)
+                    await cursor.execute(f"""
+                        insert into votes (device_id, category, tenant_id)
+                        values ("{device_id}", "{category}", {tenant_id});
+                    """)
+
+                    # increment totals
+                    await cursor.execute(f"""
+                        insert into vote_totals (category, tenant_id, tenant_name, vote_count)
+                        select 
+                            t.type,
+                            t.tenant_id,
+                            t.name,
+                            1
+                        from tenants t
+                        where t.tenant_id = {tenant_id}
+                        on duplicate key update vote_count = vote_count + 1;
+                    """)
+
+                await conn.commit()
+
+                return {"status": "ok"}
+
+            except Exception as err:
+                await conn.rollback()
+                log.error(f"vote error: {err}")
+                return {"status": "error"}
+
+@app.get("/api/vote/results")
+async def get_vote_results():
+
+    sql = """
+        select category, tenant_id, tenant_name, vote_count
+        from vote_totals
+        order by category, vote_count desc;
+    """
+
+    rows = await get_data(sql)
+
+    result = {
+        "food": [],
+        "exhibit": [],
+        "business": []
+    }
+
+    for r in rows:
+        cat = r["category"]
+
+        if len(result[cat]) < 3:
+            result[cat].append(r)
+
+    return json_response(result)
+
+@app.get("/api/vote/status/{device_id}")
+async def vote_status(device_id: str):
+
+    sql = f"""
+        select category
+        from votes
+        where device_id = "{device_id}";
+    """
+
+    rows = await get_data(sql)
+
+    voted = [r["category"] for r in rows]
+
+    return voted
+
+
 # if __name__ == "__main__":
 
 #    log.info('starting web server')

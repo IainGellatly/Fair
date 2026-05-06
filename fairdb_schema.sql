@@ -65,3 +65,22 @@ create table events (
 );
 create index events_type on events(type);
 
+drop table if exists vote_totals;
+create table vote_totals (
+    category    varchar(20),
+    tenant_id   integer,
+    tenant_name varchar(100),
+    vote_count  integer default 0,
+    primary key (category, tenant_id)
+);
+
+drop table if exists votes;
+create table votes (
+    vote_id    integer auto_increment primary key,
+    device_id  varchar(64),
+    category   varchar(20),
+    tenant_id  integer,
+    created_at datetime default current_timestamp,
+    unique key (device_id, category)
+);
+

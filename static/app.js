@@ -11,6 +11,13 @@ let subscriptionId = 0;
 let pushAuthorized = false;
 let alertSet = new Set();
 
+let deviceId = localStorage.getItem("device_id");
+
+if (!deviceId){
+  deviceId = crypto.randomUUID();
+  localStorage.setItem("device_id", deviceId);
+}
+
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding)
@@ -72,6 +79,28 @@ function toggleMoreRow(){
     items[0].scrollIntoView({
       behavior: 'smooth',
       block: 'center'
+    });
+  }
+}
+
+function toggleVoteSection(id){
+
+  const all = document.querySelectorAll('.vote-list');
+
+  all.forEach(el => {
+    if (el.id === 'vote-' + id){
+      el.classList.toggle('active');
+    } else {
+      el.classList.remove('active');
+    }
+  });
+
+  // optional: scroll opened section into view
+  const el = document.getElementById('vote-' + id);
+  if (el && el.classList.contains('active')){
+    el.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
     });
   }
 }
@@ -284,6 +313,144 @@ async function loadEvents(type){
   } catch (err){
     content.innerHTML = `<div class="card">Error loading events</div>`;
   }
+}
+
+// ---------------- VOTE ---------------
+async function loadVotePage(){
+
+  const content = document.getElementById("content");
+
+  const votedRes = await fetch(`/api/vote/status/${deviceId}`);
+  const voted = await votedRes.json();
+
+  // already voted → show results
+  if (voted.length > 0){
+    loadVoteResults();
+    return;
+  }
+
+  // load candidates
+  const [food, exhibit, business] = await Promise.all([
+    fetch("/api/tenants/food").then(r=>r.json()),
+    fetch("/api/tenants/exhibit").then(r=>r.json()),
+    fetch("/api/tenants/business").then(r=>r.json())
+  ]);
+
+  function renderSection(title, data, id){
+    return `
+      <div class="vote-section">
+
+        <div class="vote-header" onclick="toggleVoteSection('${id}')">
+          ${title}
+        </div>
+
+        <div id="vote-${id}" class="vote-list">
+          ${data.map(x => `
+            <div class="vote-option" onclick="selectVote('${id}', ${x.tenant_id}, this)">
+              ${x.name}
+            </div>
+          `).join('')}
+        </div>
+
+      </div>
+    `;
+  }
+
+  content.innerHTML = `
+    <h2>Vote for Your Favorites</h2>
+
+    ${renderSection("Food", food, "food")}
+    ${renderSection("Exhibits", exhibit, "exhibit")}
+    ${renderSection("Business", business, "business")}
+
+    <button onclick="submitVote()">Vote</button>
+  `;
+
+  scrollToContent();
+}
+
+setTimeout(() => {
+  toggleVoteSection('food');
+}, 100);
+
+let voteSelection = {
+  food: null,
+  exhibit: null,
+  business: null
+};
+
+function selectVote(category, id, el){
+
+  voteSelection[category] = id;
+
+  document.querySelectorAll(`#vote-${category} .vote-option`)
+    .forEach(x => x.classList.remove("selected"));
+
+  el.classList.add("selected");
+}
+
+async function submitVote(){
+
+  const hasSelection =
+    voteSelection.food ||
+    voteSelection.exhibit ||
+    voteSelection.business;
+
+  if (!hasSelection){
+    alert("Please select at least one category");
+    return;
+  }
+
+  if (!confirm("Submit your vote? This cannot be changed.")) return;
+
+  const res = await fetch("/api/vote", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      device_id: deviceId,
+      votes: voteSelection
+    })
+  });
+
+  const result = await res.json();
+
+  if (result.status === "ok"){
+    loadVoteResults();
+  } else {
+    alert("Vote failed");
+  }
+}
+
+async function loadVoteResults(){
+
+  const content = document.getElementById("content");
+
+  const res = await fetch("/api/vote/results");
+  const data = await res.json();
+
+  function renderTop(title, list){
+    return `
+      <h3>${title}</h3>
+      ${list.map((x,i)=>`
+        <div class="ui-card">
+          <div class="ui-card-content">
+            <div class="ui-card-title">${i+1}. ${x.tenant_name}</div>
+            <div class="ui-card-body">${x.vote_count} votes</div>
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  content.innerHTML = `
+    <h2>Current Leaders</h2>
+
+    ${renderTop("Food", data.food)}
+    ${renderTop("Exhibits", data.exhibit)}
+    ${renderTop("Business", data.business)}
+  `;
+
+  scrollToContent();
 }
 
 // ---------------- MAP ----------------
@@ -557,6 +724,8 @@ async function loadPage(page){
     return;
   }
 
+
+
   // ---------------- STATIC PAGES ----------------
   const staticPages = {
     midway: "midway",
@@ -616,6 +785,12 @@ if (page === "map"){
 // -------------- TODAY ----------------
 if (page === "today"){
   loadTodayEvents();
+  return;
+}
+
+// --------------- VOTE ----------------
+if (page === "vote"){
+  loadVotePage();
   return;
 }
 
