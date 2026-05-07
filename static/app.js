@@ -416,37 +416,51 @@ async function loadVotePage(){
   // store globally for picker
   window.voteData = { food, exhibit, business };
 
-  function renderCard(label, category, icon){
+    function renderCard(label, category, icon){
 
-    const selected = voteSelection[category];
+      const selected = voteSelection[category];
 
-let name = "<Tap to Pick>";
+      let name = "&lt;None Selected&gt;";
 
-if (selected){
-  const found = voteData[category].find(x => x.tenant_id === selected);
-  if (found){
-    name = found.name;
-  }
-}
+      if (selected){
+        const found = voteData[category].find(x => x.tenant_id === selected);
+        if (found){
+          name = found.name;
+        }
+      }
 
     return `
-      <div class="ui-card vote-card" onclick="openVotePicker('${category}')">
+      <div class="ui-card vote-card">
 
         <div class="ui-card-media">
           <img src="/static/icons/menu/${icon}.webp">
         </div>
 
         <div class="ui-card-content">
-         <div class="ui-card-title">${label}</div>
 
-        <div class="ui-card-body">
-          ${selected ? name : '<span class="placeholder">&lt;Tap to Pick&gt;</span>'}
+          <div class="ui-card-title">${label}</div>
+
+          <div class="ui-card-body"></div>   <!-- blank line -->
+
+          <div class="ui-card-body ${selected ? '' : 'placeholder'}">
+            ${name}
+          </div>
+
         </div>
+
+        <!-- ✅ MOVED OUTSIDE -->
+        <div class="ui-card-actions">
+          <button
+            class="alert-btn ${selected ? 'active' : ''}"
+            onclick="openVotePicker('${category}')"
+          >
+            ${selected ? 'Change' : 'Select'}
+          </button>
         </div>
 
       </div>
     `;
-  }
+    }
 
   content.innerHTML = `
     <h2>Vote for Best of Fair:</h2>
@@ -455,7 +469,7 @@ if (selected){
     ${renderCard("Best Exhibitor Display", "exhibit", "exhibits")}
     ${renderCard("Best Business Booth", "business", "business")}
 
-    <button onclick="submitVote()">Vote</button>
+    <button class="vote-submit-btn" onclick="submitVote()">Submit Ballot</button>
   `;
 
   scrollToContent();

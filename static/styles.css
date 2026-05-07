@@ -325,7 +325,11 @@ button:active {
   width: 96%;
   display: flex;
   justify-content: center;
-  margin-top: 6px;
+  margin-top: 4px;
+}
+
+.ui-card-actions .alert-btn {
+  width: 140px;
 }
 
 /* BUTTON */
@@ -584,10 +588,11 @@ button:active {
   display: block;
   margin-top: 2px;
   font-size: 0.9rem;
+  color: #333;
 }
 
 .placeholder {
-  color: #777;
+  color: #8a8a8a;
   font-style: italic;
   display: block;
 }
@@ -627,3 +632,31 @@ button:active {
   margin-bottom: 6px;
 }
 
+.vote-card {
+  align-items: flex-start;   /* ⬅️ key fix */
+}
+
+.vote-submit-btn {
+  width: 70%;   /* ~10% narrower than default 80% */
+}
+
+.vote-card .ui-card-actions {
+  flex-basis: 100%;     /* 🔥 forces it onto its own row */
+  display: flex;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.vote-card .ui-card-content {
+  justify-content: flex-start;
+}
+
+.vote-card .placeholder {
+  color: #666;
+  font-style: italic;
+  margin-top: 2px;   /* 🔥 THIS is what makes it visible */
+}
+
+.vote-card {
+  padding: 10px;
+}
