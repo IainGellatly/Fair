@@ -632,6 +632,14 @@ button:active {
   margin-bottom: 6px;
 }
 
+.vote-thanks-note {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #8b5a2b;   /* matches your wood theme */
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
 .vote-card {
   align-items: flex-start;   /* ⬅️ key fix */
 }
@@ -644,7 +652,7 @@ button:active {
   flex-basis: 100%;     /* 🔥 forces it onto its own row */
   display: flex;
   justify-content: center;
-  margin-top: 2px;
+  margin-top: -12px;
 }
 
 .vote-card .ui-card-content {
@@ -658,5 +666,16 @@ button:active {
 }
 
 .vote-card {
-  padding: 10px;
+  padding: 10px 10px;
 }
+
+.vote-note {
+  font-size: 0.9rem;
+  color: #6b5b4a;
+  margin-bottom: 8px;
+}
+
+.vote-card .ui-card-body:empty {
+  height: 0.3em;   /* cut spacer in half */
+}
+

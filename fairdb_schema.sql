@@ -78,9 +78,10 @@ drop table if exists votes;
 create table votes (
     vote_id    integer auto_increment primary key,
     device_id  varchar(64),
+    vote_date  date not null default (current_date),
     category   varchar(20),
     tenant_id  integer,
     created_at datetime default current_timestamp,
-    unique key (device_id, category)
+    unique key (device_id, vote_date, category)
 );
 

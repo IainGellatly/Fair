@@ -1,34 +1,18 @@
 name,description,location,times,icon,type,featured
-Rotary BBQ,Chicken BBQ dinners,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Boy Scouts Grill,Burgers and hot dogs,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Fire Dept Fry Shack,French fries and fried snacks,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Lions Club Sausage Stand,Sausage sandwiches,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Kiwanis Ice Cream,Soft serve and sundaes,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-4-H Milk Bar,Milkshakes and dairy drinks,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-County Corn Roasters,Roasted sweet corn,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Fair Pizza Co,Fresh pizza slices,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Golden Funnel Cakes,Funnel cakes and sweets,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Maple Syrup Stand,Pancakes and maple treats,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-BBQ Pit Masters,Smoked ribs and brisket,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Hot Pretzel Barn,Soft pretzels and dips,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-County Fair Tacos,Street tacos and nachos,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,1
-Fresh Lemonade Stand,Hand-squeezed lemonade,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Popcorn Palace,Butter popcorn varieties,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Candy Apple Corner,Candy and caramel apples,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Farm Fresh Burgers,Local beef burgers,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Deep Fried Delights,Fried Oreos and candy bars,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Sweet Corn Dogs,Corn dogs and sides,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Ice Cream Truck Classics,Classic novelties,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Chicken Finger Hut,Chicken tenders and fries,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-County Fair Gyros,Gyros and Greek wraps,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Italian Sausage Co,Peppers and sausage,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Grilled Cheese Wagon,Gourmet grilled cheese,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,1
-Loaded Fries Shack,Fries with toppings,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Snow Cone Station,Flavored shaved ice,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,0
-BBQ Chicken Express,Grilled chicken meals,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Fair Donut Shop,Fresh donuts daily,Midway,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Nacho Supreme Stand,Nachos with cheese,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
-Fresh Fruit Cups,Healthy fruit snacks,Food Court,Daily 12:00PM - 11:00PM,fair.webp,food,0
+Pomona Grange,"Serving breakfast, chicken bbq and daily specials",Food Court,Daily 12:00PM - 11:00PM,food/grange.webp,food,0
+Birdland,"Popcorn chicken, fried dough bites and more",Food Court,Daily 12:00PM - 11:00PM,food/birdland.webp,food,0
+Marion Seniors ,"Burgers, hots, fries and pies",Food Court,Daily 12:00PM - 11:00PM,food/marionseniors.webp,food,0
+4-H Dairy,Ice cream and milkshakes,Food Court,Daily 12:00PM - 11:00PM,food/dairy.webp,food,0
+Pal Mac Seniors,"Burgers, hots and fries",Food Court,Daily 12:00PM - 11:00PM,food/palmacseniors.webp,food,0
+Palmyra Fire Department,Clams and corn,Food Court,Daily 12:00PM - 11:00PM,food/fire.webp,food,0
+The Taco Shack,"Tacos, burritos, salads and more",Food Court,Daily 12:00PM - 11:00PM,food/taco.webp,food,0
+Mark's Pizzeria,Fresh pizza by the slice,Food Court,Daily 12:00PM - 11:00PM,food/marks.webp,food,0
+Brittany's Lemonade,Fresh squeezed lemonade,Midway,Daily 12:00PM - 11:00PM,food/lemon.webp,food,0
+Olde Slovakia,"Traditional Slovak food- pierogies, kraut, sausage & more",Food Court,Daily 12:00PM - 11:00PM,food/olde.webp,food,0
+Palmyra-Macedon Rotary,"Grilled chicken, burgers, hots and fries",Food Court,Daily 12:00PM - 11:00PM,food/rotary.webp,food,1
+546 Chicken and Waffles,"Chicken and waffles, mother clucker, chicken and fries",Food Court,Daily 12:00PM - 11:00PM,food/chicken.webp,food,0
+Imprint Coffee Roasters,Custom specialty coffee drinks served hot and cold,Food Court,Daily 12:00PM - 11:00PM,food/imprint.webp,food,0
+Booth's Sugar Waffles,"Freshly made sugar waffles - Chocolate, Plain, Sugared",Food Court,Daily 12:00PM - 11:00PM,food/boothwaffle.webp,food,1
 Wayne Historical Society,Local history exhibits,Commercial Building #1,Daily 10:00AM - 10:00PM,fair.webp,exhibit,0
 Palmyra Garden Club,Gardening tips and displays,Floral Hall,Daily 10:00AM - 10:00PM,fair.webp,exhibit,0
 Wayne County Social Services,Community assistance programs,Commercial Building #1,Daily 10:00AM - 10:00PM,fair.webp,exhibit,0
@@ -84,7 +68,7 @@ Landscaping Pros,Landscape design ideas,Commercial Building #1,Daily 11:00AM - 1
 Security Systems Inc,Home security demos,Commercial Building #1,Daily 11:00AM - 10:00PM,fair.webp,business,0
 Appliance Center,Home appliances and deals,Commercial Building #2,Daily 11:00AM - 10:00PM,fair.webp,business,0
 Custom Sheds & Garages,Prefab structures display,Commercial Building #2,Daily 11:00AM - 10:00PM,fair.webp,business,0
-Cavies,Guinea pig cavies,Livestock Tent,Daily 10:00AM - 8:00PM,animal/cavie.webp,animal,0 
+Cavies,Guinea pig cavies,Livestock Tent,Daily 10:00AM - 8:00PM,animal/cavie.webp,animal,0
 Chicks,Come watch baby chicks be hatched!,4-H Building,Daily 12:00PM - 9:00PM,animal/chicks.webp,animal,1
 Cows,Daily milking and grooming,Cattle Building,Daily 12:00PM - 9:00PM,animal/cow.webp,animal,0
 Goats,Petting and feeding,Livestock Tent,Daily 12:00PM - 7:00PM,animal/goat.webp,animal,0

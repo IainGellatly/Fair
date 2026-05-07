@@ -402,6 +402,12 @@ async function loadVotePage(){
   const votedRes = await fetch(`/api/vote/status/${deviceId}`);
   const voted = await votedRes.json();
 
+    let note = '';
+
+    if (true) { // always show if you want
+      note = `<div class="vote-thanks-note">Vote once per day to see results</div>`;
+    }
+
   if (voted.length > 0){
     loadVoteResults();
     return;
@@ -463,8 +469,8 @@ async function loadVotePage(){
     }
 
   content.innerHTML = `
-    <h2>Vote for Best of Fair:</h2>
-
+    <h2>Vote for Best of Fair</h2>
+    ${note}
     ${renderCard("Best Food Vendor", "food", "food")}
     ${renderCard("Best Exhibitor Display", "exhibit", "exhibits")}
     ${renderCard("Best Business Booth", "business", "business")}
@@ -520,11 +526,11 @@ async function submitVote(){
 
   const result = await res.json();
 
-  if (result.status === "ok"){
-    loadVoteResults();
-  } else {
-    alert("Vote failed");
-  }
+    if (result.status === "ok" || result.status === "already_voted"){
+      loadVoteResults();
+    } else {
+      alert("Vote failed");
+    }
 }
 
 async function loadVoteResults(){
@@ -574,6 +580,8 @@ async function loadVoteResults(){
 
     <div class="vote-thanks">Thanks for Voting!</div>
 
+    <div class="vote-thanks-note">Vote again tomorrow. Refresh anytime.</div>
+
     <h2 class="vote-results-heading">Ranking at ${ts}</h2>
 
     ${renderCard("Best Food Vendor", "food", data.food)}
@@ -583,6 +591,7 @@ async function loadVoteResults(){
 
   scrollToContent();
 }
+
 
 // ---------------- MAP ----------------
 function showMap(){

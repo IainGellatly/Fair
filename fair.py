@@ -12,6 +12,7 @@ import json
 import orjson
 from urllib.parse import urlparse
 from py_vapid import Vapid
+from datetime import date
 
 
 # ---------------- CONFIG ----------------
@@ -37,6 +38,7 @@ DB_HOST = 'localhost'
 DB_NAME = 'fairdb'
 DB_USER = 'admin'
 DB_PASSWORD = 'FanTab12345!'
+VOTING_MODE = "daily"   # "single" or "daily"
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -412,6 +414,27 @@ async def submit_vote(request: Request):
             try:
                 await conn.begin()
 
+                today = date.today()
+
+                if VOTING_MODE == "single":
+                    check_sql = f'''
+                        select 1 from votes 
+                        where device_id = "{device_id}" 
+                        limit 1;
+                    '''
+                else:
+                    check_sql = f'''
+                        select 1 from votes 
+                        where device_id = "{device_id}" 
+                        and vote_date = "{today}"
+                        limit 1;
+                    '''
+
+                existing = await get_data(check_sql)
+
+                if existing:
+                    return {"status": "already_voted"}
+
                 for category, tenant_id in votes.items():
 
                     if not tenant_id:
@@ -419,8 +442,8 @@ async def submit_vote(request: Request):
 
                     # insert vote (prevents duplicates)
                     await cursor.execute(f"""
-                        insert into votes (device_id, category, tenant_id)
-                        values ("{device_id}", "{category}", {tenant_id});
+                        insert into votes (device_id, category, tenant_id, vote_date)
+                        values ("{device_id}", "{category}", {tenant_id}, "{today}")
                     """)
 
                     # increment totals
@@ -473,11 +496,21 @@ async def get_vote_results():
 @app.get("/api/vote/status/{device_id}")
 async def vote_status(device_id: str):
 
-    sql = f"""
-        select category
-        from votes
-        where device_id = "{device_id}";
-    """
+    today = date.today()
+
+    if VOTING_MODE == "single":
+        sql = f"""
+            select category
+            from votes
+            where device_id = "{device_id}";
+        """
+    else:
+        sql = f"""
+            select category
+            from votes
+            where device_id = "{device_id}"
+            and vote_date = "{today}";
+        """
 
     rows = await get_data(sql)
 
