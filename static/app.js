@@ -18,6 +18,17 @@ if (!deviceId){
   localStorage.setItem("device_id", deviceId);
 }
 
+function ordinal(n){
+  if (n % 100 >= 11 && n % 100 <= 13) return n + "th";
+
+  switch (n % 10){
+    case 1: return n + "st";
+    case 2: return n + "nd";
+    case 3: return n + "rd";
+    default: return n + "th";
+  }
+}
+
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding)
@@ -31,6 +42,74 @@ function urlBase64ToUint8Array(base64String) {
     outputArray[i] = rawData.charCodeAt(i);
   }
   return outputArray;
+}
+
+function openVotePicker(category){
+
+  const data = voteData[category];
+
+  const overlay = document.createElement("div");
+  overlay.className = "vote-modal";
+
+  overlay.innerHTML = `
+    <div class="vote-modal-content">
+
+      <div class="vote-modal-header">
+        Select ${category.charAt(0).toUpperCase() + category.slice(1)}
+      </div>
+
+      <input
+        type="text"
+        placeholder="Search..."
+        oninput="filterVoteList(this.value)"
+        class="vote-search"
+      >
+
+      <div id="vote-list">
+        ${data.map(x => `
+          <div class="vote-item ${voteSelection[category] === x.tenant_id ? 'selected' : ''}"
+               onclick="selectVoteModal('${category}', ${x.tenant_id}, this)">
+            ${x.name}
+          </div>
+        `).join('')}
+      </div>
+
+      <button onclick="closeVoteModal()">Close</button>
+
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+}
+
+function closeVoteModal(){
+  const modal = document.querySelector(".vote-modal");
+  if (modal) modal.remove();
+}
+
+function selectVoteModal(category, id, el){
+
+  voteSelection[category] = id;
+
+  document.querySelectorAll(".vote-item")
+    .forEach(x => x.classList.remove("selected"));
+
+  el.classList.add("selected");
+
+  setTimeout(() => {
+    closeVoteModal();
+    loadVotePage(); // refresh cards
+  }, 150);
+}
+
+function filterVoteList(text){
+
+  text = text.toLowerCase();
+
+  document.querySelectorAll(".vote-item").forEach(el => {
+    const match = el.innerText.toLowerCase().includes(text);
+    el.style.display = match ? "block" : "none";
+  });
 }
 
 function showInstallInstructions(){
@@ -323,33 +402,46 @@ async function loadVotePage(){
   const votedRes = await fetch(`/api/vote/status/${deviceId}`);
   const voted = await votedRes.json();
 
-  // already voted → show results
   if (voted.length > 0){
     loadVoteResults();
     return;
   }
 
-  // load candidates
   const [food, exhibit, business] = await Promise.all([
     fetch("/api/tenants/food").then(r=>r.json()),
     fetch("/api/tenants/exhibit").then(r=>r.json()),
     fetch("/api/tenants/business").then(r=>r.json())
   ]);
 
-  function renderSection(title, data, id){
-    return `
-      <div class="vote-section">
+  // store globally for picker
+  window.voteData = { food, exhibit, business };
 
-        <div class="vote-header" onclick="toggleVoteSection('${id}')">
-          ${title}
+  function renderCard(label, category, icon){
+
+    const selected = voteSelection[category];
+
+let name = "<Tap to Pick>";
+
+if (selected){
+  const found = voteData[category].find(x => x.tenant_id === selected);
+  if (found){
+    name = found.name;
+  }
+}
+
+    return `
+      <div class="ui-card vote-card" onclick="openVotePicker('${category}')">
+
+        <div class="ui-card-media">
+          <img src="/static/icons/menu/${icon}.webp">
         </div>
 
-        <div id="vote-${id}" class="vote-list">
-          ${data.map(x => `
-            <div class="vote-option" onclick="selectVote('${id}', ${x.tenant_id}, this)">
-              ${x.name}
-            </div>
-          `).join('')}
+        <div class="ui-card-content">
+         <div class="ui-card-title">${label}</div>
+
+        <div class="ui-card-body">
+          ${selected ? name : '<span class="placeholder">&lt;Tap to Pick&gt;</span>'}
+        </div>
         </div>
 
       </div>
@@ -357,11 +449,11 @@ async function loadVotePage(){
   }
 
   content.innerHTML = `
-    <h2>Vote for Your Favorites</h2>
+    <h2>Vote for Best of Fair:</h2>
 
-    ${renderSection("Food", food, "food")}
-    ${renderSection("Exhibits", exhibit, "exhibit")}
-    ${renderSection("Business", business, "business")}
+    ${renderCard("Best Food Vendor", "food", "food")}
+    ${renderCard("Best Exhibitor Display", "exhibit", "exhibits")}
+    ${renderCard("Best Business Booth", "business", "business")}
 
     <button onclick="submitVote()">Vote</button>
   `;
@@ -428,26 +520,51 @@ async function loadVoteResults(){
   const res = await fetch("/api/vote/results");
   const data = await res.json();
 
-  function renderTop(title, list){
+  const now = new Date();
+  const ts = now.toLocaleString();
+
+  function renderCard(title, icon, list){
+
     return `
-      <h3>${title}</h3>
-      ${list.map((x,i)=>`
-        <div class="ui-card">
-          <div class="ui-card-content">
-            <div class="ui-card-title">${i+1}. ${x.tenant_name}</div>
-            <div class="ui-card-body">${x.vote_count} votes</div>
-          </div>
+      <div class="ui-card vote-result-card">
+
+        <div class="ui-card-media">
+          <img src="/static/icons/menu/${icon}.webp">
         </div>
-      `).join('')}
+
+        <div class="ui-card-content">
+
+          <div class="vote-result-header">
+            <div class="vote-result-title">${title}</div>
+            <div class="vote-result-votes">Votes</div>
+          </div>
+
+          ${list.map((x,i)=>`
+            <div class="vote-result-row">
+              <div class="vote-result-name">
+                <span class="vote-rank">${ordinal(i+1)}</span> ${x.tenant_name}
+              </div>
+              <div class="vote-result-count">
+                ${x.vote_count}
+              </div>
+            </div>
+          `).join('')}
+
+        </div>
+
+      </div>
     `;
   }
 
   content.innerHTML = `
-    <h2>Current Leaders</h2>
 
-    ${renderTop("Food", data.food)}
-    ${renderTop("Exhibits", data.exhibit)}
-    ${renderTop("Business", data.business)}
+    <div class="vote-thanks">Thanks for Voting!</div>
+
+    <h2 class="vote-results-heading">Ranking at ${ts}</h2>
+
+    ${renderCard("Best Food Vendor", "food", data.food)}
+    ${renderCard("Best Exhibitor Display", "exhibits", data.exhibit)}
+    ${renderCard("Best Business Booth", "business", data.business)}
   `;
 
   scrollToContent();
