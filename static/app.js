@@ -136,7 +136,25 @@ function scrollToContent(){
 }
 
 function goHome(){
+
+  // keep smooth scroll exactly as-is
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // 🔥 clear AFTER scroll completes (timed)
+  setTimeout(() => {
+
+    // stop any running timers (like Today page)
+    if (todayRefreshTimer){
+      clearInterval(todayRefreshTimer);
+      todayRefreshTimer = null;
+    }
+
+    const content = document.getElementById("content");
+    if (content){
+      content.innerHTML = '';
+    }
+
+  }, 600); // small delay so scroll happens first
 }
 
 function renderLine(val){
@@ -576,11 +594,81 @@ async function loadVoteResults(){
     `;
   }
 
+content.innerHTML = `
+
+  <div class="vote-thanks">Thanks for Voting Today!</div>
+
+  <div class="vote-thanks-note">Vote again tomorrow. Refresh anytime.</div>
+
+  <button class="vote-submit-btn" onclick="refreshVoteResults()">
+    Refresh
+  </button>
+
+  <h2 class="vote-results-heading">Ranking at ${ts}</h2>
+
+  ${renderCard("Best Food Vendor", "food", data.food)}
+  ${renderCard("Best Exhibitor Display", "exhibits", data.exhibit)}
+  ${renderCard("Best Business Booth", "business", data.business)}
+
+`;
+
+  scrollToContent();
+}
+
+async function refreshVoteResults(){
+
+  // save current scroll position
+  const scrollPos = window.scrollY;
+
+  const content = document.getElementById("content");
+
+  const res = await fetch("/api/vote/results");
+  const data = await res.json();
+
+  const now = new Date();
+  const ts = now.toLocaleString();
+
+  function renderCard(title, icon, list){
+    return `
+      <div class="ui-card vote-result-card">
+
+        <div class="ui-card-media">
+          <img src="/static/icons/menu/${icon}.webp">
+        </div>
+
+        <div class="ui-card-content">
+
+          <div class="vote-result-header">
+            <div class="vote-result-title">${title}</div>
+            <div class="vote-result-votes">Votes</div>
+          </div>
+
+          ${list.map((x,i)=>`
+            <div class="vote-result-row">
+              <div class="vote-result-name">
+                <span class="vote-rank">${ordinal(i+1)}</span> ${x.tenant_name}
+              </div>
+              <div class="vote-result-count">
+                ${x.vote_count}
+              </div>
+            </div>
+          `).join('')}
+
+        </div>
+
+      </div>
+    `;
+  }
+
   content.innerHTML = `
 
-    <div class="vote-thanks">Thanks for Voting!</div>
+    <div class="vote-thanks">Thanks for Voting Today!</div>
 
     <div class="vote-thanks-note">Vote again tomorrow. Refresh anytime.</div>
+
+    <button class="vote-submit-btn" onclick="refreshVoteResults()">
+      Refresh
+    </button>
 
     <h2 class="vote-results-heading">Ranking at ${ts}</h2>
 
@@ -589,9 +677,9 @@ async function loadVoteResults(){
     ${renderCard("Best Business Booth", "business", data.business)}
   `;
 
-  scrollToContent();
+  // 🔥 restore exact scroll position
+  window.scrollTo(0, scrollPos);
 }
-
 
 // ---------------- MAP ----------------
 function showMap(){

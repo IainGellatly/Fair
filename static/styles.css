@@ -2,9 +2,9 @@
 body{font-family:Arial;background:#f4f1e8;margin:0;text-align:center}
 
 .logo {
-  width: 30%;
-  max-width: 160px;   /* keeps it from getting huge on desktop */
-  margin: 10px auto;
+  width: 45%;
+  max-width: 200px;   /* keeps it from getting huge on desktop */
+  margin: 10px auto 0px auto;
   display: block;
 }
 
@@ -231,7 +231,7 @@ button:active {
 
 .footer-text {
   font-size: 8px;        /* ~8pt equivalent on mobile */
-  color: #777;
+  color: #666;
   margin-top: 5px;
 }
 
@@ -679,3 +679,38 @@ button:active {
   height: 0.3em;   /* cut spacer in half */
 }
 
+.footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;   /* ⬅️ KEY: pushes left/right out */
+  width: 90%;
+  max-width: 380px;
+  margin: 0 auto;
+  gap: 4px;
+}
+
+/* left + right text */
+.footer-side {
+  font-size: 16px;
+  font-weight: bold;
+  color: #555;
+  white-space: nowrap;
+  flex: 1;                         /* ⬅️ allows proper spacing */
+}
+
+/* force alignment */
+.footer-side.left {
+  text-align: right;               /* pulls toward logo */
+  padding-right: 6px;
+}
+
+.footer-side.right {
+  text-align: left;
+  padding-left: 6px;
+}
+
+/* center logo */
+#footerLogo img {
+  width: 42px;                     /* slightly smaller to fit row */
+  flex: 0 0 auto;                 /* ⬅️ prevents stretching */
+}

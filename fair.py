@@ -304,12 +304,12 @@ async def subscribe(request: Request):
 
     ins_sql = f'''
         insert into subscriptions 
-            (endpoint, p256dh, auth) 
+            (endpoint, p256dh, auth)
         values 
-            ("{end_pt}", "{p256dh}", "{auth}")
+            ("{end_pt}", "{p256dh}", "{auth}") AS new
         on duplicate key update
-            p256dh = values(p256dh),
-            auth = values(auth);
+            p256dh = new.p256dh,
+            auth = new.auth;
         '''
     await run_cmd(ins_sql)
 
@@ -426,7 +426,7 @@ async def submit_vote(request: Request):
                     check_sql = f'''
                         select 1 from votes 
                         where device_id = "{device_id}" 
-                        and vote_date = "{today}"
+                        and vote_date = curdate()
                         limit 1;
                     '''
 
@@ -443,7 +443,7 @@ async def submit_vote(request: Request):
                     # insert vote (prevents duplicates)
                     await cursor.execute(f"""
                         insert into votes (device_id, category, tenant_id, vote_date)
-                        values ("{device_id}", "{category}", {tenant_id}, "{today}")
+                        values ("{device_id}", "{category}", {tenant_id}, curdate())
                     """)
 
                     # increment totals
@@ -509,7 +509,7 @@ async def vote_status(device_id: str):
             select category
             from votes
             where device_id = "{device_id}"
-            and vote_date = "{today}";
+            and vote_date = curdate();
         """
 
     rows = await get_data(sql)
