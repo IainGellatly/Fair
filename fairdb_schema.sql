@@ -85,3 +85,28 @@ create table votes (
     unique key (device_id, vote_date, category)
 );
 
+drop table if exists analytics_events;
+create table analytics_events (
+    id           bigint auto_increment primary key,
+    event_type   varchar(32),
+    event_value  varchar(64),
+    device_id    varchar(64),
+    created_at   datetime default current_timestamp
+);
+
+drop table if exists submitted_surveys;
+create table submitted_surveys (
+    survey_id      int auto_increment primary key,
+    device_id      varchar(64) unique,
+    submitted_at   datetime,
+    comment        text
+);
+
+drop table if exists survey_answers;
+create table survey_answers (
+    id           int auto_increment primary key,
+    survey_id    int,
+    question_id  int,
+    answer_id    int,
+    index (survey_id)
+);

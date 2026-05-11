@@ -625,19 +625,19 @@ button:active {
 }
 
 .vote-thanks {
-  font-size: 1.5rem;
+  font-size: 2.5rem;
   font-weight: bold;
   color: #8b5a2b;   /* matches your wood theme */
   margin-top: 24px;
-  margin-bottom: 6px;
+  margin-bottom: 12px;
 }
 
 .vote-thanks-note {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: bold;
   color: #8b5a2b;   /* matches your wood theme */
   margin-top: 6px;
-  margin-bottom: 6px;
+  margin-bottom: 12px;
 }
 
 .vote-card {
@@ -713,4 +713,93 @@ button:active {
 #footerLogo img {
   width: 42px;                     /* slightly smaller to fit row */
   flex: 0 0 auto;                 /* ⬅️ prevents stretching */
+}
+
+.survey-options {
+  display: flex;
+  flex-wrap: wrap;
+
+  column-gap: 6px;   /* keep horizontal spacing */
+  row-gap: 4px;      /* 🔥 reduced ~25–30% vertically */
+
+  margin-top: 6px;
+}
+
+.survey-btn {
+  background: linear-gradient(#a47148, #8b5a2b);
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+
+.survey-btn.active {
+  background: linear-gradient(#2e7d32, #1b5e20);
+}
+
+.survey-comment {
+  width: 95%;
+  height: 80px;
+  margin-top: 6px;
+}
+
+.coupon-card {
+  border: 2px dashed #8b5a2b;
+}
+
+.coupon-amount {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.small-note {
+  font-size: 0.8rem;
+  margin-top: 6px;
+}
+
+.coupon-card {
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+
+/* BIG coupon layout */
+.coupon-large {
+  flex-direction: column;
+  text-align: center;
+  padding: 20px 10px;
+  border: 4px dashed #8b5a2b;   /* 🔥 thicker border */
+}
+
+/* LARGE LOGO (branding focus) */
+.coupon-logo {
+  width: 50%;
+  max-width: 220px;
+  margin: 0 auto 10px auto;
+}
+
+/* MAIN VALUE TEXT */
+.coupon-amount {
+  font-size: 4rem;        /* 🔥 ~2x bigger */
+  font-weight: bold;
+  color: #8b5a2b;
+  margin-top: -12px;
+}
+
+/* LOCATION TEXT */
+.coupon-location {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: -6px;
+}
+
+/* INSTRUCTION TEXT */
+.coupon-note {
+  font-size: 1.3rem;
+  margin-top: 10px;
+}
+
+.coupon-large {
+  background: #fffdf7; /* slight warm paper tone */
 }

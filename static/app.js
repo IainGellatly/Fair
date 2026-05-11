@@ -1,3 +1,52 @@
+const surveyConfig = [
+  {
+    id: 1,
+    question: "What is your favorite Fair attraction?",
+    max: 3,
+    options: [
+      {id:1, label:"Animals"},
+      {id:2, label:"Food Vendors"},
+      {id:3, label:"Music"},
+      {id:4, label:"Midway"},
+      {id:5, label:"Exhibits"},
+      {id:6, label:"Business Booths"},
+      {id:7, label:"Grandstand Events"},
+      {id:8, label:"Entertainment Alley"},
+      {id:9, label:"Other (add comment below)"}
+    ]
+  },
+  {
+    id: 2,
+    question: "What would you like to see more of?",
+    max: 3,
+    options: [
+      {id:1, label:"Animals"},
+      {id:2, label:"Food Vendors"},
+      {id:3, label:"Music"},
+      {id:4, label:"Midway"},
+      {id:5, label:"Exhibits"},
+      {id:6, label:"Business Booths"},
+      {id:7, label:"Grandstand Events"},
+      {id:8, label:"Entertainment Alley"},
+      {id:9, label:"Other (add comment below)"}
+    ]
+  },
+  {
+    id: 3,
+    question: "How long are you staying today?",
+    max: 1,
+    options: [
+      {id:1, label:"Less than 1 hour"},
+      {id:2, label:"1-2 hours"},
+      {id:3, label:"3-4 hours"},
+      {id:4, label:"All Day"}
+    ]
+  }
+];
+
+let surveyAnswers = {};
+let surveyComment = "";
+
 const VAPID_PUBLIC_KEY = "BPAr2_PD2PGYvI0EsANa5gCXJ6z_hupiV6Bjdt7jxMaL_0D_QFdF-PbP3wDDNBM8PNzvbWRQegM9WH0yOyDVJ00";
 
 // --------- PLATFORM DETECTION ----------
@@ -681,6 +730,187 @@ async function refreshVoteResults(){
   window.scrollTo(0, scrollPos);
 }
 
+// ---------------- SURVEY -------------
+async function loadSurvey(){
+
+  const content = document.getElementById("content");
+
+  const res = await fetch(`/api/survey/status/${deviceId}`);
+  const status = await res.json();
+
+  if (status.submitted){
+    renderSurveyThankYou();
+    return;
+  }
+
+    let h = `
+      <div class="vote-thanks">Fair Survey</div>
+    `;
+
+    h += `
+      <div class="vote-thanks-note">
+        Answer 3 quick questions and <br>
+        get a $1.00 discount coupon<br>
+        for the Wayne County Fair Store.
+      </div>
+    `;
+
+  surveyConfig.forEach(q => {
+
+    h += `
+      <div class="ui-card">
+
+        <div class="ui-card-media">
+          <img src="/static/icons/fair.webp" />
+        </div>
+
+        <div class="ui-card-content">
+          <div class="ui-card-title">${q.question}</div>
+          <div class="ui-card-body">(Pick up to ${q.max})</div>
+
+          <div class="survey-options">
+            ${q.options.map(o => `
+              <button class="survey-btn"
+                onclick="toggleSurvey(${q.id}, ${o.id}, ${q.max}, this)">
+                ${o.label}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  h += `
+    <div class="ui-card">
+
+      <div class="ui-card-media">
+        <img src="/static/icons/fair.webp" />
+      </div>
+
+      <div class="ui-card-content">
+        <div class="ui-card-title">Comments?</div>
+        <textarea class="survey-comment"
+          oninput="updateSurveyComment(this.value)"></textarea>
+      </div>
+    </div>
+
+    <button id="surveySubmitBtn" class="vote-submit-btn" disabled onclick="submitSurvey()">
+      Submit Survey
+    </button>
+  `;
+
+  content.innerHTML = h;
+  scrollToContent();
+}
+
+function toggleSurvey(qid, aid, max, btn){
+
+  if (!surveyAnswers[qid]){
+    surveyAnswers[qid] = new Set();
+  }
+
+  const set = surveyAnswers[qid];
+
+  if (set.has(aid)){
+    set.delete(aid);
+    btn.classList.remove("active");
+  }
+  else {
+    if (set.size >= max) return;
+
+    if (max === 1){
+      set.clear();
+      document.querySelectorAll(`[onclick^="toggleSurvey(${qid},"]`)
+        .forEach(b => b.classList.remove("active"));
+    }
+
+    set.add(aid);
+    btn.classList.add("active");
+  }
+
+  updateSurveySubmit();
+}
+
+function updateSurveyComment(val){
+  surveyComment = val;
+  updateSurveySubmit();
+}
+
+function updateSurveySubmit(){
+
+  const hasAnswer = Object.values(surveyAnswers)
+    .some(set => set.size > 0);
+
+  const hasComment = surveyComment.trim().length > 0;
+
+  document.getElementById("surveySubmitBtn").disabled =
+    !(hasAnswer || hasComment);
+}
+
+async function submitSurvey(){
+
+  if (!confirm("Submit survey? Answers cannot be changed.")) return;
+
+  let payload = [];
+
+  Object.entries(surveyAnswers).forEach(([qid, set]) => {
+    set.forEach(aid => {
+      payload.push({
+        question_id: Number(qid),
+        answer_id: aid
+      });
+    });
+  });
+
+  const res = await fetch("/api/survey/submit", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      device_id: deviceId,
+      answers: payload,
+      comment: surveyComment
+    })
+  });
+
+  const result = await res.json();
+
+  if (result.status === "ok" || result.status === "already_submitted"){
+    renderSurveyThankYou();
+  } else {
+    alert("Submission failed");
+  }
+}
+
+function renderSurveyThankYou(){
+
+  const content = document.getElementById("content");
+
+    content.innerHTML = `
+      <div class="vote-thanks">Thanks <br>for Your Input!</div>
+      <div class="vote-thanks-note">
+        Use your coupon at the Fair Store
+      </div>
+
+      <div class="ui-card coupon-card coupon-large">
+
+        <img src="/static/icons/fair.webp" class="coupon-logo" />
+
+        <div class="coupon-amount">$1.00 OFF</div>
+
+        <div class="coupon-location">Wayne County Fair Store</div>
+        <div class="coupon-location">Inside Floral Hall</div>
+
+        <div class="coupon-note">
+          Show this screen to redeem
+        </div>
+
+      </div>
+    `;
+
+  scrollToContent();
+}
+
 // ---------------- MAP ----------------
 function showMap(){
 
@@ -934,25 +1164,27 @@ async function loadPage(page){
     }
 
   // 🔴 Preserve "More row" behavior
-  if (page !== "more"){
-    const isMoreRowButton = document.querySelector(
-      `.more-row[data-page="${page}"]`
-    );
+// 🔥 HANDLE MORE ROW VISIBILITY (supports multiple rows)
+if (page !== "more"){
 
-    if (!isMoreRowButton){
-      document.querySelectorAll(".more-row").forEach(el => {
-        el.style.display = "none";
-      });
-    }
+  // check if clicked item exists in ANY more-row
+  const isMoreRowButton = document.querySelector(
+    `.more-row[data-page="${page}"]`
+  );
+
+  // if NOT part of expanded rows → collapse all
+  if (!isMoreRowButton){
+    document.querySelectorAll(".more-row").forEach(el => {
+      el.style.display = "none";
+    });
   }
+}
 
   // ---------------- MORE BUTTON ----------------
   if (page === "more"){
     toggleMoreRow();
     return;
   }
-
-
 
   // ---------------- STATIC PAGES ----------------
   const staticPages = {
@@ -1004,6 +1236,12 @@ if (page === "calendar"){
   return;
 }
 
+// -------------- SURVEY ---------------
+if (page === "survey"){
+  loadSurvey();
+  return;
+}
+
 // ---------------- MAP ----------------
 if (page === "map"){
   showMap();
@@ -1037,7 +1275,21 @@ document.querySelectorAll(".icon-card").forEach(card => {
   const page = card.dataset.page;
   if (!page) return;
 
-  card.addEventListener("click", () => loadPage(page));
+card.addEventListener("click", () => {
+
+  // 🔥 fire-and-forget analytics
+  fetch("/api/analytics", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      event: "menu_click",
+      value: page,
+      device_id: deviceId
+    })
+  }).catch(()=>{}); // ignore errors
+
+  loadPage(page);
+});
 });
 
 // ---------------- GLOBAL SETTINGS ----------------

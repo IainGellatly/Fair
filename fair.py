@@ -63,6 +63,7 @@ logging.basicConfig(
 )
 
 pool: asyncmy.pool.Pool | None = None
+analytics_buffer = []
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -80,7 +81,7 @@ async def lifespan(app: FastAPI):
         autocommit=True
     )
 
-    # asyncio.create_task(alert_scheduler())
+    asyncio.create_task(analytics_worker())
 
     yield
 
@@ -518,11 +519,104 @@ async def vote_status(device_id: str):
 
     return voted
 
+# ----------------- SURVEY -------------------
+@app.get("/api/survey/status/{device_id}")
+async def survey_status(device_id: str):
 
-# if __name__ == "__main__":
+    sql = f'''
+        select 1 from submitted_surveys
+        where device_id = "{device_id}"
+        limit 1;
+    '''
+    rows = await get_data(sql)
 
-#    log.info('starting web server')
-#    uvicorn.run(app,
-#                host=APP_SERVER_HOST,
-#                port=APP_SERVER_PORT,
-#                workers=APP_SERVER_WORKERS)
+    return {"submitted": len(rows) > 0}
+
+@app.post("/api/survey/submit")
+async def submit_survey(request: Request):
+
+    data = await request.json()
+
+    device_id = data.get("device_id")
+    answers = data.get("answers", [])
+    comment = data.get("comment", "")
+
+    if not device_id:
+        return {"status": "error"}
+
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cursor:
+
+            try:
+                await conn.begin()
+
+                # 🔒 enforce one per device
+                check_sql = f'''
+                    select survey_id from submitted_surveys
+                    where device_id = "{device_id}"
+                    limit 1;
+                '''
+                existing = await get_data(check_sql)
+
+                if existing:
+                    return {"status": "already_submitted"}
+
+                # insert survey
+                await cursor.execute(f"""
+                    insert into submitted_surveys (device_id, submitted_at, comment)
+                    values ("{device_id}", now(), %s)
+                """, (comment,))
+
+                survey_id = cursor.lastrowid
+
+                # insert answers
+                for a in answers:
+                    q = a.get("question_id")
+                    ans = a.get("answer_id")
+
+                    await cursor.execute(f"""
+                        insert into survey_answers (survey_id, question_id, answer_id)
+                        values ({survey_id}, {q}, {ans})
+                    """)
+
+                await conn.commit()
+
+                return {"status": "ok"}
+
+            except Exception as err:
+                await conn.rollback()
+                log.error(f"survey error: {err}")
+                return {"status": "error"}
+
+# ---------------- ANALYTICS -----------------
+async def analytics_worker():
+    while True:
+        if analytics_buffer:
+            batch = analytics_buffer.copy()
+            analytics_buffer.clear()
+
+            values = ",".join([
+                f'("{e["event"]}", "{e["value"]}", "{e["device_id"]}")'
+                for e in batch
+            ])
+
+            sql = f"""
+                insert into analytics_events (event_type, event_value, device_id)
+                values {values}
+            """
+
+            await run_cmd(sql)
+
+        await asyncio.sleep(3)
+
+@app.post("/api/analytics")
+async def log_event(request: Request):
+
+    try:
+        data = await request.json()
+        analytics_buffer.append(data)
+        return {"status": "ok"}
+
+    except Exception as err:
+        log.error(f"analytics error: {err}")
+        return {"status": "error"}
