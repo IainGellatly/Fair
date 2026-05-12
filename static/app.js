@@ -749,8 +749,8 @@ async function loadSurvey(){
 
     h += `
       <div class="vote-thanks-note">
-        Answer 3 quick questions and <br>
-        get a $1.00 discount coupon<br>
+        Answer a few quick questions and <br>
+        get a 10% off discount coupon<br>
         for the Wayne County Fair Store.
       </div>
     `;
@@ -896,7 +896,7 @@ function renderSurveyThankYou(){
 
         <img src="/static/icons/fair.webp" class="coupon-logo" />
 
-        <div class="coupon-amount">$1.00 OFF</div>
+        <div class="coupon-amount">10% OFF</div>
 
         <div class="coupon-location">Wayne County Fair Store</div>
         <div class="coupon-location">Inside Floral Hall</div>
