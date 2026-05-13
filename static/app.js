@@ -260,7 +260,20 @@ async function loadStatic(page){
     const res = await fetch(`/static/${page}.html`);
     const html = await res.text();
 
+    let titleMap = {
+      midway: "Midway Rides <br> and Entertainment",
+      facilities: "Restroom Facilities",
+      tickets: "Tickets",
+      faqs: "Frequently Asked <br> Questions",
+      about: "About the Fair",
+      firstaid: "First Aid"
+    };
+
+    let title = titleMap[page] || '';
+
     content.innerHTML = `
+      <div class="vote-thanks">${title}</div>
+
       <div class="card static-page">
         ${html}
       </div>
@@ -284,12 +297,20 @@ async function loadTenants(type){
 
     let titleMap = {
       food: "Food Vendors",
-      exhibit: "Exhibits",
-      business: "Business",
+      exhibit: "Exhibit Booths",
+      business: "Business Booths",
       animal: "Animals"
     };
 
-    let h = `<h2>${titleMap[type] || type}</h2>`;
+    let subTitleMap = {
+      food: "Snacks, drinks and meals for all tastes",
+      exhibit: "Information and displays by police, <br> government and community organizations",
+      business: "Home, farm and personal <br> business products and services",
+      animal: "Animal displays, judging and <br> demonstrations for the whole family"
+    };
+
+    let h = `<div class="vote-thanks">${titleMap[type] || type}</div>`;
+    h += `<div class="vote-thanks-note">${subTitleMap[type] || type}</div>`;
 
     data.forEach(item => {
 
@@ -338,7 +359,8 @@ async function loadSponsors(){
     const res = await fetch(`/api/sponsors`);
     const data = await res.json();
 
-    let h = `<h2>Sponsors</h2>`;
+    let h = `<div class="vote-thanks">Sponsors</div>`;
+    h += `<div class="vote-thanks-note">Please support our sponsors</div>`;
 
     data.forEach(item => {
 
@@ -392,7 +414,28 @@ async function loadEvents(type){
     const res = await fetch(url);
     const data = await res.json();
 
-    let h = '';
+    let titleMap = {
+      today: "Today's Events",
+      music: "Musical Entertainment",
+      grandstand: "Grandstand Events",
+      calendar: "Fair Calendar"
+    };
+
+    let subTitleMap = {
+      today: "Happening today. <br>Get reminder notifications <br> of favorite events",
+      music: "All music shows are free",
+      grandstand: "Tap Tickets on main menu <br> for paid events",
+      calendar: "Full week of shows and events"
+    };
+
+// determine title and subtitle
+
+    let title = titleMap[type] || titleMap["calendar"];
+    let subTitle = subTitleMap[type] || subTitleMap["calendar"];
+
+    let h = `<div class="vote-thanks">${title}</div>`;
+    h += `<div class="vote-thanks-note">${subTitle}</div>`;
+
     let currentDay = '';
 
     data.forEach(item => {
@@ -536,7 +579,7 @@ async function loadVotePage(){
     }
 
   content.innerHTML = `
-    <h2>Vote for Best of Fair</h2>
+    <div class="vote-thanks">Vote for Best of Fair</div>
     ${note}
     ${renderCard("Best Food Vendor", "food", "food")}
     ${renderCard("Best Exhibitor Display", "exhibit", "exhibits")}
@@ -915,8 +958,13 @@ function renderSurveyThankYou(){
 function showMap(){
 
   document.getElementById('content').innerHTML = `
-    <div class="card">
-      Pinch and spread to explore. Red dot is your location. Tap yellow ? for info.
+
+    <div class="vote-thanks">Fairground Map</div>
+
+    <div class="vote-thanks-note">
+      Pinch and spread to explore.<br>
+      Red dot is your location.<br>
+      Tap yellow ? for info.
     </div>
     <div id="map"></div>
   `;
@@ -1483,7 +1531,13 @@ async function loadTodayEvents(preserveScroll = false){
 
     const data = await res.json();
 
-    let h = renderPushCard();
+    let h = `
+      <div class="vote-thanks">Today's Events</div>
+    `;
+    h += `<div class="vote-thanks-note">
+        Happening today. <br>Get reminders too for your favorite events
+        </div>`;
+    h += renderPushCard();
 
     const now = new Date();
     let currentDay = '';
