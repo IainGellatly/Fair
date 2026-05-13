@@ -271,10 +271,25 @@ async function loadStatic(page){
 
     let title = titleMap[page] || '';
 
+    let searchBox = '';
+
+    if (page === 'faqs'){
+      searchBox = `
+        <input
+          type="text"
+          placeholder="Search FAQs..."
+          class="faq-search"
+          oninput="filterFAQs(this.value)"
+        >
+      `;
+    }
+
     content.innerHTML = `
       <div class="vote-thanks">${title}</div>
 
-      <div class="card static-page">
+      ${searchBox}
+
+      <div class="card static-page" id="faqContainer">
         ${html}
       </div>
     `;
@@ -1784,4 +1799,20 @@ window.addEventListener("load", () => {
   }
 
 });
+
+function filterFAQs(text){
+
+  text = text.toLowerCase();
+
+  const container = document.getElementById("faqContainer");
+  if (!container) return;
+
+  const cards = container.querySelectorAll(".ui-card");
+
+  cards.forEach(card => {
+    const content = card.innerText.toLowerCase();
+    const match = content.includes(text);
+    card.style.display = match ? "flex" : "none";
+  });
+}
 

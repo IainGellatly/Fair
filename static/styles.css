@@ -803,3 +803,14 @@ button:active {
 .coupon-large {
   background: #fffdf7; /* slight warm paper tone */
 }
+
+.faq-search {
+  width: 80%;
+  padding: 10px;
+  margin: 10px auto 6px auto;
+
+  border-radius: 10px;
+  border: 1px solid #ccc;
+
+  font-size: 16px;
+}
