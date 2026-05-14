@@ -110,3 +110,12 @@ create table survey_answers (
     answer_id    int,
     index (survey_id)
 );
+
+drop table if exists app_config;
+create table app_config (
+  config_key varchar(50) primary key,
+  config_value varchar(50)
+);
+
+insert into app_config (config_key, config_value)
+values ('static_version', '1');

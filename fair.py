@@ -620,3 +620,19 @@ async def log_event(request: Request):
     except Exception as err:
         log.error(f"analytics error: {err}")
         return {"status": "error"}
+
+# --------- STATIC CONTENT VERSION -----------
+@app.get("/api/static_version")
+async def static_version():
+
+    sql = '''
+        select config_value
+        from app_config
+        where config_key = 'static_version'
+        limit 1;
+    '''
+
+    rows = await get_data(sql)
+    version = rows[0]['config_value'] if rows else "1"
+
+    return {"version": version}

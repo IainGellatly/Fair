@@ -8,7 +8,7 @@ const surveyConfig = [
       {id:2, label:"Food Vendors"},
       {id:3, label:"Music"},
       {id:4, label:"Midway"},
-      {id:5, label:"Exhibits"},
+      {id:5, label:"Exhibitor Displays"},
       {id:6, label:"Business Booths"},
       {id:7, label:"Grandstand Events"},
       {id:8, label:"Entertainment Alley"},
@@ -24,7 +24,7 @@ const surveyConfig = [
       {id:2, label:"Food Vendors"},
       {id:3, label:"Music"},
       {id:4, label:"Midway"},
-      {id:5, label:"Exhibits"},
+      {id:5, label:"Exhibitor Displays"},
       {id:6, label:"Business Booths"},
       {id:7, label:"Grandstand Events"},
       {id:8, label:"Entertainment Alley"},
@@ -257,7 +257,8 @@ async function loadStatic(page){
   const content = document.getElementById("content");
 
   try {
-    const res = await fetch(`/static/${page}.html`);
+    const version = localStorage.getItem("static_version") || "1";
+    const res = await fetch(`/static/${page}.html?v=${version}`);
     const html = await res.text();
 
     let titleMap = {
@@ -312,7 +313,7 @@ async function loadTenants(type){
 
     let titleMap = {
       food: "Food Vendors",
-      exhibit: "Exhibit Booths",
+      exhibit: "Exhibitor Displays",
       business: "Business Booths",
       animal: "Animals"
     };
@@ -1786,19 +1787,23 @@ async function toggleAlert(eventId, btn){
 
 initSubscription().catch(() => {});
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
+
+  // 🔥 check static version on app load
+  await checkStaticVersion();
 
   const params = new URLSearchParams(window.location.search);
   const page = params.get("page");
 
   if (page === "today"){
     loadTodayEvents();
-  } else {
-    // default behavior if you ever add one
-    // loadPage('home');
   }
-
 });
+
+// 🔄 periodic version check (every 3 hours)
+setInterval(() => {
+  checkStaticVersion();
+}, 3 * 60 * 60 * 1000);
 
 function filterFAQs(text){
 
@@ -1814,5 +1819,31 @@ function filterFAQs(text){
     const match = content.includes(text);
     card.style.display = match ? "flex" : "none";
   });
+}
+
+async function checkStaticVersion(){
+
+  try {
+
+    const res = await fetch("/api/static_version");
+    const data = await res.json();
+
+    const current = localStorage.getItem("static_version");
+
+    if (current != data.version){
+
+      // 🔥 clear cached static pages
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith("static_")){
+          localStorage.removeItem(k);
+        }
+      });
+
+      localStorage.setItem("static_version", data.version);
+    }
+
+  } catch (err){
+    console.log("static version check failed");
+  }
 }
 
