@@ -453,15 +453,39 @@ async function loadEvents(type){
     h += `<div class="vote-thanks-note">${subTitle}</div>`;
 
     let currentDay = '';
+    const today = new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric'
+    });
 
     data.forEach(item => {
 
       // ---------------- GROUP BY DAY ----------------
-      if (item.day_date !== currentDay){
-        currentDay = item.day_date;
+    if (item.day_date !== currentDay){
+      currentDay = item.day_date;
 
-        h += `<h2 style="margin-top:20px;"><b>${currentDay}</b></h2>`;
-      }
+      // remove commas/ordinals for comparison
+      const normalizedCurrent = currentDay
+        .replace(/,/g, '')
+        .replace(/\b(\d+)(st|nd|rd|th)\b/g, '$1');
+
+      const normalizedToday = today.replace(/,/g, '');
+
+      const scrollTag =
+        normalizedCurrent.includes(normalizedToday)
+          ? 'data-scroll-day="today"'
+          : '';
+
+      h += `
+        <h2
+          style="margin-top:20px;"
+          ${scrollTag}
+        >
+          <b>${currentDay}</b>
+        </h2>
+      `;
+    }
 
       // ---------------- ICON ----------------
       const iconPath = item.icon
@@ -513,7 +537,68 @@ async function loadEvents(type){
     });
 
     content.innerHTML = h;
-    scrollToContent();
+
+    // 🔥 SMART CALENDAR SCROLL
+    if (!type){
+
+      const todayEl = document.querySelector('[data-scroll-day="today"]');
+
+    function scrollWithOffset(el){
+
+      const offset = 12;
+
+      const targetY =
+        el.getBoundingClientRect().top
+        + window.pageYOffset
+        - offset;
+
+      const startY = window.pageYOffset;
+      const distance = targetY - startY;
+
+      const duration = 2400; // milliseconds (adjust to taste)
+
+      let startTime = null;
+
+      function easeInOutQuad(t){
+        return t < 0.5
+          ? 2 * t * t
+          : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      }
+
+      function animateScroll(currentTime){
+
+        if (!startTime){
+          startTime = currentTime;
+        }
+
+        const elapsed = currentTime - startTime;
+
+        const progress = Math.min(elapsed / duration, 1);
+
+        const eased = easeInOutQuad(progress);
+
+        window.scrollTo(
+          0,
+          startY + (distance * eased)
+        );
+
+        if (progress < 1){
+          requestAnimationFrame(animateScroll);
+        }
+      }
+
+      requestAnimationFrame(animateScroll);
+    }
+
+      if (todayEl){
+        scrollWithOffset(todayEl);
+      } else {
+        scrollToContent();
+      }
+
+    } else {
+      scrollToContent();
+    }
 
   } catch (err){
     content.innerHTML = `<div class="card">Error loading events</div>`;
