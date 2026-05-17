@@ -1067,7 +1067,9 @@ function showMap(){
       Red dot is your location.<br>
       Tap yellow ? for info.
     </div>
-    <div id="map"></div>
+    <div id="map">
+      <div id="mapInner"></div>
+    </div>
   `;
 
   scrollToContent();
@@ -1128,52 +1130,182 @@ function showMap(){
     return dist > 0.00005;
   }
 
-  const mapEl = document.getElementById('map');
+    const mapEl = document.getElementById('map');
+    const mapInner = document.getElementById('mapInner');
+
+let currentScale = 1;
+
+let startDistance = 0;
+let startScale = 1;
+
+let currentX = 0;
+let currentY = 0;
+
+let startPanX = 0;
+let startPanY = 0;
+
+let isDragging = false;
+
+function applyMapTransform(){
+
+  mapInner.style.transform =
+    `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
+}
+
+function getDistance(touches){
+
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+/* ---------- PINCH START ---------- */
+
+mapEl.addEventListener('touchstart', (e) => {
+
+  /* pinch zoom */
+  if (e.touches.length === 2){
+
+    startDistance = getDistance(e.touches);
+    startScale = currentScale;
+  }
+
+  /* drag pan */
+  if (e.touches.length === 1){
+
+    isDragging = true;
+
+    startPanX = e.touches[0].clientX - currentX;
+    startPanY = e.touches[0].clientY - currentY;
+  }
+
+}, { passive:false });
+
+/* ---------- TOUCH MOVE ---------- */
+
+mapEl.addEventListener('touchmove', (e) => {
+
+  e.preventDefault();
+
+  /* ---------- PINCH ---------- */
+
+  if (e.touches.length === 2){
+
+    const distance = getDistance(e.touches);
+
+    currentScale =
+      startScale * (distance / startDistance);
+
+    currentScale =
+      Math.max(1, Math.min(currentScale, 4));
+
+    applyMapTransform();
+  }
+
+  /* ---------- PAN ---------- */
+
+  else if (e.touches.length === 1 && isDragging){
+
+    currentX =
+      e.touches[0].clientX - startPanX;
+
+    currentY =
+      e.touches[0].clientY - startPanY;
+
+    applyMapTransform();
+  }
+
+}, { passive:false });
+
+/* ---------- TOUCH END ---------- */
+
+mapEl.addEventListener('touchend', () => {
+
+  isDragging = false;
+
+}, { passive:false });
 
   // ---------------- POI ZONES ----------------
   const POIS = [
-    { id: "entertainment",
-        left: 14.82, top: 14.43, width: 16.13, height: 9.71,
+    { id: "Entertainment",
+        left: 15.77, top: 14.43, width: 15.62, height: 9.71,
         text: "Beer tent, main stage and seating area" },
-    { id: "grandstand",
+    { id: "Grandstand",
         left: 20.66, top: 45.44, width: 17.15, height: 19.26,
         text: "Bleacher seating for demolition derby and track events" },
-    { id: "midway",
+    { id: "Midway",
         left: 14.96, top: 25.11, width: 17.3, height: 19.53,
         text: "Rides, games and more food" },
-    { id: "food",
-        left: 36.72, top: 21.51, width: 18.61, height: 6.12,
-        text: "Snack, drinks and meals with bench seating" },
-    { id: "entrance",
+    { id: "Food Court",
+        left: 38.32, top: 22.10, width: 17.01, height: 5.53,
+        text: "Snack, drinks and meals with ample seating" },
+    { id: "Main Gate",
         left: 49.78, top: 3.38, width: 7.3, height: 8.85,
-        text: "Flag pole, seating and welcome area" },
-    { id: "commercial",
-        left: 31.75, top: 14.22, width: 11.75, height: 6.92,
-        text: "Two buildings full of business booths and exhibits" },
-    { id: "agriculture",
-        left: 71.02, top: 14.16, width: 9.78, height: 13.89,
-        text: "Livestock displays and events" },
-    { id: "stable",
-        left: 72.12, top: 29.67, width: 13.07, height: 26.23,
-        text: "Horse stables and track event preparation area" },
-    { id: "history",
-        left: 56.2, top: 21.41, width: 7.37, height: 8.32,
-        text: "Historical museum" },
-    { id: "floral",
-        left: 49.27, top: 12.77, width: 8.54, height: 8.32,
-        text: "Main exhibit hall, domestics and ag judging" },
-    { id: "sensory",
-        left: 41.39, top: 3.43, width: 7.52, height: 8.85,
-        text: "Sensory friendly sunshine tent" },
-    { id: "4h",
+        text: "Gate, flag pole, seating and welcome area" },
+    {
+        id: "Commercial 1",
+        left: 38.10,
+        top: 14.43,
+        width: 5.11,
+        height: 7.14,
+        text: "Business and organization booths and displays",
+
+        modal: {
+          title: "Commercial Building 1",
+          image: "/static/maps/commercial_1_plan.webp"
+        }
+    },
+    {
+        id: "Commercial 2",
+        left: 31.75,
+        top: 14.22,
+        width: 5.99,
+        height: 9.44,
+        text: "Business and organization booths and displays",
+
+        modal: {
+          title: "Commercial Building 2",
+          image: "/static/maps/commercial_2_plan.webp"
+        }
+    },
+    { id: "Information",
+        left: 43.94, top: 18.13, width: 6.28, height: 3.76,
+        text: "Information and announcer booth" },
+    { id: "4-H Building",
         left: 57.96, top: 3.33, width: 7.52, height: 9.17,
-        text: "4-H exhibit and activity building" },
-    { id: "livestock",
-        left: 62.34, top: 14.81, width: 8.03, height: 6.22,
-        text: "Livestock exhibits and activities tent" },
-    { id: "ring",
-        left: 56.28, top: 34.23, width: 13.94, height: 15.02,
-        text: "Livestock judging and exhibition ring" }
+        text: "4-H exhibits and demonstrations" },
+    { id: "History Building",
+        left: 56.86, top: 23.23, width: 9.85, height: 5.53,
+        text: "Historical museum" },
+    {
+        id: "Floral Hall",
+        left: 50.44,
+        top: 12.77,
+        width: 7.37,
+        height: 8.91,
+        text: "Government and organization exhibits, domestics",
+
+        modal: {
+          title: "Floral Hall",
+          image: "/static/maps/floral_plan.webp"
+        }
+    },
+    { id: "Livestock Tent",
+        left: 61.97, top: 14.27, width: 8.76, height: 8.53,
+        text: "Animal exhibits and demonstrations" },
+    { id: "Cattle Barn",
+        left: 71.02, top: 14.16, width: 9.78, height: 13.89,
+        text: "Animal exhibits and demonstrations" },
+    { id: "Horse Barn",
+        left: 72.12, top: 29.67, width: 13.07, height: 26.23,
+        text: "Horse stables and tack displays" },
+    { id: "Weekly Events",
+        left: 41.39, top: 3.43, width: 7.52, height: 9.82,
+        text: "Weekly show tent, Sunshine shed and greased pole contest" },
+    { id: "Track Area",
+        left: 56.28, top: 29.45, width: 13.94, height: 19.80,
+        text: "Antiques, Livestock judging and exhibition ring" }
   ];
 
   POIS.forEach(poi => {
@@ -1186,11 +1318,199 @@ function showMap(){
     z.style.height = poi.height + '%';
 
     z.addEventListener('click', (e) => {
+
+      // rich fullscreen modal POIs
+      if (poi.modal){
+        showPOIModal(poi);
+        return;
+      }
+
+      // existing lightweight popup POIs
       showPOIPopup(poi, e);
     });
 
-    mapEl.appendChild(z);
+    mapInner.appendChild(z);
   });
+
+   function showPOIModal(poi){
+
+      // remove existing popup if open
+      const existingPopup = document.querySelector('.poi-popup');
+      if (existingPopup){
+        existingPopup.remove();
+      }
+
+      // remove existing modal if open
+      const existingModal = document.querySelector('.poi-modal');
+      if (existingModal){
+        existingModal.remove();
+      }
+
+      // lock body scroll while modal open
+      document.body.style.overflow = 'hidden';
+
+      const modal = document.createElement('div');
+      modal.className = 'poi-modal';
+
+      modal.innerHTML = `
+        <div class="poi-modal-content">
+
+          <button class="poi-modal-close">
+            ✕
+          </button>
+
+          <div class="poi-modal-title">
+            ${poi.modal.title}
+          </div>
+
+          <div class="poi-modal-text">
+            ${poi.text}
+          </div>
+
+<div class="poi-modal-image-wrap">
+
+  <div class="poi-modal-image-inner">
+
+    <img
+      src="${poi.modal.image}"
+      class="poi-modal-image"
+      alt="${poi.modal.title}"
+    >
+
+  </div>
+
+</div>
+
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+const imageWrap =
+  modal.querySelector('.poi-modal-image-wrap');
+
+const imageInner =
+  modal.querySelector('.poi-modal-image-inner');
+
+let scale = 1;
+
+let startDistance = 0;
+let startScale = 1;
+
+let x = 0;
+let y = 0;
+
+let startX = 0;
+let startY = 0;
+
+let dragging = false;
+
+function applyTransform(){
+
+  imageInner.style.transform =
+    `translate(${x}px, ${y}px) scale(${scale})`;
+}
+
+function getDistance(touches){
+
+  const dx =
+    touches[0].clientX -
+    touches[1].clientX;
+
+  const dy =
+    touches[0].clientY -
+    touches[1].clientY;
+
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+/* ---------- START ---------- */
+
+imageWrap.addEventListener('touchstart', (e) => {
+
+  if (e.touches.length === 2){
+
+    startDistance = getDistance(e.touches);
+    startScale = scale;
+  }
+
+  if (e.touches.length === 1){
+
+    dragging = true;
+
+    startX =
+      e.touches[0].clientX - x;
+
+    startY =
+      e.touches[0].clientY - y;
+  }
+
+}, { passive:false });
+
+/* ---------- MOVE ---------- */
+
+imageWrap.addEventListener('touchmove', (e) => {
+
+  e.preventDefault();
+
+  /* pinch zoom */
+  if (e.touches.length === 2){
+
+    const distance =
+      getDistance(e.touches);
+
+    scale =
+      startScale *
+      (distance / startDistance);
+
+    scale =
+      Math.max(1, Math.min(scale, 5));
+
+    applyTransform();
+  }
+
+  /* pan */
+  else if (
+    e.touches.length === 1 &&
+    dragging
+  ){
+
+    x =
+      e.touches[0].clientX - startX;
+
+    y =
+      e.touches[0].clientY - startY;
+
+    applyTransform();
+  }
+
+}, { passive:false });
+
+/* ---------- END ---------- */
+
+imageWrap.addEventListener('touchend', () => {
+
+  dragging = false;
+
+}, { passive:false });
+
+      function closeModal(){
+        document.body.style.overflow = '';
+        modal.remove();
+      }
+
+      // close button
+      modal
+        .querySelector('.poi-modal-close')
+        .addEventListener('click', closeModal);
+
+      // tap dark background
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal){
+          closeModal();
+        }
+      });
+    }
 
   function showPOIPopup(poi, event){
 
@@ -1253,7 +1573,7 @@ function showMap(){
 
   let pin = document.createElement('div');
   pin.className = 'pin';
-  mapEl.appendChild(pin);
+  mapInner.appendChild(pin);
 
   function updateUserPosition(pos) {
 
