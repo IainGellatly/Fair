@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="/static/styles.css">
-<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="stylesheet" href="/static/styles.css?v={{ app_version }}">
+<link rel="icon" type="image/png" href="/static/favicon.png?v={{ app_version }}">
     <title>Wayne County Fair</title>
 
 </head>
 <body>
 
-<img src="/static/logo.webp" class="logo" alt="logo"/>
+<img src="/static/logo.webp?v={{ app_version }}" class="logo" alt="logo"/>
 
 <br>
 
@@ -114,7 +114,7 @@
 
   <!-- ROW 7 (HIDDEN BY DEFAULT) -->
   <div class="icon-card more-row" style="display:none;">
-    <img src="/static/logo.webp" alt="logo">
+    <img src="/static/logo.webp?v={{ app_version }}" alt="Fair Logo" onclick="goHome()" />
   </div>
 
   <div class="icon-card more-row" data-page="faqs" style="display:none;">
@@ -123,7 +123,7 @@
   </div>
 
   <div class="icon-card more-row" style="display:none;">
-    <img src="/static/logo.webp" alt="logo">
+    <img src="/static/logo.webp?v={{ app_version }}" alt="Fair Logo" onclick="goHome()" />
   </div>
 
 </div>
@@ -140,7 +140,7 @@
   <div class="footer-row">
     <div class="footer-side">Aug 10th-16th, 2026</div>
 
-    <img src="/static/logo.webp" alt="Fair Logo" onclick="goHome()" />
+    <img src="/static/logo.webp?v={{ app_version }}" alt="Fair Logo" onclick="goHome()" />
 
     <div class="footer-side">Palmyra, New York</div>
   </div>

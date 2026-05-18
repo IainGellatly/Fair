@@ -14,7 +14,8 @@ from urllib.parse import urlparse
 from py_vapid import Vapid
 from datetime import date
 from fastapi.templating import Jinja2Templates
-
+import os
+from pathlib import Path
 
 # ---------------- CONFIG ----------------
 VAPID_PUBLIC_KEY = "BPAr2_PD2PGYvI0EsANa5gCXJ6z_hupiV6Bjdt7jxMaL_0D_QFdF-PbP3wDDNBM8PNzvbWRQegM9WH0yOyDVJ00"
@@ -40,7 +41,6 @@ DB_NAME = 'fairdb'
 DB_USER = 'admin'
 DB_PASSWORD = 'FanTab12345!'
 VOTING_MODE = "daily"   # "single" or "daily"
-APP_VERSION = "15"
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -63,6 +63,42 @@ logging.basicConfig(
     level=CLOUD_LOGGING_LEVEL,
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+
+def get_app_version():
+
+    latest = 0
+
+    paths = [
+        "static",
+        "templates",
+        "sw.js"
+    ]
+
+    for base in paths:
+
+        p = Path(base)
+
+        # single file
+        if p.is_file():
+
+            latest = max(
+                latest,
+                p.stat().st_mtime
+            )
+
+        # entire directory tree
+        elif p.is_dir():
+
+            for f in p.rglob("*"):
+
+                if f.is_file():
+
+                    latest = max(
+                        latest,
+                        f.stat().st_mtime
+                    )
+
+    return str(int(latest))
 
 pool: asyncmy.pool.Pool | None = None
 analytics_buffer = []
@@ -95,6 +131,29 @@ app = FastAPI(lifespan=lifespan)
 templates = Jinja2Templates(directory="templates")
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 
+@app.middleware("http")
+async def add_cache_headers(request, call_next):
+
+    response = await call_next(request)
+
+    path = request.url.path
+
+    # NEVER cache main HTML page
+    if path == "/":
+
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate"
+        )
+
+    # cache static assets aggressively
+    elif path.startswith("/static") or path == "/sw.js":
+
+        response.headers["Cache-Control"] = (
+            "public, max-age=31536000, immutable"
+        )
+
+    return response
+
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
 
@@ -102,7 +161,7 @@ async def root(request: Request):
         request=request,
         name="index_template.html",
         context={
-            "app_version": APP_VERSION
+            "app_version": get_app_version()
         }
     )
 
@@ -630,24 +689,3 @@ async def log_event(request: Request):
     except Exception as err:
         log.error(f"analytics error: {err}")
         return {"status": "error"}
-
-# ----------- VERSIONING -------------
-@app.get("/api/static_version")
-async def static_version():
-
-    sql = '''
-        select config_value
-        from app_config
-        where config_key = 'static_version'
-        limit 1;
-    '''
-
-    rows = await get_data(sql)
-    version = rows[0]['config_value'] if rows else "1"
-
-    return {"version": version}
-
-@app.get("/api/app_version")
-async def get_app_version():
-
-    return {"version": APP_VERSION}

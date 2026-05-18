@@ -1155,6 +1155,37 @@ function applyMapTransform(){
     `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
 }
 
+function clampPan(){
+
+  const scaledWidth =
+    mapEl.clientWidth * currentScale;
+
+  const scaledHeight =
+    mapEl.clientHeight * currentScale;
+
+  const maxX =
+    Math.max(0,
+      (scaledWidth - mapEl.clientWidth) / 2
+    );
+
+  const maxY =
+    Math.max(0,
+      (scaledHeight - mapEl.clientHeight) / 2
+    );
+
+  const buffer = 40;
+
+  currentX = Math.min(
+    maxX + buffer,
+    Math.max(-(maxX + buffer), currentX)
+  );
+
+  currentY = Math.min(
+    maxY + buffer,
+    Math.max(-(maxY + buffer), currentY)
+  );
+}
+
 function getDistance(touches){
 
   const dx = touches[0].clientX - touches[1].clientX;
@@ -1203,6 +1234,8 @@ mapEl.addEventListener('touchmove', (e) => {
     currentScale =
       Math.max(1, Math.min(currentScale, 4));
 
+    clampPan();
+
     applyMapTransform();
   }
 
@@ -1215,6 +1248,8 @@ mapEl.addEventListener('touchmove', (e) => {
 
     currentY =
       e.touches[0].clientY - startPanY;
+
+    clampPan();
 
     applyMapTransform();
   }
@@ -1233,7 +1268,7 @@ mapEl.addEventListener('touchend', () => {
   const POIS = [
     { id: "Entertainment Alley",
         left: 15.77, top: 14.43, width: 15.62, height: 9.71,
-        text: "Beer tent, main stage, dancing and seating area" },
+        text: "Beer tent, main stage, bands, dancing and seating area" },
     { id: "Grandstand",
         left: 20.66, top: 45.44, width: 17.15, height: 19.26,
         text: "Bleacher seating for demolition derby and track events" },
@@ -1414,6 +1449,37 @@ function applyTransform(){
     `translate(${x}px, ${y}px) scale(${scale})`;
 }
 
+function clampPan(){
+
+  const scaledWidth =
+    imageWrap.clientWidth * scale;
+
+  const scaledHeight =
+    imageWrap.clientHeight * scale;
+
+  const maxX =
+    Math.max(0,
+      (scaledWidth - imageWrap.clientWidth) / 2
+    );
+
+  const maxY =
+    Math.max(0,
+      (scaledHeight - imageWrap.clientHeight) / 2
+    );
+
+  const buffer = 40;
+
+  x = Math.min(
+    maxX + buffer,
+    Math.max(-(maxX + buffer), x)
+  );
+
+  y = Math.min(
+    maxY + buffer,
+    Math.max(-(maxY + buffer), y)
+  );
+}
+
 function getDistance(touches){
 
   const dx =
@@ -1469,6 +1535,8 @@ imageWrap.addEventListener('touchmove', (e) => {
     scale =
       Math.max(1, Math.min(scale, 5));
 
+    clampPan();
+
     applyTransform();
   }
 
@@ -1483,6 +1551,8 @@ imageWrap.addEventListener('touchmove', (e) => {
 
     y =
       e.touches[0].clientY - startY;
+
+    clampPan();
 
     applyTransform();
   }
@@ -1959,7 +2029,7 @@ async function loadTodayEvents(preserveScroll = false){
       <div class="vote-thanks">Today's Events</div>
     `;
     h += `<div class="vote-thanks-note">
-        Happening today. <br>Get reminders too for your favorite events
+        Happening today. <br>Set alerts too for your favorite events
         </div>`;
     h += renderPushCard();
 
