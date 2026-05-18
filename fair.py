@@ -13,6 +13,7 @@ import orjson
 from urllib.parse import urlparse
 from py_vapid import Vapid
 from datetime import date
+from fastapi.templating import Jinja2Templates
 
 
 # ---------------- CONFIG ----------------
@@ -39,6 +40,7 @@ DB_NAME = 'fairdb'
 DB_USER = 'admin'
 DB_PASSWORD = 'FanTab12345!'
 VOTING_MODE = "daily"   # "single" or "daily"
+APP_VERSION = "15"
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -90,11 +92,19 @@ async def lifespan(app: FastAPI):
 
 # -------------- WEB APP -------------------
 app = FastAPI(lifespan=lifespan)
+templates = Jinja2Templates(directory="templates")
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
-def root():
-    return FileResponse("templates/index.html")
+async def root(request: Request):
+
+    return templates.TemplateResponse(
+        request=request,
+        name="index_template.html",
+        context={
+            "app_version": APP_VERSION
+        }
+    )
 
 # -------------- JSON HELPER ---------------
 def json_response(data):
@@ -621,7 +631,7 @@ async def log_event(request: Request):
         log.error(f"analytics error: {err}")
         return {"status": "error"}
 
-# --------- STATIC CONTENT VERSION -----------
+# ----------- VERSIONING -------------
 @app.get("/api/static_version")
 async def static_version():
 
@@ -636,3 +646,8 @@ async def static_version():
     version = rows[0]['config_value'] if rows else "1"
 
     return {"version": version}
+
+@app.get("/api/app_version")
+async def get_app_version():
+
+    return {"version": APP_VERSION}

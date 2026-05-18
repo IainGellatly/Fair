@@ -130,9 +130,11 @@
 
 <!-- CONTENT AREA -->
 <div id="content"></div>
+<script>
+  window.APP_VERSION = "{{ app_version }}";
+</script>
 
-<script src="/static/app.js"></script>
-
+<script src="/static/app.js?v={{ app_version }}"></script>
 <div id="footerLogo">
 
   <div class="footer-row">

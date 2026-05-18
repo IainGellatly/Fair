@@ -173,7 +173,10 @@ function showInstallInstructions(){
 
 // ---------------- SERVICE WORKER ----------------
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
+
+  navigator.serviceWorker.register(
+    '/sw.js?v=' + window.APP_VERSION
+  );
 }
 
 // ---------------- HELPERS ----------------
@@ -257,7 +260,7 @@ async function loadStatic(page){
   const content = document.getElementById("content");
 
   try {
-    const version = localStorage.getItem("static_version") || "1";
+    const version = window.APP_VERSION;
     const res = await fetch(`/static/${page}.html?v=${version}`);
     const html = await res.text();
 
@@ -1228,9 +1231,9 @@ mapEl.addEventListener('touchend', () => {
 
   // ---------------- POI ZONES ----------------
   const POIS = [
-    { id: "Entertainment",
+    { id: "Entertainment Alley",
         left: 15.77, top: 14.43, width: 15.62, height: 9.71,
-        text: "Beer tent, main stage and seating area" },
+        text: "Beer tent, main stage, dancing and seating area" },
     { id: "Grandstand",
         left: 20.66, top: 45.44, width: 17.15, height: 19.26,
         text: "Bleacher seating for demolition derby and track events" },
@@ -2194,8 +2197,8 @@ initSubscription().catch(() => {});
 
 window.addEventListener("load", async () => {
 
-  // 🔥 check static version on app load
-  await checkStaticVersion();
+  // 🔥 full app version check
+  await checkAppVersion();
 
   const params = new URLSearchParams(window.location.search);
   const page = params.get("page");
@@ -2205,10 +2208,73 @@ window.addEventListener("load", async () => {
   }
 });
 
+async function checkAppVersion(){
+
+  try {
+
+    const res = await fetch("/api/app_version");
+    const data = await res.json();
+
+    const current = localStorage.getItem("app_version");
+
+    // first install
+    if (!current){
+      localStorage.setItem("app_version", data.version);
+      return;
+    }
+
+    // version changed
+    if (current != data.version){
+
+      console.log("App version changed. Clearing caches.");
+
+      // save new version first
+      localStorage.setItem("app_version", data.version);
+
+      // clear localStorage except device_id
+      const keepDeviceId = localStorage.getItem("device_id");
+
+      localStorage.clear();
+
+      if (keepDeviceId){
+        localStorage.setItem("device_id", keepDeviceId);
+      }
+
+      // clear browser caches
+      if ('caches' in window){
+        const names = await caches.keys();
+
+        await Promise.all(
+          names.map(name => caches.delete(name))
+        );
+      }
+
+      // unregister service workers
+      if ('serviceWorker' in navigator){
+
+        const regs =
+          await navigator.serviceWorker.getRegistrations();
+
+        for (const reg of regs){
+          await reg.unregister();
+        }
+      }
+
+      // hard reload
+      window.location.reload(true);
+    }
+
+  } catch (err){
+
+    console.log("app version check failed");
+
+  }
+}
+
 // 🔄 periodic version check (every 3 hours)
 setInterval(() => {
-  checkStaticVersion();
-}, 3 * 60 * 60 * 1000);
+  checkAppVersion();
+}, 60 * 60 * 1000);
 
 function filterFAQs(text){
 
@@ -2226,29 +2292,4 @@ function filterFAQs(text){
   });
 }
 
-async function checkStaticVersion(){
-
-  try {
-
-    const res = await fetch("/api/static_version");
-    const data = await res.json();
-
-    const current = localStorage.getItem("static_version");
-
-    if (current != data.version){
-
-      // 🔥 clear cached static pages
-      Object.keys(localStorage).forEach(k => {
-        if (k.startsWith("static_")){
-          localStorage.removeItem(k);
-        }
-      });
-
-      localStorage.setItem("static_version", data.version);
-    }
-
-  } catch (err){
-    console.log("static version check failed");
-  }
-}
 
