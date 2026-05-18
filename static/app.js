@@ -261,7 +261,7 @@ async function loadStatic(page){
 
   try {
     const version = window.APP_VERSION;
-    const res = await fetch(`/static/${page}.html?v=${version}`);
+    const res = await fetch(`/static/pages/${page}.html?v=${version}`);
     const html = await res.text();
 
     let titleMap = {
