@@ -174,9 +174,7 @@ function showInstallInstructions(){
 // ---------------- SERVICE WORKER ----------------
 if ('serviceWorker' in navigator) {
 
-  navigator.serviceWorker.register(
-    '/sw.js?v=' + window.APP_VERSION
-  );
+    navigator.serviceWorker.register('/sw.js');
 }
 
 // ---------------- HELPERS ----------------
@@ -2267,9 +2265,6 @@ initSubscription().catch(() => {});
 
 window.addEventListener("load", async () => {
 
-  // 🔥 full app version check
-  await checkAppVersion();
-
   const params = new URLSearchParams(window.location.search);
   const page = params.get("page");
 
@@ -2277,74 +2272,6 @@ window.addEventListener("load", async () => {
     loadTodayEvents();
   }
 });
-
-async function checkAppVersion(){
-
-  try {
-
-    const res = await fetch("/api/app_version");
-    const data = await res.json();
-
-    const current = localStorage.getItem("app_version");
-
-    // first install
-    if (!current){
-      localStorage.setItem("app_version", data.version);
-      return;
-    }
-
-    // version changed
-    if (current != data.version){
-
-      console.log("App version changed. Clearing caches.");
-
-      // save new version first
-      localStorage.setItem("app_version", data.version);
-
-      // clear localStorage except device_id
-      const keepDeviceId = localStorage.getItem("device_id");
-
-      localStorage.clear();
-
-      if (keepDeviceId){
-        localStorage.setItem("device_id", keepDeviceId);
-      }
-
-      // clear browser caches
-      if ('caches' in window){
-        const names = await caches.keys();
-
-        await Promise.all(
-          names.map(name => caches.delete(name))
-        );
-      }
-
-      // unregister service workers
-      if ('serviceWorker' in navigator){
-
-        const regs =
-          await navigator.serviceWorker.getRegistrations();
-
-        for (const reg of regs){
-          await reg.unregister();
-        }
-      }
-
-      // hard reload
-      window.location.reload(true);
-    }
-
-  } catch (err){
-
-    console.log("app version check failed");
-
-  }
-}
-
-// 🔄 periodic version check (every 3 hours)
-setInterval(() => {
-  checkAppVersion();
-}, 60 * 60 * 1000);
 
 function filterFAQs(text){
 

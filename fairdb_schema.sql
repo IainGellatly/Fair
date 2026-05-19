@@ -29,7 +29,7 @@ drop table if exists tenants;
 create table tenants (
 	tenant_id		integer auto_increment primary key,
     name            varchar(64),
-    description     varchar(128),
+    description     varchar(256),
     location        varchar(64),
     times           varchar(64),
     icon            varchar(128),

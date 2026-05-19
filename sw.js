@@ -1,32 +1,11 @@
-const CACHE_NAME =
-  "fair-cache-" + self.location.search;
+const CACHE_NAME = "fair-cache-v1";
 
 self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
-
-  event.waitUntil(
-
-    caches.keys().then(keys => {
-
-      return Promise.all(
-
-        keys.map(key => {
-
-          if (key !== CACHE_NAME){
-            return caches.delete(key);
-          }
-
-        })
-
-      );
-
-    }).then(() => self.clients.claim())
-
-  );
-
+  event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('push', function(event) {
@@ -54,12 +33,10 @@ self.addEventListener('push', function(event) {
 
         await self.registration.showNotification(title, {
           body: body,
-          icon: '/static/logo.png',
-          badge: '/static/logo.png',
+          icon: '/static/logo.webp',
+          badge: '/static/logo.webp',
           vibrate: [200, 100, 200, 100, 200],
-          tag: "fair-alert",
           requireInteraction: true,
-          renotify: true,
           data: { url: url }   // 👈 NEW
         });
 
