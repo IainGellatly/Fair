@@ -309,7 +309,10 @@ async def get_sponsors():
 @app.get('/api/tenants/{ten_type}')
 async def get_tenants(ten_type: str):
 
-    sql = f'select * from tenants where type = "{ten_type}" order by name;'
+    sql = f'''
+        select * from tenants where type = "{ten_type}" 
+        order by featured desc, name;
+        '''
     rows = await get_data(sql)
 
     return json_response(rows)
@@ -689,3 +692,12 @@ async def log_event(request: Request):
     except Exception as err:
         log.error(f"analytics error: {err}")
         return {"status": "error"}
+
+# ------------- TASTING EVENT ---------------
+@app.get("/api/tasting")
+async def get_tasting():
+
+    qry = "select * from tasting order by featured desc, name;"
+    result = await get_data(qry)
+
+    return json_response(result)

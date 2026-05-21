@@ -4,7 +4,7 @@ body{font-family:Arial;background:#f4f1e8;margin:0;text-align:center}
 .logo {
   width: 45%;
   max-width: 200px;   /* keeps it from getting huge on desktop */
-  margin: 10px auto 0px auto;
+  margin: 10px auto -10px auto;
   display: block;
 }
 
@@ -781,12 +781,12 @@ button:active {
 }
 
 .coupon-amount {
-  font-size: 2rem;
+  font-size: 1.2rem;
   font-weight: bold;
 }
 
 .small-note {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   margin-top: 6px;
 }
 
@@ -812,7 +812,7 @@ button:active {
 
 /* MAIN VALUE TEXT */
 .coupon-amount {
-  font-size: 4rem;        /* 🔥 ~2x bigger */
+  font-size: 2.5rem;        /* 🔥 ~2x bigger */
   font-weight: bold;
   color: #8b5a2b;
   margin-top: -12px;
@@ -827,7 +827,7 @@ button:active {
 
 /* INSTRUCTION TEXT */
 .coupon-note {
-  font-size: 1.3rem;
+  font-size: 1rem;
   margin-top: 10px;
 }
 
@@ -976,4 +976,59 @@ html,
 body{
   touch-action: manipulation;
   overflow-x: hidden;
+}
+
+/* ---------------- TASTING ---------------- */
+
+.taste-card {
+  align-items: center;
+}
+
+.taste-media {
+  align-self: center;
+}
+
+.taste-extra {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #8b5a2b;
+
+  margin-top: 4px;
+  margin-bottom: 6px;
+}
+
+.taste-card a {
+  word-break: break-word;
+}
+
+/* ---------------- FEATURED MENU ROW ---------------- */
+
+.featured-row {
+
+  grid-column: 1 / -1;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 12px;
+
+  padding: 10px 6px 8px 6px;
+
+  border-radius: 20px;
+
+  /* slightly darker for outdoor sunlight visibility */
+  background: #e6dfd1;
+
+  /* subtle depth */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.45),
+    0 1px 4px rgba(0,0,0,0.06);
+
+  border: 1px solid rgba(0,0,0,0.04);
+
+  margin-bottom: 2px;
+}
+
+.featured-row .icon-card {
+  transform: translateY(-1px);
 }

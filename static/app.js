@@ -725,7 +725,7 @@ async function submitVote(){
     return;
   }
 
-  if (!confirm("Submit your vote? This cannot be changed.")) return;
+  if (!confirm("Tap OK to submit your vote today.")) return;
 
   const res = await fetch("/api/vote", {
     method: "POST",
@@ -894,9 +894,10 @@ async function loadSurvey(){
 
     h += `
       <div class="vote-thanks-note">
-        Answer a few quick questions and <br>
-        get a 10% off discount coupon<br>
-        for the Wayne County Fair Store.
+        Answer a few questions and <br>
+        receive a coupon for a<br><br>
+        FREE COMMEMORATIVE PIN <br><br>
+        at the Wayne County Fair Store.
       </div>
     `;
 
@@ -995,7 +996,7 @@ function updateSurveySubmit(){
 
 async function submitSurvey(){
 
-  if (!confirm("Submit survey? Answers cannot be changed.")) return;
+  if (!confirm("Tap OK to submit your survey.")) return;
 
   let payload = [];
 
@@ -1041,13 +1042,13 @@ function renderSurveyThankYou(){
 
         <img src="/static/icons/fair.webp" class="coupon-logo" />
 
-        <div class="coupon-amount">10% OFF</div>
+        <div class="coupon-amount">FREE COMMEMORATIVE PIN</div>
 
         <div class="coupon-location">Wayne County Fair Store</div>
         <div class="coupon-location">Inside Floral Hall</div>
 
         <div class="coupon-note">
-          Show this screen to redeem
+          Show screen to redeem. One pin per person.
         </div>
 
       </div>
@@ -1760,6 +1761,11 @@ if (page !== "more"){
     return;
   }
 
+    if (page === 'taste'){
+      loadTasting();
+      return;
+    }
+
 // ---------------- EVENTS PAGES ----------------
 if (page === "music"){
   loadEvents("music");
@@ -2287,6 +2293,101 @@ function filterFAQs(text){
     const match = content.includes(text);
     card.style.display = match ? "flex" : "none";
   });
+}
+
+// ---------------- TASTING LOADER ----------------
+async function loadTasting(){
+
+  const content = document.getElementById("content");
+
+  try {
+
+    const res = await fetch(`/api/tasting`);
+    const data = await res.json();
+
+    let h = `
+      <div class="vote-thanks">Wine and Beer Tasting</div>
+
+      <div class="vote-thanks-note">
+        Thursday August 13th 5-7pm <br>Entertainment Alley
+      </div>
+
+      <div class="taste-extra">
+        Tickets $15/person online or at the door
+      </div>
+
+      <div class="taste-extra">
+        All attendees must be 21 or older
+      </div>
+    `;
+
+    data.forEach(item => {
+
+      const iconPath = item.icon
+        ? `/static/icons/${item.icon}`
+        : null;
+
+      const featuredStyle = item.featured == 1
+        ? 'style="background:#f4e7d3; border:2px solid #8b5a2b;"'
+        : '';
+
+      h += `
+        <div class="ui-card taste-card" ${featuredStyle}>
+
+          ${iconPath ? `
+            <div class="ui-card-media taste-media">
+              <img src="${iconPath}" />
+            </div>
+          ` : ``}
+
+          <div class="ui-card-content">
+
+            <div class="ui-card-title">
+              ${item.name || ''}
+            </div>
+
+            ${renderLine(item.description)}
+
+            <div class="ui-card-body"></div>
+
+            ${renderLine(item.products)}
+
+            <div class="ui-card-body"></div>
+
+            ${renderLine(item.about)}
+
+            <div class="ui-card-body"></div>
+
+            ${item.website
+              ? `
+                <div class="ui-card-body">
+                  <a
+                    href="${item.website}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    ${item.website}
+                  </a>
+                </div>
+              `
+              : ''
+            }
+
+          </div>
+
+        </div>
+      `;
+    });
+
+    content.innerHTML = h;
+
+    scrollToContent();
+
+  } catch (err){
+
+    content.innerHTML =
+      `<div class="card">Error loading tasting data</div>`;
+  }
 }
 
 

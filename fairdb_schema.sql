@@ -38,7 +38,6 @@ create table tenants (
 );
 create index tenants_type on tenants(type);
 
-
 drop table if exists sponsors;
 create table sponsors (
 	sponsor_id		integer auto_increment primary key,
@@ -46,6 +45,18 @@ create table sponsors (
     description     varchar(128),
     icon            varchar(128),
     tier            varchar(32)
+);
+
+drop table if exists tasting;
+create table tasting (
+    taste_id        integer auto_increment primary key,
+    name            varchar(64),
+    description     varchar(128),
+    products        varchar(128),
+    about           varchar(256),
+    website         varchar(128),
+    icon            varchar(128),
+    featured        integer
 );
 
 drop table if exists events;

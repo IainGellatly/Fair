@@ -4,6 +4,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="/static/styles.css?v={{ app_version }}">
 <link rel="icon" type="image/png" href="/static/favicon.png?v={{ app_version }}">
+<link rel="manifest" href="/static/manifest.webmanifest?v={{ app_version }}">
+<link rel="apple-touch-icon"
+      href="/static/favicon.png?v={{ app_version }}">
+
     <title>Wayne County Fair</title>
 
 </head>
@@ -16,20 +20,24 @@
 <!-- GRID -->
 <div class="icon-grid">
 
-  <!-- ROW 1 -->
-  <div class="icon-card" data-page="today">
-    <img src="/static/icons/menu/today.webp" alt="today">
-    <div>Today</div>
-  </div>
+  <!-- FEATURED ROW -->
+  <div class="featured-row">
 
-  <div class="icon-card" data-page="map">
-    <img src="/static/icons/menu/map.webp" alt="map">
-    <div>Map</div>
-  </div>
+    <div class="icon-card" data-page="today">
+      <img src="/static/icons/menu/today.webp" alt="today">
+      <div>Today</div>
+    </div>
 
-  <div class="icon-card" data-page="calendar">
-    <img src="/static/icons/menu/calendar.webp" alt="calendar">
-    <div>Calendar</div>
+    <div class="icon-card" data-page="map">
+      <img src="/static/icons/menu/map.webp" alt="map">
+      <div>Map</div>
+    </div>
+
+    <div class="icon-card" data-page="vote">
+      <img src="/static/icons/menu/vote.webp" alt="vote">
+      <div>Vote</div>
+    </div>
+
   </div>
 
   <!-- ROW 2 -->
@@ -65,9 +73,9 @@
   </div>
 
   <!-- ROW 4 -->
-  <div class="icon-card" data-page="vote">
-    <img src="/static/icons/menu/vote.webp" alt="vote">
-    <div>Vote</div>
+  <div class="icon-card" data-page="calendar">
+    <img src="/static/icons/menu/calendar.webp" alt="calendar">
+    <div>Calendar</div>
   </div>
 
   <div class="icon-card" data-page="midway">
@@ -113,10 +121,6 @@
   </div>
 
   <!-- ROW 7 (HIDDEN BY DEFAULT) -->
-  <div class="icon-card more-row" style="display:none;">
-    <img src="/static/logo.webp?v={{ app_version }}" alt="Fair Logo" onclick="goHome()" />
-  </div>
-
   <div class="icon-card more-row" data-page="faqs" style="display:none;">
     <img src="/static/icons/menu/faqs.webp" alt="about">
     <div>FAQs</div>
@@ -124,6 +128,11 @@
 
   <div class="icon-card more-row" style="display:none;">
     <img src="/static/logo.webp?v={{ app_version }}" alt="Fair Logo" onclick="goHome()" />
+  </div>
+
+  <div class="icon-card more-row" data-page="taste" style="display:none;">
+    <img src="/static/icons/menu/taste.webp" alt="tasting">
+  <div>Tasting</div>
   </div>
 
 </div>

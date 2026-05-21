@@ -37,6 +37,8 @@ self.addEventListener('push', function(event) {
           badge: '/static/logo.webp',
           vibrate: [200, 100, 200, 100, 200],
           requireInteraction: true,
+//          tag: "fair-alert",
+//          renotify: true,
           data: { url: url }   // 👈 NEW
         });
 
