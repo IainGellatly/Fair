@@ -1,15 +1,15 @@
 const surveyConfig = [
   {
     id: 1,
-    question: "What is your favorite Fair attraction?",
+    question: "What are your favorite Fair attractions?",
     max: 3,
     options: [
       {id:1, label:"Animals"},
       {id:2, label:"Food Vendors"},
       {id:3, label:"Music"},
-      {id:4, label:"Midway"},
-      {id:5, label:"Exhibitor Displays"},
-      {id:6, label:"Business Booths"},
+      {id:4, label:"Midway Rides"},
+      {id:5, label:"Judged Exhibits"},
+      {id:6, label:"Vendor Booths"},
       {id:7, label:"Grandstand Events"},
       {id:8, label:"Entertainment Alley"},
       {id:9, label:"Other (add comment below)"}
@@ -23,9 +23,9 @@ const surveyConfig = [
       {id:1, label:"Animals"},
       {id:2, label:"Food Vendors"},
       {id:3, label:"Music"},
-      {id:4, label:"Midway"},
-      {id:5, label:"Exhibitor Displays"},
-      {id:6, label:"Business Booths"},
+      {id:4, label:"Midway Rides"},
+      {id:5, label:"Judged Exhibits"},
+      {id:6, label:"Vendor Booths"},
       {id:7, label:"Grandstand Events"},
       {id:8, label:"Entertainment Alley"},
       {id:9, label:"Other (add comment below)"}
@@ -268,7 +268,10 @@ async function loadStatic(page){
       tickets: "Tickets",
       faqs: "Frequently Asked <br> Questions",
       about: "About the Fair",
-      firstaid: "First Aid"
+      firstaid: "First Aid",
+      parade: 'Wayne County Fair <br> Parade<br><span style="font-size: 0.65em;">Saturday, August 15th 4PM</span>',
+      exhibits: 'Judged Fair Exhibits',
+      tasting: 'Beer and Wine Tasting <br><span style="font-size: 0.65em;">Thursday, August 13th 5-7:30PM</span>'
     };
 
     let title = titleMap[page] || '';
@@ -314,15 +317,15 @@ async function loadTenants(type){
 
     let titleMap = {
       food: "Food Vendors",
-      exhibit: "Exhibitor Displays",
-      business: "Business Booths",
+      community: "Community Services",
+      vendor: "Vendor Booths",
       animal: "Animals"
     };
 
     let subTitleMap = {
       food: "Snacks, drinks and meals for all tastes",
-      exhibit: "Information and displays by police, <br> government and community organizations",
-      business: "Home, farm and personal <br> business products and services",
+      community: "Information and displays by <br> organizations helping our community",
+      vendor: "Home, farm and personal <br> products and services",
       animal: "Animal displays, judging and <br> demonstrations for the whole family"
     };
 
@@ -441,7 +444,7 @@ async function loadEvents(type){
     let subTitleMap = {
       today: "Happening today. <br>Get reminder notifications <br> of favorite events",
       music: "All music shows are free",
-      grandstand: "Tap Tickets on main menu <br> for paid events",
+      grandstand: "Tap Buy Tickets below <br> or pay at Grandstand Gate",
       calendar: "Full week of shows and events"
     };
 
@@ -511,30 +514,55 @@ async function loadEvents(type){
         ? `${item.start_time} - ${item.end_time}`
         : '';
 
-      h += `
-        <div class="ui-card" ${bgStyle}>
+    // only show ticket button for future paid Grandstand events
+    const eventEnded =
+      item.end_datetime &&
+      new Date(item.end_datetime) < new Date();
 
-          ${iconPath ? `
-            <div class="ui-card-media">
-              <img src="${iconPath}" />
-            </div>
-          ` : ``}
+    const showTicketButton =
+      item.location === "Grandstand" &&
+      item.price &&
+      item.price.toLowerCase() !== "free" &&
+      !eventEnded;
 
-          <div class="ui-card-content">
-            <div class="ui-card-title">${item.name}</div>
+    h += `
+      <div class="ui-card event-card" ${bgStyle}>
 
-            ${renderLine(item.description)}
-
-            <div class="ui-card-body"><b>${item.price || ''}</b></div>
-
-            ${renderLine(item.location)}
-
-            ${renderLine(timeRange)}
-
+        ${iconPath ? `
+          <div class="ui-card-media">
+            <img src="${iconPath}" />
           </div>
+        ` : ``}
+
+        <div class="ui-card-content">
+          <div class="ui-card-title">${item.name}</div>
+
+          ${renderLine(item.description)}
+
+          <div class="ui-card-body"><b>${item.price || ''}</b></div>
+
+          ${renderLine(item.location)}
+
+          ${renderLine(timeRange)}
 
         </div>
-      `;
+
+        ${showTicketButton ? `
+          <div class="ui-card-actions ticket-actions">
+            <button
+              class="ticket-btn"
+              onclick="window.open(
+                'https://www.etix.com/ticket/v/29262/wayne-county-fair-palmyra-ny',
+                '_blank'
+              )"
+            >
+              Buy Tickets
+            </button>
+          </div>
+        ` : ``}
+
+      </div>
+    `;
     });
 
     content.innerHTML = h;
@@ -625,14 +653,14 @@ async function loadVotePage(){
     return;
   }
 
-  const [food, exhibit, business] = await Promise.all([
-    fetch("/api/tenants/food").then(r=>r.json()),
-    fetch("/api/tenants/exhibit").then(r=>r.json()),
-    fetch("/api/tenants/business").then(r=>r.json())
+  const [food, indoor, outdoor] = await Promise.all([
+    fetch("/api/candidates/food").then(r=>r.json()),
+    fetch("/api/candidates/indoor").then(r=>r.json()),
+    fetch("/api/candidates/outdoor").then(r=>r.json())
   ]);
 
   // store globally for picker
-  window.voteData = { food, exhibit, business };
+  window.voteData = { food, indoor, outdoor };
 
     function renderCard(label, category, icon){
 
@@ -651,7 +679,7 @@ async function loadVotePage(){
       <div class="ui-card vote-card">
 
         <div class="ui-card-media">
-          <img src="/static/icons/menu/${icon}.webp">
+          <img src="/static/icons/vote/1stribbon.webp">
         </div>
 
         <div class="ui-card-content">
@@ -684,8 +712,8 @@ async function loadVotePage(){
     <div class="vote-thanks">Vote for Best of Fair</div>
     ${note}
     ${renderCard("Best Food Vendor", "food", "food")}
-    ${renderCard("Best Exhibitor Display", "exhibit", "exhibits")}
-    ${renderCard("Best Business Booth", "business", "business")}
+    ${renderCard("Best Indoor Vendor Booth", "indoor", "indoor")}
+    ${renderCard("Best Outdoor Vendor Display", "outdoor", "outdoor")}
 
     <button class="vote-submit-btn" onclick="submitVote()">Submit Ballot</button>
   `;
@@ -699,8 +727,8 @@ setTimeout(() => {
 
 let voteSelection = {
   food: null,
-  exhibit: null,
-  business: null
+  indoor: null,
+  outdoor: null
 };
 
 function selectVote(category, id, el){
@@ -717,8 +745,8 @@ async function submitVote(){
 
   const hasSelection =
     voteSelection.food ||
-    voteSelection.exhibit ||
-    voteSelection.business;
+    voteSelection.indoor ||
+    voteSelection.outdoor;
 
   if (!hasSelection){
     alert("Please select at least one category");
@@ -761,7 +789,7 @@ async function loadVoteResults(){
       <div class="ui-card vote-result-card">
 
         <div class="ui-card-media">
-          <img src="/static/icons/menu/${icon}.webp">
+          <img src="/static/icons/vote/1stribbon.webp">
         </div>
 
         <div class="ui-card-content">
@@ -801,8 +829,8 @@ content.innerHTML = `
   <h2 class="vote-results-heading">Ranking at ${ts}</h2>
 
   ${renderCard("Best Food Vendor", "food", data.food)}
-  ${renderCard("Best Exhibitor Display", "exhibits", data.exhibit)}
-  ${renderCard("Best Business Booth", "business", data.business)}
+  ${renderCard("Best Indoor Vendor Booth", "indoor", data.indoor)}
+  ${renderCard("Best Outdoor Vendor Display", "outdoor", data.outdoor)}
 
 `;
 
@@ -827,7 +855,7 @@ async function refreshVoteResults(){
       <div class="ui-card vote-result-card">
 
         <div class="ui-card-media">
-          <img src="/static/icons/menu/${icon}.webp">
+          <img src="/static/icons/vote/1stribbon.webp">
         </div>
 
         <div class="ui-card-content">
@@ -867,8 +895,8 @@ async function refreshVoteResults(){
     <h2 class="vote-results-heading">Ranking at ${ts}</h2>
 
     ${renderCard("Best Food Vendor", "food", data.food)}
-    ${renderCard("Best Exhibitor Display", "exhibits", data.exhibit)}
-    ${renderCard("Best Business Booth", "business", data.business)}
+    ${renderCard("Best Indoor Vendor Booth", "indoor", data.indoor)}
+    ${renderCard("Best Outdoor Vendor Display", "outdoor", data.outdoor)}
   `;
 
   // 🔥 restore exact scroll position
@@ -1286,7 +1314,7 @@ mapEl.addEventListener('touchend', () => {
         top: 14.43,
         width: 5.11,
         height: 7.14,
-        text: "Business and organization booths and displays",
+        text: "Vendor and community booths and displays",
 
         modal: {
           title: "Commercial Building 1",
@@ -1299,7 +1327,7 @@ mapEl.addEventListener('touchend', () => {
         top: 14.22,
         width: 5.99,
         height: 9.44,
-        text: "Business and organization booths and displays",
+        text: "Vendor and community booths and displays",
 
         modal: {
           title: "Commercial Building 2",
@@ -1734,7 +1762,10 @@ if (page !== "more"){
     tickets: "tickets",
     faqs: "faqs",
     about: "about",
-    firstaid: "firstaid"
+    firstaid: "firstaid",
+    parade: "parade",
+    exhibits: "exhibits",
+    tasting: "tasting"
   };
 
   if (staticPages[page]){
@@ -1745,8 +1776,8 @@ if (page !== "more"){
   // ---------------- TENANT PAGES ----------------
   const tenantMap = {
     food: "food",
-    exhibits: "exhibit",
-    business: "business",
+    community: "community",
+    vendors: "vendor",
     animals: "animal"
   };
 

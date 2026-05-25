@@ -1032,3 +1032,91 @@ body{
 .featured-row .icon-card {
   transform: translateY(-1px);
 }
+
+.parade-card {
+    text-align: center;
+    padding: 0px 0px 0px;
+}
+
+/* Title */
+.parade-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 12px;
+}
+
+/* Subtitle */
+.parade-subtitle {
+    font-size: 0.9rem;
+    line-height: 1.2;
+    margin-bottom: 12px;
+}
+
+/* Image wrapper */
+.parade-map-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    overflow: hidden;
+
+    border-radius: 20px;
+
+    border: 3px solid #9a6b23;
+
+    box-shadow:
+        0 3px 8px rgba(0,0,0,0.18);
+
+    background: #f5f5f5;
+}
+
+/* Actual image */
+.parade-map {
+    display: block;
+
+    width: 100%;
+    max-width: 900px;
+
+    height: auto;
+
+    object-fit: contain;
+}
+
+/* EVENT CARD */
+.event-card {
+  align-items: flex-start;
+}
+
+/* TICKET BUTTON ROW */
+.ticket-actions {
+  flex-basis: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: -2px;
+}
+
+/* BUY TICKETS BUTTON */
+.ticket-btn {
+  width: 60%;
+  max-width: 320px;
+
+  background: #9c6b10;
+  color: white;
+
+  border: none;
+  border-radius: 8px;
+
+  padding: 10px 14px;
+
+  font-size: 1rem;
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+/* BUTTON PRESS */
+.ticket-btn:active {
+  transform: translateY(1px);
+}
+

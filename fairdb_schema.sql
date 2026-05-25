@@ -34,6 +34,7 @@ create table tenants (
     times           varchar(64),
     icon            varchar(128),
     type            varchar(32),
+    outdoor         integer default 0,
     featured        integer default 0
 );
 create index tenants_type on tenants(type);

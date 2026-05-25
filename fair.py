@@ -306,6 +306,28 @@ async def get_sponsors():
 
     return json_response(result)
 
+@app.get('/api/candidates/{can_type}')
+async def get_candidates(can_type: str):
+
+    if can_type == 'indoor':
+
+        where_cl = f'outdoor = 0 and type in ("community", "vendor")'
+
+    elif can_type == 'outdoor':
+
+        where_cl = f'outdoor = 1 and type in ("community", "vendor")'
+
+    else:
+
+        where_cl = 'type = "food"'
+
+    sql = f'''
+        select * from tenants where {where_cl} order by name;
+        '''
+    rows = await get_data(sql)
+
+    return json_response(rows)
+
 @app.get('/api/tenants/{ten_type}')
 async def get_tenants(ten_type: str):
 
@@ -476,7 +498,7 @@ async def submit_vote(request: Request):
     data = await request.json()
 
     device_id = data.get("device_id")
-    votes = data.get("votes")   # { food: 12, exhibit: 5, business: 9 }
+    votes = data.get("votes")
 
     if not device_id or not votes:
         return {"status": "error"}
@@ -523,7 +545,7 @@ async def submit_vote(request: Request):
                     await cursor.execute(f"""
                         insert into vote_totals (category, tenant_id, tenant_name, vote_count)
                         select 
-                            t.type,
+                            "{category}",
                             t.tenant_id,
                             t.name,
                             1
@@ -554,8 +576,8 @@ async def get_vote_results():
 
     result = {
         "food": [],
-        "exhibit": [],
-        "business": []
+        "indoor": [],
+        "outdoor": []
     }
 
     for r in rows:
