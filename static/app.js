@@ -49,10 +49,35 @@ let surveyComment = "";
 
 const VAPID_PUBLIC_KEY = "BPAr2_PD2PGYvI0EsANa5gCXJ6z_hupiV6Bjdt7jxMaL_0D_QFdF-PbP3wDDNBM8PNzvbWRQegM9WH0yOyDVJ00";
 
+document.addEventListener('DOMContentLoaded', () => {
+
+  const btn =
+    document.getElementById('installButton');
+
+  if (btn){
+
+    btn.addEventListener('click', installApp);
+  }
+
+  // hide if already installed
+  if (isStandalone){
+
+    const installUI =
+      document.getElementById('installContainer');
+
+    if (installUI){
+      installUI.style.display = 'none';
+    }
+  }
+});
+
 // --------- PLATFORM DETECTION ----------
 const isApple = /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isStandalone = window.matchMedia('(display-mode: standalone)').matches
   || window.navigator.standalone === true;
+// ---------- INSTALL APP ----------
+
+let deferredInstallPrompt = null;
 
 let todayRefreshTimer = null;
 
@@ -162,13 +187,57 @@ function filterVoteList(text){
 }
 
 function showInstallInstructions(){
-  alert(
-    "To install:\n\n" +
-    "1. Tap the Share icon (square with arrow)\n" +
-    "2. Select 'Add to Home Screen'\n" +
-    "3. Open the app from your home screen\n" +
-    "4. Then enable notifications"
-  );
+
+  // prevent duplicates
+  if (document.getElementById('iosInstallOverlay')){
+    return;
+  }
+
+  const overlay = document.createElement('div');
+
+  overlay.id = 'iosInstallOverlay';
+
+  overlay.innerHTML = `
+
+    <div class="ios-install-sheet">
+
+      <div class="ios-install-title">
+        Install the Fair App
+      </div>
+
+      <div class="ios-install-step">
+        1. Tap ⋯ below and tap ⬆️ "Share".
+      </div>
+
+      <div class="ios-install-step">
+        2. Find and tap "Add to Home Screen" <br>(may be under "View More").
+      </div>
+
+      <div class="ios-install-step">
+        3. Open app using Fair icon.
+      </div>
+
+      <button
+        class="ios-install-close"
+        onclick="closeInstallInstructions()"
+      >
+        Close
+      </button>
+
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+}
+
+function closeInstallInstructions(){
+
+  const overlay =
+    document.getElementById('iosInstallOverlay');
+
+  if (overlay){
+    overlay.remove();
+  }
 }
 
 // ---------------- SERVICE WORKER ----------------
@@ -176,6 +245,40 @@ if ('serviceWorker' in navigator) {
 
     navigator.serviceWorker.register('/sw.js');
 }
+
+// ---------------- INSTALL PROMPT ----------------
+
+// iPhone/iPad Safari
+if (isApple && !isStandalone){
+
+  window.addEventListener('DOMContentLoaded', () => {
+
+    const installUI =
+      document.getElementById('installContainer');
+
+    if (installUI){
+      installUI.style.display = 'block';
+    }
+  });
+}
+
+// Android / Chrome
+window.addEventListener('beforeinstallprompt', (e) => {
+
+  e.preventDefault();
+
+  deferredInstallPrompt = e;
+
+  if (!isStandalone){
+
+    const installUI =
+      document.getElementById('installContainer');
+
+    if (installUI){
+      installUI.style.display = 'block';
+    }
+  }
+});
 
 // ---------------- HELPERS ----------------
 function scrollToContent(){
@@ -264,14 +367,14 @@ async function loadStatic(page){
 
     let titleMap = {
       midway: "Midway Rides <br> and Entertainment",
-      facilities: "Restroom Facilities",
-      tickets: "Tickets",
+      facilities: "Restroom <br>Facilities",
+      tickets: "Ticket <br>Information",
       faqs: "Frequently Asked <br> Questions",
-      about: "About the Fair",
-      firstaid: "First Aid",
+      about: "About the <br>Wayne County Fair",
+      firstaid: "First Aid <br>Station",
       parade: 'Wayne County Fair <br> Parade<br><span style="font-size: 0.65em;">Saturday, August 15th 4PM</span>',
-      exhibits: 'Judged Fair Exhibits',
-      tasting: 'Beer and Wine Tasting <br><span style="font-size: 0.65em;">Thursday, August 13th 5-7:30PM</span>'
+      exhibits: 'Judged <br>Fair Exhibits',
+      tasting: 'Beer and Wine <br>Tasting <br><span style="font-size: 0.65em;">Thursday, August 13th 5-7:30PM</span>'
     };
 
     let title = titleMap[page] || '';
@@ -294,9 +397,7 @@ async function loadStatic(page){
 
       ${searchBox}
 
-      <div class="card static-page" id="faqContainer">
-        ${html}
-      </div>
+      ${html}
     `;
 
     scrollToContent();
@@ -316,20 +417,21 @@ async function loadTenants(type){
     const data = await res.json();
 
     let titleMap = {
-      food: "Food Vendors",
-      community: "Community Services",
-      vendor: "Vendor Booths",
-      animal: "Animals"
+      food: "Fair Food <br>Vendors",
+      community: "Community <br>Services Booths",
+      vendor: "Vendor Booths <br> and Displays",
+      animal: "Animal <br>Exhibits"
     };
 
     let subTitleMap = {
       food: "Snacks, drinks and meals for all tastes",
       community: "Information and displays by <br> organizations helping our community",
       vendor: "Home, farm and personal <br> products and services",
-      animal: "Animal displays, judging and <br> demonstrations for the whole family"
+      animal: "Displays, judging and <br> demonstrations for the whole family"
     };
 
     let h = `<div class="vote-thanks">${titleMap[type] || type}</div>`;
+
     h += `<div class="vote-thanks-note">${subTitleMap[type] || type}</div>`;
 
     data.forEach(item => {
@@ -379,7 +481,7 @@ async function loadSponsors(){
     const res = await fetch(`/api/sponsors`);
     const data = await res.json();
 
-    let h = `<div class="vote-thanks">Sponsors</div>`;
+    let h = `<div class="vote-thanks">Fair Sponsors</div>`;
     h += `<div class="vote-thanks-note">Please support our sponsors</div>`;
 
     data.forEach(item => {
@@ -435,10 +537,10 @@ async function loadEvents(type){
     const data = await res.json();
 
     let titleMap = {
-      today: "Today's Events",
-      music: "Musical Entertainment",
-      grandstand: "Grandstand Events",
-      calendar: "Fair Calendar"
+      today: "Today's <br>Events",
+      music: "Musical <br>Entertainment",
+      grandstand: "Grandstand <br>Events",
+      calendar: "Complete <br>Fair Calendar"
     };
 
     let subTitleMap = {
@@ -709,7 +811,7 @@ async function loadVotePage(){
     }
 
   content.innerHTML = `
-    <div class="vote-thanks">Vote for Best of Fair</div>
+    <div class="vote-thanks">Vote for <br>Best Fair Vendor</div>
     ${note}
     ${renderCard("Best Food Vendor", "food", "food")}
     ${renderCard("Best Indoor Vendor Booth", "indoor", "indoor")}
@@ -917,14 +1019,13 @@ async function loadSurvey(){
   }
 
     let h = `
-      <div class="vote-thanks">Fair Survey</div>
+      <div class="vote-thanks">Quick <br> Fair Survey</div>
     `;
 
     h += `
       <div class="vote-thanks-note">
-        Answer a few questions and <br>
-        receive a coupon for a<br><br>
-        FREE COMMEMORATIVE PIN <br><br>
+        Answer a few questions and get a<br>
+        FREE COMMEMORATIVE PIN <br>
         at the Wayne County Fair Store.
       </div>
     `;
@@ -1334,9 +1435,6 @@ mapEl.addEventListener('touchend', () => {
           image: "/static/maps/commercial_2_plan.webp"
         }
     },
-    { id: "Information",
-        left: 43.94, top: 18.13, width: 6.28, height: 3.76,
-        text: "Information and announcer booth" },
     { id: "4-H Building",
         left: 57.96, top: 3.33, width: 7.52, height: 9.17,
         text: "4-H exhibits and demonstrations" },
@@ -1999,7 +2097,7 @@ function renderPushCard(){
           </div>
 
           <div class="push-action">
-            <button class="alert-btn" onclick="loadStatic('install_ios')">
+            <button class="alert-btn" onclick="installApp()">
               Install App
             </button>
           </div>
@@ -2061,10 +2159,10 @@ async function loadTodayEvents(preserveScroll = false){
     const data = await res.json();
 
     let h = `
-      <div class="vote-thanks">Today's Events</div>
+      <div class="vote-thanks">Today's Fair <br>Events</div>
     `;
     h += `<div class="vote-thanks-note">
-        Happening today. <br>Set alerts too for your favorite events
+        Set alerts for your favorite events
         </div>`;
     h += renderPushCard();
 
@@ -2325,6 +2423,38 @@ function filterFAQs(text){
     card.style.display = match ? "flex" : "none";
   });
 }
+
+async function installApp(){
+
+  // iPhone/iPad
+  if (isApple){
+
+    showInstallInstructions();
+    return;
+  }
+
+  // Android / Chrome
+  if (deferredInstallPrompt){
+
+    deferredInstallPrompt.prompt();
+
+    const result =
+      await deferredInstallPrompt.userChoice;
+
+    if (result.outcome === 'accepted'){
+
+      const installUI =
+        document.getElementById('installContainer');
+
+      if (installUI){
+        installUI.style.display = 'none';
+      }
+    }
+
+    deferredInstallPrompt = null;
+  }
+}
+
 
 // ---------------- TASTING LOADER ----------------
 async function loadTasting(){

@@ -2,9 +2,9 @@
 body{font-family:Arial;background:#f4f1e8;margin:0;text-align:center}
 
 .logo {
-  width: 45%;
+  width: 47%;
   max-width: 200px;   /* keeps it from getting huge on desktop */
-  margin: 10px auto -10px auto;
+  margin: 10px auto -26px auto;
   display: block;
 }
 
@@ -247,7 +247,7 @@ button:active {
 #footerLogo {
   width: 100%;
   text-align: center;
-  margin-top: 20px;
+  margin-top: 4px;
   margin-bottom: 10px;
 }
 
@@ -1010,9 +1010,9 @@ body{
   display: grid;
   grid-template-columns: repeat(3, 1fr);
 
-  gap: 12px;
+  gap: 20px;
 
-  padding: 10px 6px 8px 6px;
+  padding: 8px 4px 8px 6px;
 
   border-radius: 20px;
 
@@ -1026,7 +1026,7 @@ body{
 
   border: 1px solid rgba(0,0,0,0.04);
 
-  margin-bottom: 2px;
+  margin-bottom: 0px;
 }
 
 .featured-row .icon-card {
@@ -1120,3 +1120,140 @@ body{
   transform: translateY(1px);
 }
 
+/* INSTALL APP BUTTON */
+
+#installContainer {
+
+  position: absolute;
+
+  top: 10px;
+  right: 2px;
+
+  width: 72px;
+
+  text-align: center;
+
+  z-index: 100;
+
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#installButton {
+
+  width: 44px;
+  height: 44px;
+
+  margin: 0 auto;
+
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  box-shadow: none;
+}
+
+#installButton img {
+
+  width: 44px;
+  height: 44px;
+
+  display: block;
+}
+
+#installLabel {
+
+  font-size: 11px;
+  font-weight: bold;
+
+  color: #5b4636;
+
+  line-height: 1.0;
+
+  margin-top: 4px;
+}
+
+/* iOS INSTALL OVERLAY */
+
+#iosInstallOverlay {
+
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0,0,0,0.35);
+
+  z-index: 99999;
+
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: center;
+
+  padding-top: calc(env(safe-area-inset-top) + 12px);
+
+}
+
+.ios-install-sheet {
+
+  width: 100%;
+
+  max-width: 420px;
+
+  background: #f3efe6;
+
+  border-top-left-radius: 22px;
+  border-top-right-radius: 22px;
+
+  padding: 22px 20px 28px;
+
+  text-align: center;
+
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+}
+
+.ios-install-title {
+
+  font-size: 24px;
+  font-weight: bold;
+
+  margin-bottom: 18px;
+
+  color: #5b4636;
+}
+
+.ios-install-step {
+
+  font-size: 18px;
+
+  margin-top: 14px;
+
+  color: #333;
+}
+
+.ios-install-share {
+
+  font-size: 48px;
+
+  margin: 10px 0;
+}
+
+.ios-install-close {
+
+  margin-top: 24px;
+
+  padding: 12px 24px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #8b5a2b;
+
+  color: white;
+
+  font-size: 18px;
+}
