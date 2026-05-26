@@ -481,7 +481,7 @@ async function loadSponsors(){
     const res = await fetch(`/api/sponsors`);
     const data = await res.json();
 
-    let h = `<div class="vote-thanks">Fair Sponsors</div>`;
+    let h = `<div class="vote-thanks">Wayne County Fair <br> Sponsors</div>`;
     h += `<div class="vote-thanks-note">Please support our sponsors</div>`;
 
     data.forEach(item => {
@@ -616,16 +616,30 @@ async function loadEvents(type){
         ? `${item.start_time} - ${item.end_time}`
         : '';
 
-    // only show ticket button for future paid Grandstand events
+    // ---------------- BUTTON LOGIC ----------------
+
+    // event already ended?
     const eventEnded =
       item.end_datetime &&
       new Date(item.end_datetime) < new Date();
 
+    // paid grandstand event?
+
     const showTicketButton =
-      item.location === "Grandstand" &&
+      item.location &&
+      item.location.toLowerCase().includes("grandstand") &&
       item.price &&
       item.price.toLowerCase() !== "free" &&
       !eventEnded;
+
+    // allow alerts only for today's future events
+    const showAlertButton =
+      type === "today" &&
+      !eventEnded;
+
+    // existing alert state
+    const alertActive =
+      alertSet.has(item.event_id);
 
     h += `
       <div class="ui-card event-card" ${bgStyle}>
@@ -649,19 +663,32 @@ async function loadEvents(type){
 
         </div>
 
+    ${(showTicketButton || showAlertButton) ? `
+      <div class="ui-card-actions stacked-actions">
+
         ${showTicketButton ? `
-          <div class="ui-card-actions ticket-actions">
-            <button
-              class="ticket-btn"
-              onclick="window.open(
-                'https://www.etix.com/ticket/v/29262/wayne-county-fair-palmyra-ny',
-                '_blank'
-              )"
-            >
-              Buy Tickets
-            </button>
-          </div>
+          <button
+            class="alert-btn"
+            onclick="window.open(
+              'https://www.etix.com/ticket/v/29262/wayne-county-fair-palmyra-ny',
+              '_blank'
+            )"
+          >
+            Buy Tickets
+          </button>
         ` : ``}
+
+        ${showAlertButton ? `
+          <button
+            class="alert-btn ${alertActive ? 'active' : ''}"
+            onclick="toggleAlert(${item.event_id}, this)"
+          >
+            ${alertActive ? 'Alert Set' : 'Alert Me'}
+          </button>
+        ` : ``}
+
+      </div>
+    ` : ``}
 
       </div>
     `;
@@ -2229,6 +2256,14 @@ async function loadTodayEvents(preserveScroll = false){
 
       const hasAlert = alertSet.has(item.event_id);
 
+    // ---------- TICKET BUTTON RULES ----------
+    const showTicketButton =
+      item.location &&
+      item.location.toLowerCase().includes("grandstand") &&
+      item.price &&
+      item.price.toLowerCase() !== "free" &&
+      now < end;
+
       const timeRange = `${item.start_time} - ${item.end_time}`;
 
             let scrollTag = '';
@@ -2264,15 +2299,31 @@ async function loadTodayEvents(preserveScroll = false){
               ` : ''}
             </div>
 
-            ${showButton ? `
-              <div class="ui-card-actions">
-                <button
-                  class="alert-btn ${hasAlert ? 'active' : ''}"
-                  onclick="toggleAlert(${item.event_id}, this)">
-                  ${hasAlert ? 'Remove Alert' : 'Alert Me'}
-                </button>
-              </div>
-            ` : ''}
+    ${(showButton || showTicketButton) ? `
+      <div class="ui-card-actions stacked-actions">
+
+        ${showTicketButton ? `
+          <button
+            class="alert-btn"
+            onclick="window.open(
+              'https://www.etix.com/ticket/v/29262/wayne-county-fair-palmyra-ny',
+              '_blank'
+            )"
+          >
+            Buy Tickets
+          </button>
+        ` : ''}
+
+        ${showButton ? `
+          <button
+            class="alert-btn ${hasAlert ? 'active' : ''}"
+            onclick="toggleAlert(${item.event_id}, this)">
+            ${hasAlert ? 'Remove Alert' : 'Alert Me'}
+          </button>
+        ` : ''}
+
+      </div>
+    ` : ''}
 
           </div>
         `;

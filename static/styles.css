@@ -359,8 +359,26 @@ button:active {
   margin-top: 4px;
 }
 
-.ui-card-actions .alert-btn {
+/* stacked event buttons */
+.stacked-actions {
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ticket button matches alert button sizing */
+.ticket-btn {
   width: 140px;
+  background: linear-gradient(#a47148, #8b5a2b);
+  color: white;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.ui-card-actions .alert-btn {
+  width: 150px;
 }
 
 /* BUTTON */
@@ -474,7 +492,7 @@ button:active {
 .static-page .alert-btn {
   width: auto;
   max-width: 180px;
-  padding: 6px 10px;
+  padding: 6px 8px;
 }
 
 .poi-content {
