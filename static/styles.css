@@ -378,7 +378,7 @@ button:active {
 }
 
 .ui-card-actions .alert-btn {
-  width: 150px;
+  width: 160px;
 }
 
 /* BUTTON */
@@ -386,7 +386,7 @@ button:active {
   background: #9c6b30;
   color: white;
   border: none;
-  padding: 6px 8px;
+  padding: 4px 4px;
   border-radius: 7px;
   cursor: pointer;
 }
@@ -401,7 +401,7 @@ button:active {
 
 .ui-card-body button {
   width: auto;
-  max-width: 140px;
+  max-width: 160px;
   white-space: normal;
 }
 
@@ -492,7 +492,7 @@ button:active {
 .static-page .alert-btn {
   width: auto;
   max-width: 180px;
-  padding: 6px 8px;
+  padding: 4px 4px;
 }
 
 .poi-content {
