@@ -406,7 +406,7 @@ async function loadStatic(page){
     scrollToContent();
 
   } catch {
-    content.innerHTML = `<div class="card">Content not available</div>`;
+    content.innerHTML = `<div class="card">Not available. Try refresh page.</div>`;
   }
 }
 
@@ -1225,7 +1225,7 @@ function showMap(){
 
     <div class="vote-thanks-note">
       Pinch and spread to explore.<br>
-      Red dot is your location.<br>
+      Red dot is your location outdoors.<br>
       Tap yellow ? for info.
     </div>
     <div id="galleryMap"></div>
@@ -1435,28 +1435,6 @@ document
 
 });
 
-if (isApple){
-
-  const center =
-    sessionStorage.getItem('mapCenter');
-
-  const zoom =
-    sessionStorage.getItem('mapZoom');
-
-  if (center && zoom){
-
-    map.setView(
-      JSON.parse(center),
-      Number(zoom)
-    );
-
-    sessionStorage.removeItem('mapCenter');
-    sessionStorage.removeItem('mapZoom');
-  }
-
-}
-
-
   const MAP_BOUNDS = {
     north: 43.061104,
     south: 43.056393,
@@ -1501,19 +1479,13 @@ function latLonToImagePoint(lat, lon){
     );
   }
 
-  function latLonToPercent(lat, lon) {
-    const x = (lon - MAP_BOUNDS.west) / (MAP_BOUNDS.east - MAP_BOUNDS.west);
-    const y = (MAP_BOUNDS.north - lat) / (MAP_BOUNDS.north - MAP_BOUNDS.south);
-    return { x: x * 100, y: y * 100 };
-  }
-
   // ---------------- SMOOTHING ----------------
   let positionHistory = [];
 
   function smoothPosition(lat, lon) {
     positionHistory.push({ lat, lon });
 
-    if (positionHistory.length > 5) {
+    if (positionHistory.length > 3) {
       positionHistory.shift();
     }
 
@@ -1709,7 +1681,7 @@ if (!gpsVisible) {
 
     {
       enableHighAccuracy: true,
-      maximumAge: 3000,
+      maximumAge: 1000,
       timeout: 10000
     }
   );
@@ -2470,18 +2442,3 @@ async function loadTasting(){
       `<div class="card">Error loading tasting data</div>`;
   }
 }
-
-window.addEventListener('pageshow', () => {
-
-  if (
-    !isApple ||
-    sessionStorage.getItem('returnToMap') !== '1'
-  ){
-    return;
-  }
-
-  sessionStorage.removeItem('returnToMap');
-
-  showMap();
-
-});
