@@ -75,11 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
 const isApple = /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isStandalone = window.matchMedia('(display-mode: standalone)').matches
   || window.navigator.standalone === true;
+
 // ---------- INSTALL APP ----------
 
 let deferredInstallPrompt = null;
 
 let todayRefreshTimer = null;
+let savedScrollY = 0;
 
 let subscriptionId = 0;
 let pushAuthorized = false;
@@ -206,7 +208,7 @@ function showInstallInstructions(){
       </div>
 
       <div class="ios-install-step">
-        1. Tap ⋯ below and tap ⬆️ "Share".
+        1. Tap ⋯ below and tap "Share".
       </div>
 
       <div class="ios-install-step">
@@ -374,7 +376,8 @@ async function loadStatic(page){
       firstaid: "First Aid <br>Station",
       parade: 'Wayne County Fair <br> Parade<br><span style="font-size: 0.65em;">Saturday, August 15th 4PM</span>',
       exhibits: 'Judged <br>Fair Exhibits',
-      tasting: 'Beer and Wine <br>Tasting <br><span style="font-size: 0.65em;">Thursday, August 13th 5-7:30PM</span>'
+      tasting: 'Beer and Wine <br>Tasting <br><span style="font-size: 0.65em;">Thursday, August 13th 5-7:30PM</span>',
+      preview: 'Preview Map'
     };
 
     let title = titleMap[page] || '';
@@ -1225,12 +1228,72 @@ function showMap(){
       Red dot is your location.<br>
       Tap yellow ? for info.
     </div>
-    <div id="map">
-      <div id="mapInner"></div>
-    </div>
+    <div id="map"></div>
   `;
 
   scrollToContent();
+
+    const map = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: -2,
+      maxZoom: 3,
+      zoomSnap: 0.25,
+      attributionControl: false,
+      maxBoundsViscosity: 1.0
+    });
+
+    const gpsMarker = L.circleMarker([0,0], {
+
+      radius: 12,
+
+      color: '#ffffff',
+      weight: 2,
+
+      fillColor: '#ff0000',
+      fillOpacity: 1
+
+    });
+
+    let gpsVisible = false;
+
+    const imageWidth = 1536;
+    const imageHeight = 2048;
+
+    const bounds = [
+      [0, 0],
+      [imageHeight, imageWidth]
+    ];
+
+    map.setMaxBounds(bounds);
+
+    L.imageOverlay(
+      '/static/maps/fair_map.webp',
+      bounds
+    ).addTo(map);
+
+    map.fitBounds(bounds);
+
+if (isApple){
+
+  const center =
+    sessionStorage.getItem('mapCenter');
+
+  const zoom =
+    sessionStorage.getItem('mapZoom');
+
+  if (center && zoom){
+
+    map.setView(
+      JSON.parse(center),
+      Number(zoom)
+    );
+
+    sessionStorage.removeItem('mapCenter');
+    sessionStorage.removeItem('mapZoom');
+  }
+
+}
+
 
   const MAP_BOUNDS = {
     north: 43.061104,
@@ -1238,6 +1301,31 @@ function showMap(){
     west: -77.240839,
     east: -77.236086
   };
+
+    function percentToMapPoint(left, top){
+
+      return [
+        imageHeight - (imageHeight * (top / 100)),
+        imageWidth * (left / 100)
+      ];
+    }
+
+function latLonToImagePoint(lat, lon){
+
+  const xPercent =
+    (lon - MAP_BOUNDS.west) /
+    (MAP_BOUNDS.east - MAP_BOUNDS.west);
+
+  const yPercent =
+    (MAP_BOUNDS.north - lat) /
+    (MAP_BOUNDS.north - MAP_BOUNDS.south);
+
+  return [
+    imageHeight * (1 - yPercent),
+    imageWidth * xPercent
+  ];
+}
+
 
   const LAT_TOL = 0.0005;
   const LON_TOL = 0.0005;
@@ -1288,137 +1376,6 @@ function showMap(){
     return dist > 0.00005;
   }
 
-    const mapEl = document.getElementById('map');
-    const mapInner = document.getElementById('mapInner');
-
-let currentScale = 1;
-
-let startDistance = 0;
-let startScale = 1;
-
-let currentX = 0;
-let currentY = 0;
-
-let startPanX = 0;
-let startPanY = 0;
-
-let isDragging = false;
-
-function applyMapTransform(){
-
-  mapInner.style.transform =
-    `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
-}
-
-function clampPan(){
-
-  const scaledWidth =
-    mapEl.clientWidth * currentScale;
-
-  const scaledHeight =
-    mapEl.clientHeight * currentScale;
-
-  const maxX =
-    Math.max(0,
-      (scaledWidth - mapEl.clientWidth) / 2
-    );
-
-  const maxY =
-    Math.max(0,
-      (scaledHeight - mapEl.clientHeight) / 2
-    );
-
-  const buffer = 40;
-
-  currentX = Math.min(
-    maxX + buffer,
-    Math.max(-(maxX + buffer), currentX)
-  );
-
-  currentY = Math.min(
-    maxY + buffer,
-    Math.max(-(maxY + buffer), currentY)
-  );
-}
-
-function getDistance(touches){
-
-  const dx = touches[0].clientX - touches[1].clientX;
-  const dy = touches[0].clientY - touches[1].clientY;
-
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-/* ---------- PINCH START ---------- */
-
-mapEl.addEventListener('touchstart', (e) => {
-
-  /* pinch zoom */
-  if (e.touches.length === 2){
-
-    startDistance = getDistance(e.touches);
-    startScale = currentScale;
-  }
-
-  /* drag pan */
-  if (e.touches.length === 1){
-
-    isDragging = true;
-
-    startPanX = e.touches[0].clientX - currentX;
-    startPanY = e.touches[0].clientY - currentY;
-  }
-
-}, { passive:false });
-
-/* ---------- TOUCH MOVE ---------- */
-
-mapEl.addEventListener('touchmove', (e) => {
-
-  e.preventDefault();
-
-  /* ---------- PINCH ---------- */
-
-  if (e.touches.length === 2){
-
-    const distance = getDistance(e.touches);
-
-    currentScale =
-      startScale * (distance / startDistance);
-
-    currentScale =
-      Math.max(1, Math.min(currentScale, 4));
-
-    clampPan();
-
-    applyMapTransform();
-  }
-
-  /* ---------- PAN ---------- */
-
-  else if (e.touches.length === 1 && isDragging){
-
-    currentX =
-      e.touches[0].clientX - startPanX;
-
-    currentY =
-      e.touches[0].clientY - startPanY;
-
-    clampPan();
-
-    applyMapTransform();
-  }
-
-}, { passive:false });
-
-/* ---------- TOUCH END ---------- */
-
-mapEl.addEventListener('touchend', () => {
-
-  isDragging = false;
-
-}, { passive:false });
-
   // ---------------- POI ZONES ----------------
   const POIS = [
     { id: "Entertainment Alley",
@@ -1442,7 +1399,7 @@ mapEl.addEventListener('touchend', () => {
         top: 14.43,
         width: 5.11,
         height: 7.14,
-        text: "Vendor and community booths and displays",
+        text: "Vendor and community booths",
 
         modal: {
           title: "Commercial Building 1",
@@ -1455,7 +1412,7 @@ mapEl.addEventListener('touchend', () => {
         top: 14.22,
         width: 5.99,
         height: 9.44,
-        text: "Vendor and community booths and displays",
+        text: "Vendor and community booths",
 
         modal: {
           title: "Commercial Building 2",
@@ -1474,7 +1431,7 @@ mapEl.addEventListener('touchend', () => {
         top: 12.77,
         width: 7.37,
         height: 8.91,
-        text: "Government and organization exhibits, domestics",
+        text: "Community booths and judged exhibits",
 
         modal: {
           title: "Floral Hall",
@@ -1498,355 +1455,225 @@ mapEl.addEventListener('touchend', () => {
         text: "Antiques, Livestock judging and exhibition ring" }
   ];
 
-  POIS.forEach(poi => {
-    const z = document.createElement('div');
-    z.className = 'zone';
+    POIS.forEach(poi => {
 
-    z.style.left = poi.left + '%';
-    z.style.top = poi.top + '%';
-    z.style.width = poi.width + '%';
-    z.style.height = poi.height + '%';
+      const point =
+        percentToMapPoint(
+          poi.left + (poi.width / 2),
+          poi.top + (poi.height / 2)
+        );
 
-    z.addEventListener('click', (e) => {
+    const rect = L.rectangle(
 
-      // rich fullscreen modal POIs
-      if (poi.modal){
-        showPOIModal(poi);
+      [
+
+        [
+          imageHeight - (imageHeight * ((poi.top + poi.height) / 100)),
+          imageWidth * (poi.left / 100)
+        ],
+
+        [
+          imageHeight - (imageHeight * (poi.top / 100)),
+          imageWidth * ((poi.left + poi.width) / 100)
+        ]
+
+      ],
+
+      {
+        stroke: false,
+        fillOpacity: 0
+      }
+
+    ).addTo(map);
+
+    rect.on('click', () => {
+
+      if (!poi.modal){
+
+        L.popup()
+          .setLatLng(point)
+          .setContent(`
+            <b>${poi.id}</b><br>
+            ${poi.text}
+          `)
+          .openOn(map);
+
         return;
       }
 
-      // existing lightweight popup POIs
-      showPOIPopup(poi, e);
+const url =
+  `/static/pages/floorplan.html`
+  + `?title=${encodeURIComponent(poi.modal.title)}`
+  + `&subtitle=${encodeURIComponent(poi.text)}`
+  + `&image=${encodeURIComponent(poi.modal.image)}`;
+
+if (isApple){
+
+  sessionStorage.setItem(
+    'mapCenter',
+    JSON.stringify(map.getCenter())
+  );
+
+  sessionStorage.setItem(
+    'mapZoom',
+    map.getZoom()
+  );
+
+}
+
+sessionStorage.setItem(
+  'returnToMap',
+  '1'
+);
+
+window.location.assign(url);
+
+    });
     });
 
-    mapInner.appendChild(z);
-  });
+if ('geolocation' in navigator){
 
-   function showPOIModal(poi){
+  navigator.geolocation.watchPosition(
 
-      // remove existing popup if open
-      const existingPopup = document.querySelector('.poi-popup');
-      if (existingPopup){
-        existingPopup.remove();
+    (pos) => {
+
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+
+    if (!isInside(lat, lon)) {
+
+      if (gpsVisible) {
+        map.removeLayer(gpsMarker);
+        gpsVisible = false;
       }
 
-      // remove existing modal if open
-      const existingModal = document.querySelector('.poi-modal');
-      if (existingModal){
-        existingModal.remove();
-      }
-
-      // lock body scroll while modal open
-      document.body.style.overflow = 'hidden';
-
-      const modal = document.createElement('div');
-      modal.className = 'poi-modal';
-
-      modal.innerHTML = `
-        <div class="poi-modal-content">
-
-          <button class="poi-modal-close">
-            ✕
-          </button>
-
-          <div class="poi-modal-title">
-            ${poi.modal.title}
-          </div>
-
-          <div class="poi-modal-text">
-            ${poi.text}
-          </div>
-
-<div class="poi-modal-image-wrap">
-
-  <div class="poi-modal-image-inner">
-
-    <img
-      src="${poi.modal.image}"
-      class="poi-modal-image"
-      alt="${poi.modal.title}"
-    >
-
-  </div>
-
-</div>
-
-        </div>
-      `;
-
-      document.body.appendChild(modal);
-
-const imageWrap =
-  modal.querySelector('.poi-modal-image-wrap');
-
-const imageInner =
-  modal.querySelector('.poi-modal-image-inner');
-
-let scale = 1;
-
-let startDistance = 0;
-let startScale = 1;
-
-let x = 0;
-let y = 0;
-
-let startX = 0;
-let startY = 0;
-
-let dragging = false;
-
-function applyTransform(){
-
-  imageInner.style.transform =
-    `translate(${x}px, ${y}px) scale(${scale})`;
-}
-
-function clampPan(){
-
-  const scaledWidth =
-    imageWrap.clientWidth * scale;
-
-  const scaledHeight =
-    imageWrap.clientHeight * scale;
-
-  const maxX =
-    Math.max(0,
-      (scaledWidth - imageWrap.clientWidth) / 2
-    );
-
-  const maxY =
-    Math.max(0,
-      (scaledHeight - imageWrap.clientHeight) / 2
-    );
-
-  const buffer = 40;
-
-  x = Math.min(
-    maxX + buffer,
-    Math.max(-(maxX + buffer), x)
-  );
-
-  y = Math.min(
-    maxY + buffer,
-    Math.max(-(maxY + buffer), y)
-  );
-}
-
-function getDistance(touches){
-
-  const dx =
-    touches[0].clientX -
-    touches[1].clientX;
-
-  const dy =
-    touches[0].clientY -
-    touches[1].clientY;
-
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-/* ---------- START ---------- */
-
-imageWrap.addEventListener('touchstart', (e) => {
-
-  if (e.touches.length === 2){
-
-    startDistance = getDistance(e.touches);
-    startScale = scale;
-  }
-
-  if (e.touches.length === 1){
-
-    dragging = true;
-
-    startX =
-      e.touches[0].clientX - x;
-
-    startY =
-      e.touches[0].clientY - y;
-  }
-
-}, { passive:false });
-
-/* ---------- MOVE ---------- */
-
-imageWrap.addEventListener('touchmove', (e) => {
-
-  e.preventDefault();
-
-  /* pinch zoom */
-  if (e.touches.length === 2){
-
-    const distance =
-      getDistance(e.touches);
-
-    scale =
-      startScale *
-      (distance / startDistance);
-
-    scale =
-      Math.max(1, Math.min(scale, 5));
-
-    clampPan();
-
-    applyTransform();
-  }
-
-  /* pan */
-  else if (
-    e.touches.length === 1 &&
-    dragging
-  ){
-
-    x =
-      e.touches[0].clientX - startX;
-
-    y =
-      e.touches[0].clientY - startY;
-
-    clampPan();
-
-    applyTransform();
-  }
-
-}, { passive:false });
-
-/* ---------- END ---------- */
-
-imageWrap.addEventListener('touchend', () => {
-
-  dragging = false;
-
-}, { passive:false });
-
-      function closeModal(){
-        document.body.style.overflow = '';
-        modal.remove();
-      }
-
-      // close button
-      modal
-        .querySelector('.poi-modal-close')
-        .addEventListener('click', closeModal);
-
-      // tap dark background
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal){
-          closeModal();
-        }
-      });
-    }
-
-  function showPOIPopup(poi, event){
-
-    const existing = document.querySelector('.poi-popup');
-    if (existing) existing.remove();
-
-    const popup = document.createElement('div');
-    popup.className = 'poi-popup';
-
-    const content = document.createElement('div');
-    content.className = 'poi-content';
-
-    content.innerHTML = `
-      <h3>${poi.id.toUpperCase()}</h3>
-      <p>${poi.text}</p>
-    `;
-
-    popup.appendChild(content);
-    document.body.appendChild(popup);
-
-    let x = 0;
-    let y = 0;
-
-    // ✅ Normal click
-    if (event.clientX && event.clientY){
-      x = event.clientX;
-      y = event.clientY;
-    }
-
-    // 🍎 iOS touch fallback
-    else if (event.touches && event.touches.length > 0){
-      x = event.touches[0].clientX;
-      y = event.touches[0].clientY;
-    }
-
-    // ✅ Final fallback (center of tapped zone)
-    if (!x || !y){
-      const r = event.target.getBoundingClientRect();
-      x = r.left + r.width / 2;
-      y = r.top + r.height / 2;
-    }
-
-    content.style.position = 'fixed';
-    content.style.left = x + 'px';
-    content.style.top = y + 'px';
-    content.style.transform = 'translate(-50%, -110%)';
-
-    const rect = content.getBoundingClientRect();
-
-    if (rect.left < 10) content.style.left = '10px';
-    if (rect.right > window.innerWidth - 10)
-      content.style.left = (window.innerWidth - rect.width - 10) + 'px';
-
-    if (rect.top < 10)
-      content.style.top = (y + 20) + 'px';
-
-    popup.addEventListener('click', () => popup.remove());
-    content.addEventListener('click', (e) => e.stopPropagation());
-  }
-
-  let pin = document.createElement('div');
-  pin.className = 'pin';
-  mapInner.appendChild(pin);
-
-  function updateUserPosition(pos) {
-
-    const accuracy = pos.coords.accuracy;
-    if (accuracy > 40) return;
-
-    let lat = pos.coords.latitude;
-    let lon = pos.coords.longitude;
-
-    const smoothed = smoothPosition(lat, lon);
-
-    if (!hasMovedEnough(smoothed.lat, smoothed.lon)) return;
-
-    lastLat = smoothed.lat;
-    lastLon = smoothed.lon;
-
-    if (!isInside(smoothed.lat, smoothed.lon)) {
-      pin.style.display = 'none';
       return;
     }
 
-    const { x, y } = latLonToPercent(smoothed.lat, smoothed.lon);
+      if (!hasMovedEnough(lat, lon)){
+        return;
+      }
 
-    const clampedX = Math.min(100, Math.max(0, x));
-    const clampedY = Math.min(100, Math.max(0, y));
+      lastLat = lat;
+      lastLon = lon;
 
-    pin.style.display = 'block';
-    pin.style.left = clampedX + '%';
-    pin.style.top = clampedY + '%';
+      const smooth =
+        smoothPosition(lat, lon);
 
-    const haloSize = Math.min(accuracy * 2, 60);
-    pin.style.boxShadow = `0 0 ${haloSize}px rgba(255,0,0,0.5)`;
-  }
+    const point =
+      latLonToImagePoint(
+        smooth.lat,
+        smooth.lon
+      );
 
-  if (!navigator.geolocation) {
-    alert("Location not supported");
-    return;
-  }
+    gpsMarker.setLatLng(point);
 
-  navigator.geolocation.watchPosition(
-    updateUserPosition,
-    (err) => console.log(err),
+    if (!gpsVisible) {
+      gpsMarker.addTo(map);
+      gpsVisible = true;
+    }
+    },
+
+    (err) => {
+      console.log("GPS error:", err);
+    },
+
     {
       enableHighAccuracy: true,
-      maximumAge: 0,
+      maximumAge: 3000,
       timeout: 10000
     }
   );
+}
+
+   function showPOIModal(poi){
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'instant'
+    });
+
+const existing = document.getElementById('floorplanOverlay');
+
+if (existing){
+  existing.remove();
+}
+
+const overlay = document.createElement('div');
+
+overlay.id = 'floorplanOverlay';
+
+overlay.innerHTML = `
+
+  <div class="floorplan-page">
+
+    <div class="floorplan-header">
+
+    <button
+      class="floorplan-close"
+      onclick="
+        document.getElementById('floorplanOverlay').remove();
+        showMap();
+      "
+    >
+      x
+    </button>
+
+      <div class="floorplan-title">
+        ${poi.modal.title}
+      </div>
+
+      <div class="floorplan-subtitle">
+        ${poi.text}
+      </div>
+
+    </div>
+
+    <div id="floorplan-map"></div>
+
+  </div>
+`;
+
+document.body.appendChild(overlay);
+
+window.scrollTo(0, 0);
+const floorplanMap = L.map('floorplan-map', {
+
+  crs: L.CRS.Simple,
+
+  minZoom: -2,
+  maxZoom: 4,
+
+  zoomSnap: 0.25,
+
+  attributionControl: false
+});
+
+const floorplanBounds = [
+  [0,0],
+  [2048,1536]
+];
+
+L.imageOverlay(
+  poi.modal.image,
+  floorplanBounds
+).addTo(floorplanMap);
+
+requestAnimationFrame(() => {
+
+  floorplanMap.invalidateSize();
+
+  floorplanMap.fitBounds(
+    floorplanBounds,
+    {
+      padding:[12,12]
+    }
+  );
+
+});
+
+   }
+
 }
 
 // ---------------- PAGE ROUTER ----------------
@@ -1890,7 +1717,8 @@ if (page !== "more"){
     firstaid: "firstaid",
     parade: "parade",
     exhibits: "exhibits",
-    tasting: "tasting"
+    tasting: "tasting",
+    preview: "preview"
   };
 
   if (staticPages[page]){
@@ -2602,4 +2430,17 @@ async function loadTasting(){
   }
 }
 
+window.addEventListener('pageshow', () => {
 
+  if (
+    !isApple ||
+    sessionStorage.getItem('returnToMap') !== '1'
+  ){
+    return;
+  }
+
+  sessionStorage.removeItem('returnToMap');
+
+  showMap();
+
+});

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1">
+
+<link rel="stylesheet" href="/static/styles.css">
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+
+body{
+  margin:0;
+  background:#f4f1e8;
+}
+
+.floorplan-header{
+
+  position:sticky;
+  top:0;
+
+  background:#f4f1e8;
+
+  padding:12px 16px 8px 16px;
+
+  border-bottom:2px solid #d8c6ac;
+
+  z-index:100;
+}
+
+.floorplan-title{
+
+  color:#8b5a2b;
+  font-size:1.75rem;
+  font-weight:bold;
+}
+
+.floorplan-subtitle{
+
+  color:#8b5a2b;
+  font-size:1.2rem;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+.floorplan-close{
+
+  position:absolute;
+
+  top:10px;
+  right:12px;
+
+  width:42px;
+  height:42px;
+
+  border-radius:50%;
+
+  font-size:24px;
+  font-weight:bold;
+
+  padding:0;
+
+  line-height:42px;
+
+  background: #8b5a2b;
+  color: #ffffff;
+  border: none;
+}
+
+.floorplan-image{
+
+  width:100%;
+  height:auto;
+
+  display:block;
+}
+
+#floorplan-map {
+
+    width: 96vw;
+
+    aspect-ratio: 1 / 1.6;
+
+    height: auto;
+
+    margin: 0 auto;
+
+    border: 3px solid #8b5a2b;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    box-shadow:
+      0 4px 10px rgba(0,0,0,0.3);
+}
+
+.leaflet-container {
+  background: #ffffff;
+}
+
+.leaflet-container,
+.leaflet-pane,
+.leaflet-map-pane {
+    background: #ffffff !important;
+}
+
+body {
+  animation: floorplanOpen 800ms ease-out;
+  transform-origin: center center;
+}
+
+@keyframes floorplanOpen {
+
+  from {
+    transform: scale(0.50);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="floorplan-header">
+
+<button
+  class="floorplan-close"
+  onclick="history.back()"
+>
+  X
+</button>
+
+  <div class="floorplan-title" id="title"></div>
+
+  <div class="floorplan-subtitle" id="subtitle"></div>
+
+</div>
+
+<div id="floorplan-map"></div>
+
+<div class="floorplan-footer">
+
+  <div class="footer-row">
+
+    <div class="footer-side left">
+      Aug 10th-16th, 2026
+    </div>
+
+    <div id="footerLogo">
+      <img
+        src="/static/icons/fair.webp"
+        alt="Fair Logo"
+      >
+    </div>
+
+    <div class="footer-side right">
+      Palmyra, New York
+    </div>
+
+  </div>
+
+  <div class="footer-text">
+    Copyright 2026 Retro Gear Laboratories LLC
+  </div>
+
+</div>
+
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+<script>
+
+const params =
+  new URLSearchParams(location.search);
+
+document.getElementById('title').textContent =
+  params.get('title') || '';
+
+document.getElementById('subtitle').textContent =
+  params.get('subtitle') || '';
+
+const imageUrl = params.get('image');
+
+const map = L.map('floorplan-map', {
+
+  crs: L.CRS.Simple,
+
+  minZoom: -2,
+  maxZoom: 4,
+
+  zoomSnap: 0.20,
+
+  attributionControl: false,
+
+  zoomControl: true,
+
+  maxBoundsViscosity: 1.0
+});
+
+const img = new Image();
+
+img.onload = () => {
+
+    const bounds = [
+        [0,0],
+        [img.height, img.width]
+    ];
+
+    map.setMaxBounds(bounds);
+
+    L.imageOverlay(
+        imageUrl,
+        bounds
+    ).addTo(map);
+
+    map.invalidateSize();
+
+    const zoom =
+      map.getBoundsZoom(bounds, false);
+
+    map.setView(
+      [img.height / 2, img.width / 2],
+      zoom
+    );
+
+};
+
+img.src = imageUrl;
+
+</script>
+
+</body>
+</html>
