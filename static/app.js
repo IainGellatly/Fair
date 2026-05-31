@@ -1228,12 +1228,40 @@ function showMap(){
       Red dot is your location.<br>
       Tap yellow ? for info.
     </div>
-    <div id="map"></div>
+    <div id="galleryMap"></div>
+
+<div class="gallery-button-row">
+
+  <button
+    id="btn-fair"
+    class="gallery-btn active">
+    Fair Map
+  </button>
+
+  <button
+    id="btn-floral"
+    class="gallery-btn">
+    Floral Hall
+  </button>
+
+  <button
+    id="btn-commercial1"
+    class="gallery-btn">
+    Commercial Bldg. 1
+  </button>
+
+  <button
+    id="btn-commercial2"
+    class="gallery-btn">
+    Commercial Bldg. 2
+  </button>
+
+</div>
   `;
 
   scrollToContent();
 
-    const map = L.map('map', {
+    const map = L.map('galleryMap', {
       crs: L.CRS.Simple,
       minZoom: -2,
       maxZoom: 3,
@@ -1264,14 +1292,148 @@ function showMap(){
       [imageHeight, imageWidth]
     ];
 
+const IMAGES = {
+
+  fair:
+    '/static/maps/fair_map.webp',
+
+  floral:
+    '/static/maps/floral_plan.webp',
+
+  commercial1:
+    '/static/maps/commercial_1_plan.webp',
+
+  commercial2:
+    '/static/maps/commercial_2_plan.webp'
+};
+
+let currentView = 'fair';
+
+const savedViews = {};
+
+let currentOverlay = null;
+
     map.setMaxBounds(bounds);
 
+currentOverlay =
+  L.imageOverlay(
+    IMAGES.fair,
+    bounds
+  ).addTo(map);
+
+    map.fitBounds(bounds);
+
+function setActiveButton(id){
+
+  document
+    .querySelectorAll('.gallery-btn')
+    .forEach(btn =>
+      btn.classList.remove('active')
+    );
+
+  document
+    .getElementById(id)
+    .classList.add('active');
+}
+
+function switchImage(view){
+
+  savedViews[currentView] = {
+
+    center: map.getCenter(),
+
+    zoom: map.getZoom()
+  };
+
+currentView = view;
+
+map.closePopup();
+
+if (view !== 'fair' && gpsVisible){
+
+  map.removeLayer(gpsMarker);
+
+  gpsVisible = false;
+}
+
+if (currentOverlay){
+
+    map.removeLayer(currentOverlay);
+  }
+
+  currentOverlay =
     L.imageOverlay(
-      '/static/maps/fair_map.webp',
+      IMAGES[view],
       bounds
     ).addTo(map);
 
+  map.setMaxBounds(bounds);
+
+  if (savedViews[view]){
+
+    map.setView(
+      savedViews[view].center,
+      savedViews[view].zoom
+    );
+
+  } else {
+
     map.fitBounds(bounds);
+  }
+
+}
+
+document
+  .getElementById('btn-fair')
+  .addEventListener('click', () => {
+
+    setActiveButton(
+      'btn-fair'
+    );
+
+    switchImage('fair');
+
+});
+
+document
+  .getElementById('btn-floral')
+  .addEventListener('click', () => {
+
+    setActiveButton(
+      'btn-floral'
+    );
+
+    switchImage('floral');
+
+});
+
+document
+  .getElementById('btn-commercial1')
+  .addEventListener('click', () => {
+
+    setActiveButton(
+      'btn-commercial1'
+    );
+
+    switchImage(
+      'commercial1'
+    );
+
+});
+
+document
+  .getElementById('btn-commercial2')
+  .addEventListener('click', () => {
+
+    setActiveButton(
+      'btn-commercial2'
+    );
+
+    switchImage(
+      'commercial2'
+    );
+
+});
 
 if (isApple){
 
@@ -1393,51 +1555,36 @@ function latLonToImagePoint(lat, lon){
     { id: "Main Gate",
         left: 49.78, top: 3.38, width: 7.3, height: 8.85,
         text: "Gate, flag pole, seating and welcome area" },
-    {
-        id: "Commercial 1",
-        left: 38.10,
-        top: 14.43,
-        width: 5.11,
-        height: 7.14,
-        text: "Vendor and community booths",
-
-        modal: {
-          title: "Commercial Building 1",
-          image: "/static/maps/commercial_1_plan.webp"
-        }
-    },
-    {
-        id: "Commercial 2",
-        left: 31.75,
-        top: 14.22,
-        width: 5.99,
-        height: 9.44,
-        text: "Vendor and community booths",
-
-        modal: {
-          title: "Commercial Building 2",
-          image: "/static/maps/commercial_2_plan.webp"
-        }
-    },
+{
+    id: "Commercial Bldg 1",
+    left: 38.10,
+    top: 14.43,
+    width: 5.11,
+    height: 7.14,
+    text: "Vendor and community booths and displays"
+},
+{
+    id: "Commercial Bldg 2",
+    left: 31.75,
+    top: 14.22,
+    width: 5.99,
+    height: 9.44,
+    text: "Vendor and community booths and displays"
+},
     { id: "4-H Building",
         left: 57.96, top: 3.33, width: 7.52, height: 9.17,
         text: "4-H exhibits and demonstrations" },
     { id: "History Building",
         left: 56.86, top: 23.23, width: 9.85, height: 5.53,
         text: "Historical museum" },
-    {
-        id: "Floral Hall",
-        left: 50.44,
-        top: 12.77,
-        width: 7.37,
-        height: 8.91,
-        text: "Community booths and judged exhibits",
-
-        modal: {
-          title: "Floral Hall",
-          image: "/static/maps/floral_plan.webp"
-        }
-    },
+{
+    id: "Floral Hall",
+    left: 50.44,
+    top: 12.77,
+    width: 7.37,
+    height: 8.91,
+    text: "Community booths, judged exhibits and floral displays"
+},
     { id: "Livestock Tent",
         left: 61.97, top: 14.27, width: 8.76, height: 8.53,
         text: "Animal exhibits and demonstrations" },
@@ -1486,49 +1633,17 @@ function latLonToImagePoint(lat, lon){
 
     ).addTo(map);
 
-    rect.on('click', () => {
+rect.on('click', () => {
 
-      if (!poi.modal){
+  L.popup()
+    .setLatLng(point)
+    .setContent(`
+      <b>${poi.id}</b><br>
+      ${poi.text}
+    `)
+    .openOn(map);
 
-        L.popup()
-          .setLatLng(point)
-          .setContent(`
-            <b>${poi.id}</b><br>
-            ${poi.text}
-          `)
-          .openOn(map);
-
-        return;
-      }
-
-const url =
-  `/static/pages/floorplan.html`
-  + `?title=${encodeURIComponent(poi.modal.title)}`
-  + `&subtitle=${encodeURIComponent(poi.text)}`
-  + `&image=${encodeURIComponent(poi.modal.image)}`;
-
-if (isApple){
-
-  sessionStorage.setItem(
-    'mapCenter',
-    JSON.stringify(map.getCenter())
-  );
-
-  sessionStorage.setItem(
-    'mapZoom',
-    map.getZoom()
-  );
-
-}
-
-sessionStorage.setItem(
-  'returnToMap',
-  '1'
-);
-
-window.location.assign(url);
-
-    });
+});
     });
 
 if ('geolocation' in navigator){
@@ -1560,18 +1675,32 @@ if ('geolocation' in navigator){
       const smooth =
         smoothPosition(lat, lon);
 
-    const point =
-      latLonToImagePoint(
-        smooth.lat,
-        smooth.lon
-      );
+const point =
+  latLonToImagePoint(
+    smooth.lat,
+    smooth.lon
+  );
 
-    gpsMarker.setLatLng(point);
+gpsMarker.setLatLng(point);
 
-    if (!gpsVisible) {
-      gpsMarker.addTo(map);
-      gpsVisible = true;
-    }
+if (currentView !== 'fair') {
+
+  if (gpsVisible) {
+
+    map.removeLayer(gpsMarker);
+
+    gpsVisible = false;
+  }
+
+  return;
+}
+
+if (!gpsVisible) {
+
+  gpsMarker.addTo(map);
+
+  gpsVisible = true;
+}
     },
 
     (err) => {
@@ -1585,94 +1714,6 @@ if ('geolocation' in navigator){
     }
   );
 }
-
-   function showPOIModal(poi){
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'instant'
-    });
-
-const existing = document.getElementById('floorplanOverlay');
-
-if (existing){
-  existing.remove();
-}
-
-const overlay = document.createElement('div');
-
-overlay.id = 'floorplanOverlay';
-
-overlay.innerHTML = `
-
-  <div class="floorplan-page">
-
-    <div class="floorplan-header">
-
-    <button
-      class="floorplan-close"
-      onclick="
-        document.getElementById('floorplanOverlay').remove();
-        showMap();
-      "
-    >
-      x
-    </button>
-
-      <div class="floorplan-title">
-        ${poi.modal.title}
-      </div>
-
-      <div class="floorplan-subtitle">
-        ${poi.text}
-      </div>
-
-    </div>
-
-    <div id="floorplan-map"></div>
-
-  </div>
-`;
-
-document.body.appendChild(overlay);
-
-window.scrollTo(0, 0);
-const floorplanMap = L.map('floorplan-map', {
-
-  crs: L.CRS.Simple,
-
-  minZoom: -2,
-  maxZoom: 4,
-
-  zoomSnap: 0.25,
-
-  attributionControl: false
-});
-
-const floorplanBounds = [
-  [0,0],
-  [2048,1536]
-];
-
-L.imageOverlay(
-  poi.modal.image,
-  floorplanBounds
-).addTo(floorplanMap);
-
-requestAnimationFrame(() => {
-
-  floorplanMap.invalidateSize();
-
-  floorplanMap.fitBounds(
-    floorplanBounds,
-    {
-      padding:[12,12]
-    }
-  );
-
-});
-
-   }
 
 }
 

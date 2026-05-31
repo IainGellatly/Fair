@@ -1,7 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.5">
+<meta
+  name="viewport"
+  content="
+    width=device-width,
+    initial-scale=1,
+    maximum-scale=1,
+    minimum-scale=1,
+    user-scalable=no,
+    viewport-fit=cover
+">
 <link rel="stylesheet" href="/static/styles.css?v={{ app_version }}">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="icon" type="image/png" href="/static/favicon.png?v={{ app_version }}">
@@ -160,12 +169,7 @@
     <img src="/static/icons/menu/faqs.webp" alt="about">
     <div>Help FAQs</div>
   </div>
-<!--
-  <div class="icon-card more-row" data-page="preview" style="display:none;">
-    <img src="/static/icons/menu/faqs.webp" alt="about">
-    <div>Preview</div>
-  </div>
--->
+
   <div class="icon-card more-row" style="display:none;">
     <img src="/static/logo.webp?v={{ app_version }}" alt="Fair Logo" onclick="goHome()" />
   </div>
