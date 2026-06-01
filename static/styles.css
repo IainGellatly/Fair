@@ -98,7 +98,7 @@ button:active {
 
   margin:0 auto;
 
-  border-radius:12px;
+  border-radius:12px 12px 12px 12px;
 
   overflow:hidden;
 
@@ -110,13 +110,17 @@ button:active {
 
 .gallery-button-row{
 
-  width:96%;
+  width:92%;
 
-  margin:12px auto;
+  margin:0 auto -3px auto;
 
   display:flex;
 
-  gap:8px;
+  gap:0;
+
+  position:relative;
+
+  z-index:10;
 }
 
 .gallery-btn{
@@ -127,9 +131,15 @@ button:active {
 
   width:auto;
 
-  padding:12px 4px;
+  padding:6px 4px;
 
-  font-size:15px;
+  font-size:14px;
+
+  border-radius:12px 12px 0 0;
+
+  box-shadow:none;
+
+  position:relative;
 }
 
 .gallery-btn.active{
@@ -139,6 +149,8 @@ button:active {
       #3f6f24,
       #355d1d
     );
+
+  z-index:20;
 }
 
 .leaflet-container {

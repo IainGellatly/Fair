@@ -1228,7 +1228,6 @@ function showMap(){
       Red dot is your location outdoors.<br>
       Tap yellow ? for info.
     </div>
-    <div id="galleryMap"></div>
 
 <div class="gallery-button-row">
 
@@ -1257,6 +1256,9 @@ function showMap(){
   </button>
 
 </div>
+
+<div id="galleryMap"></div>
+
   `;
 
   scrollToContent();
@@ -1272,7 +1274,7 @@ function showMap(){
 
     const gpsMarker = L.circleMarker([0,0], {
 
-      radius: 12,
+      radius: 16,
 
       color: '#ffffff',
       weight: 2,
@@ -1479,21 +1481,39 @@ function latLonToImagePoint(lat, lon){
     );
   }
 
-  // ---------------- SMOOTHING ----------------
-  let positionHistory = [];
+// ---------------- EXPONENTIAL SMOOTHING ----------------
 
-  function smoothPosition(lat, lon) {
-    positionHistory.push({ lat, lon });
+let filteredLat = null;
+let filteredLon = null;
 
-    if (positionHistory.length > 3) {
-      positionHistory.shift();
-    }
+// Higher alpha = more responsive
+// Lower alpha = smoother
+const GPS_ALPHA = 0.45;
 
-    let avgLat = positionHistory.reduce((sum, p) => sum + p.lat, 0) / positionHistory.length;
-    let avgLon = positionHistory.reduce((sum, p) => sum + p.lon, 0) / positionHistory.length;
+function smoothPosition(lat, lon) {
 
-    return { lat: avgLat, lon: avgLon };
+  if (filteredLat === null) {
+
+    filteredLat = lat;
+    filteredLon = lon;
+
+  } else {
+
+    filteredLat =
+      (GPS_ALPHA * lat) +
+      ((1 - GPS_ALPHA) * filteredLat);
+
+    filteredLon =
+      (GPS_ALPHA * lon) +
+      ((1 - GPS_ALPHA) * filteredLon);
+
   }
+
+  return {
+    lat: filteredLat,
+    lon: filteredLon
+  };
+}
 
   // ---------------- MOVEMENT FILTER ----------------
   let lastLat = null;
@@ -1507,7 +1527,7 @@ function latLonToImagePoint(lat, lon){
       Math.pow(lon - lastLon, 2)
     );
 
-    return dist > 0.00005;
+    return dist > 0.00002;
   }
 
   // ---------------- POI ZONES ----------------
