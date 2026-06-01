@@ -284,10 +284,20 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 // ---------------- HELPERS ----------------
 function scrollToContent(){
+
   const el = document.getElementById('content');
-  if (el){
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+
+  if (!el) return;
+
+  const y =
+    el.getBoundingClientRect().top +
+    window.pageYOffset -
+    12;   // adjust
+
+  window.scrollTo({
+    top: y,
+    behavior: 'smooth'
+  });
 }
 
 function goHome(){
@@ -368,19 +378,28 @@ async function loadStatic(page){
     const html = await res.text();
 
     let titleMap = {
-      midway: "Midway Rides <br> and Entertainment",
-      facilities: "Restroom <br>Facilities",
-      tickets: "Ticket <br>Information",
-      faqs: "Frequently Asked <br> Questions",
-      about: "About the <br>Wayne County Fair",
-      firstaid: "First Aid <br>Station",
-      parade: 'Wayne County Fair <br> Parade<br><span style="font-size: 0.65em;">Saturday, August 15th 4PM</span>',
-      exhibits: 'Judged <br>Fair Exhibits',
-      tasting: 'Beer and Wine <br>Tasting <br><span style="font-size: 0.65em;">Thursday, August 13th 5-7:30PM</span>',
+      midway: "Midway Rides & Entertainment",
+      facilities: "Restroom Facilities",
+      tickets: "Ticket Information",
+      faqs: "Frequently Asked Questions",
+      about: "About the Wayne County Fair",
+      firstaid: "First Aid Station",
+      parade: 'Fair Parade',
+      exhibits: 'Judged Exhibits',
+      tasting: 'Beer & Wine Tasting',
       preview: 'Preview Map'
     };
 
     let title = titleMap[page] || '';
+
+    let subTitleMap = {
+      tickets: "Buy Online or at the Fair",
+      exhibits: "Check Out Agriculture, Domestics, Animals and More",
+      parade: 'Saturday, August 15th 4PM',
+      tasting: 'Thursday, August 13th 5-7:30PM'
+    };
+
+    let subTitle = subTitleMap[page] || '';
 
     let searchBox = '';
 
@@ -396,7 +415,38 @@ async function loadStatic(page){
     }
 
     content.innerHTML = `
-      <div class="vote-thanks">${title}</div>
+<div class="ticket-header">
+
+  <img
+    class="ticket-header-bg"
+    src="/static/icons/ticket_outline.png"
+    alt="">
+
+  <div class="ticket-header-content">
+
+    <div class="ticket-header-logo">
+      <img src="/static/icons/fair.webp" alt="">
+    </div>
+
+    <div class="ticket-header-text">
+
+      <div class="ticket-header-title">
+        ${title}
+      </div>
+
+      <div class="ticket-header-subtitle">
+        ${subTitle}
+      </div>
+
+    </div>
+
+    <div class="ticket-header-date">
+      8/10-16, 2026
+    </div>
+
+  </div>
+
+</div>
 
       ${searchBox}
 
@@ -420,22 +470,53 @@ async function loadTenants(type){
     const data = await res.json();
 
     let titleMap = {
-      food: "Fair Food <br>Vendors",
-      community: "Community <br>Services Booths",
-      vendor: "Vendor Booths <br> and Displays",
-      animal: "Animal <br>Exhibits"
+      food: "Food Vendors",
+      community: "Community Booths",
+      vendor: "Vendor Booths",
+      animal: "Animal Exhibits"
     };
 
     let subTitleMap = {
-      food: "Snacks, drinks and meals for all tastes",
-      community: "Information and displays by <br> organizations helping our community",
-      vendor: "Home, farm and personal <br> products and services",
-      animal: "Displays, judging and <br> demonstrations for the whole family"
+      food: "Snacks, Drinks and Delicious Meals for All Tastes",
+      community: "Information about Organizations Helping Our Community",
+      vendor: "Home, Farm and Personal Products and Services",
+      animal: "Displays, Judging and Fun for the Whole Family"
     };
 
-    let h = `<div class="vote-thanks">${titleMap[type] || type}</div>`;
+let h = `
+<div class="ticket-header">
 
-    h += `<div class="vote-thanks-note">${subTitleMap[type] || type}</div>`;
+  <img
+    class="ticket-header-bg"
+    src="/static/icons/ticket_outline.png"
+    alt="">
+
+  <div class="ticket-header-content">
+
+    <div class="ticket-header-logo">
+      <img src="/static/icons/fair.webp" alt="">
+    </div>
+
+    <div class="ticket-header-text">
+
+      <div class="ticket-header-title">
+        ${titleMap[type] || type}
+      </div>
+
+      <div class="ticket-header-subtitle">
+        ${subTitleMap[type] || type}
+      </div>
+
+    </div>
+
+    <div class="ticket-header-date">
+      8/10-16, 2026
+    </div>
+
+  </div>
+
+</div>
+`;
 
     data.forEach(item => {
 
@@ -484,8 +565,40 @@ async function loadSponsors(){
     const res = await fetch(`/api/sponsors`);
     const data = await res.json();
 
-    let h = `<div class="vote-thanks">Wayne County Fair <br> Sponsors</div>`;
-    h += `<div class="vote-thanks-note">Please support our sponsors</div>`;
+let h = `
+<div class="ticket-header">
+
+  <img
+    class="ticket-header-bg"
+    src="/static/icons/ticket_outline.png"
+    alt="">
+
+  <div class="ticket-header-content">
+
+    <div class="ticket-header-logo">
+      <img src="/static/icons/fair.webp" alt="">
+    </div>
+
+    <div class="ticket-header-text">
+
+      <div class="ticket-header-title">
+        Fair Sponsors
+      </div>
+
+      <div class="ticket-header-subtitle">
+        Please Support Our Sponsors
+      </div>
+
+    </div>
+
+    <div class="ticket-header-date">
+      8/10-16, 2026
+    </div>
+
+  </div>
+
+</div>
+`;
 
     data.forEach(item => {
 
@@ -540,17 +653,17 @@ async function loadEvents(type){
     const data = await res.json();
 
     let titleMap = {
-      today: "Today's <br>Events",
-      music: "Musical <br>Entertainment",
-      grandstand: "Grandstand <br>Events",
-      calendar: "Complete <br>Fair Calendar"
+      today: "Today's Events",
+      music: "Music Entertainment",
+      grandstand: "Grandstand Events",
+      calendar: "Full Fair Calendar"
     };
 
     let subTitleMap = {
-      today: "Happening today. <br>Get reminder notifications <br> of favorite events",
-      music: "All music shows are free",
-      grandstand: "Tap Buy Tickets below <br> or pay at Grandstand Gate",
-      calendar: "Full week of shows and events"
+      today: "Happening Today. Get Reminder Notifications for Your Favorites",
+      music: "All Music Shows are Free",
+      grandstand: "Tap Buy Tickets Below or Pay at the Grandstand",
+      calendar: "A Full Week of Shows and Events"
     };
 
 // determine title and subtitle
@@ -558,8 +671,40 @@ async function loadEvents(type){
     let title = titleMap[type] || titleMap["calendar"];
     let subTitle = subTitleMap[type] || subTitleMap["calendar"];
 
-    let h = `<div class="vote-thanks">${title}</div>`;
-    h += `<div class="vote-thanks-note">${subTitle}</div>`;
+let h = `
+<div class="ticket-header">
+
+  <img
+    class="ticket-header-bg"
+    src="/static/icons/ticket_outline.png"
+    alt="">
+
+  <div class="ticket-header-content">
+
+    <div class="ticket-header-logo">
+      <img src="/static/icons/fair.webp" alt="">
+    </div>
+
+    <div class="ticket-header-text">
+
+      <div class="ticket-header-title">
+        ${title}
+      </div>
+
+      <div class="ticket-header-subtitle">
+        ${subTitle}
+      </div>
+
+    </div>
+
+    <div class="ticket-header-date">
+      8/10-16, 2026
+    </div>
+
+  </div>
+
+</div>
+`;
 
     let currentDay = '';
     const today = new Date().toLocaleDateString('en-US', {
@@ -774,12 +919,6 @@ async function loadVotePage(){
   const votedRes = await fetch(`/api/vote/status/${deviceId}`);
   const voted = await votedRes.json();
 
-    let note = '';
-
-    if (true) { // always show if you want
-      note = `<div class="vote-thanks-note">Vote once per day to see results</div>`;
-    }
-
   if (voted.length > 0){
     loadVoteResults();
     return;
@@ -841,8 +980,40 @@ async function loadVotePage(){
     }
 
   content.innerHTML = `
-    <div class="vote-thanks">Vote for <br>Best Fair Vendor</div>
-    ${note}
+
+<div class="ticket-header">
+
+  <img
+    class="ticket-header-bg"
+    src="/static/icons/ticket_outline.png"
+    alt="">
+
+  <div class="ticket-header-content">
+
+    <div class="ticket-header-logo">
+      <img src="/static/icons/fair.webp" alt="">
+    </div>
+
+    <div class="ticket-header-text">
+
+      <div class="ticket-header-title">
+        Best Fair Vendor
+      </div>
+
+      <div class="ticket-header-subtitle">
+        Vote Once Per Day to See Results
+      </div>
+
+    </div>
+
+    <div class="ticket-header-date">
+      8/10-16, 2026
+    </div>
+
+  </div>
+
+</div>
+
     ${renderCard("Best Food Vendor", "food", "food")}
     ${renderCard("Best Indoor Vendor Booth", "indoor", "indoor")}
     ${renderCard("Best Outdoor Vendor Display", "outdoor", "outdoor")}
@@ -926,6 +1097,9 @@ async function loadVoteResults(){
 
         <div class="ui-card-content">
 
+
+
+
           <div class="vote-result-header">
             <div class="vote-result-title">${title}</div>
             <div class="vote-result-votes">Votes</div>
@@ -950,9 +1124,38 @@ async function loadVoteResults(){
 
 content.innerHTML = `
 
-  <div class="vote-thanks">Thanks for Voting Today!</div>
+<div class="ticket-header">
 
-  <div class="vote-thanks-note">Vote again tomorrow. Refresh anytime.</div>
+  <img
+    class="ticket-header-bg"
+    src="/static/icons/ticket_outline.png"
+    alt="">
+
+  <div class="ticket-header-content">
+
+    <div class="ticket-header-logo">
+      <img src="/static/icons/fair.webp" alt="">
+    </div>
+
+    <div class="ticket-header-text">
+
+      <div class="ticket-header-title">
+        Thanks for Voting
+      </div>
+
+      <div class="ticket-header-subtitle">
+        Vote Again Tomorrow. <br>Refresh Results Anytime.
+      </div>
+
+    </div>
+
+    <div class="ticket-header-date">
+      8/10-16, 2026
+    </div>
+
+  </div>
+
+</div>
 
   <button class="vote-submit-btn" onclick="refreshVoteResults()">
     Refresh
@@ -1016,9 +1219,38 @@ async function refreshVoteResults(){
 
   content.innerHTML = `
 
-    <div class="vote-thanks">Thanks for Voting Today!</div>
+<div class="ticket-header">
 
-    <div class="vote-thanks-note">Vote again tomorrow. Refresh anytime.</div>
+  <img
+    class="ticket-header-bg"
+    src="/static/icons/ticket_outline.png"
+    alt="">
+
+  <div class="ticket-header-content">
+
+    <div class="ticket-header-logo">
+      <img src="/static/icons/fair.webp" alt="">
+    </div>
+
+    <div class="ticket-header-text">
+
+      <div class="ticket-header-title">
+        Thanks for Voting
+      </div>
+
+      <div class="ticket-header-subtitle">
+        Vote Again Tomorrow. <br>Refresh Results Anytime.
+      </div>
+
+    </div>
+
+    <div class="ticket-header-date">
+      8/10-16, 2026
+    </div>
+
+  </div>
+
+</div>
 
     <button class="vote-submit-btn" onclick="refreshVoteResults()">
       Refresh
@@ -1048,17 +1280,42 @@ async function loadSurvey(){
     return;
   }
 
-    let h = `
-      <div class="vote-thanks">Quick <br> Fair Survey</div>
-    `;
+let h = `
+<div class="ticket-header">
 
-    h += `
-      <div class="vote-thanks-note">
-        Answer a few questions and get a<br>
-        FREE COMMEMORATIVE PIN <br>
+  <img
+    class="ticket-header-bg"
+    src="/static/icons/ticket_outline.png"
+    alt="">
+
+  <div class="ticket-header-content">
+
+    <div class="ticket-header-logo">
+      <img src="/static/icons/fair.webp" alt="">
+    </div>
+
+    <div class="ticket-header-text">
+
+      <div class="ticket-header-title">
+        Quick Fair Survey
+      </div>
+
+      <div class="ticket-header-subtitle">
+        Answer and get a
+        FREE COMMEMORATIVE PIN
         at the Wayne County Fair Store.
       </div>
-    `;
+
+    </div>
+
+    <div class="ticket-header-date">
+      8/10-16, 2026
+    </div>
+
+  </div>
+
+</div>
+`;
 
   surveyConfig.forEach(q => {
 
@@ -1192,10 +1449,39 @@ function renderSurveyThankYou(){
   const content = document.getElementById("content");
 
     content.innerHTML = `
-      <div class="vote-thanks">Thanks <br>for Your Input!</div>
-      <div class="vote-thanks-note">
-        Use your coupon at the Fair Store
+
+<div class="ticket-header">
+
+  <img
+    class="ticket-header-bg"
+    src="/static/icons/ticket_outline.png"
+    alt="">
+
+  <div class="ticket-header-content">
+
+    <div class="ticket-header-logo">
+      <img src="/static/icons/fair.webp" alt="">
+    </div>
+
+    <div class="ticket-header-text">
+
+      <div class="ticket-header-title">
+        Thank You!
       </div>
+
+      <div class="ticket-header-subtitle">
+        Show Your Coupon at the Wayne County Fair Store
+      </div>
+
+    </div>
+
+    <div class="ticket-header-date">
+      8/10-16, 2026
+    </div>
+
+  </div>
+
+</div>
 
       <div class="ui-card coupon-card coupon-large">
 
@@ -1221,13 +1507,40 @@ function showMap(){
 
   document.getElementById('content').innerHTML = `
 
-    <div class="vote-thanks">Fairground Map</div>
+<div class="ticket-header">
 
-    <div class="vote-thanks-note">
-      Pinch and spread to explore.<br>
-      Red dot is your location outdoors.<br>
-      Tap yellow ? for info.
+  <img
+    class="ticket-header-bg"
+    src="/static/icons/ticket_outline.png"
+    alt="">
+
+  <div class="ticket-header-content">
+
+    <div class="ticket-header-logo">
+      <img src="/static/icons/fair.webp" alt="">
     </div>
+
+    <div class="ticket-header-text">
+
+      <div class="ticket-header-title">
+        Maps & Halls
+      </div>
+
+      <div class="ticket-header-subtitle">
+      Pinch and spread to explore. Red dot is your location.
+      Tap ? for info.
+      </div>
+
+    </div>
+
+    <div class="ticket-header-date">
+      8/10-16, 2026
+    </div>
+
+  </div>
+
+</div>
+
 
 <div class="gallery-button-row">
 
@@ -2046,12 +2359,42 @@ async function loadTodayEvents(preserveScroll = false){
 
     const data = await res.json();
 
-    let h = `
-      <div class="vote-thanks">Today's Fair <br>Events</div>
-    `;
-    h += `<div class="vote-thanks-note">
-        Set alerts for your favorite events
-        </div>`;
+let h = `
+<div class="ticket-header">
+
+  <img
+    class="ticket-header-bg"
+    src="/static/icons/ticket_outline.png"
+    alt="">
+
+  <div class="ticket-header-content">
+
+    <div class="ticket-header-logo">
+      <img src="/static/icons/fair.webp" alt="">
+    </div>
+
+    <div class="ticket-header-text">
+
+      <div class="ticket-header-title">
+        Today's Events
+      </div>
+
+      <div class="ticket-header-subtitle">
+        Set Alerts for Your Favorites
+      </div>
+
+    </div>
+
+    <div class="ticket-header-date">
+      8/10-16, 2026
+    </div>
+
+  </div>
+
+</div>
+`;
+
+
     h += renderPushCard();
 
     const now = new Date();
