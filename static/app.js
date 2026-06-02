@@ -394,9 +394,9 @@ async function loadStatic(page){
 
     let subTitleMap = {
       tickets: "Buy Online or at the Fair",
-      exhibits: "Check Out Agriculture, Domestics, Animals and More",
+      exhibits: "Agriculture, Domestics, Animals and Much More",
       parade: 'Saturday, August 15th 4PM',
-      tasting: 'Thursday, August 13th 5-7:30PM'
+      tasting: 'Gourmet Food and Drink from Across the Finger Lakes'
     };
 
     let subTitle = subTitleMap[page] || '';
@@ -478,7 +478,7 @@ async function loadTenants(type){
 
     let subTitleMap = {
       food: "Snacks, Drinks and Delicious Meals for All Tastes",
-      community: "Information about Organizations Helping Our Community",
+      community: "Organizations Helping Our Community",
       vendor: "Home, Farm and Personal Products and Services",
       animal: "Displays, Judging and Fun for the Whole Family"
     };
@@ -586,7 +586,7 @@ let h = `
       </div>
 
       <div class="ticket-header-subtitle">
-        Please Support Our Sponsors
+        Support Our Great Sponsors
       </div>
 
     </div>
@@ -662,7 +662,7 @@ async function loadEvents(type){
     let subTitleMap = {
       today: "Happening Today. Get Reminder Notifications for Your Favorites",
       music: "All Music Shows are Free",
-      grandstand: "Tap Buy Tickets Below or Pay at the Grandstand",
+      grandstand: "Buy Online or at the Grandstand",
       calendar: "A Full Week of Shows and Events"
     };
 
@@ -997,7 +997,7 @@ async function loadVotePage(){
     <div class="ticket-header-text">
 
       <div class="ticket-header-title">
-        Best Fair Vendor
+        Best Fair Vendors
       </div>
 
       <div class="ticket-header-subtitle">
@@ -1301,9 +1301,8 @@ let h = `
       </div>
 
       <div class="ticket-header-subtitle">
-        Answer and get a
-        FREE COMMEMORATIVE PIN
-        at the Wayne County Fair Store.
+        Get a Free Commemorative Pin
+        at the Wayne County Fair Store
       </div>
 
     </div>
@@ -1527,8 +1526,10 @@ function showMap(){
       </div>
 
       <div class="ticket-header-subtitle">
-      Pinch and spread to explore. Red dot is your location.
+      <span style="font-size: 1em;">
+      Pinch/spread to explore. Red dot is your location.
       Tap ? for info.
+      </span>
       </div>
 
     </div>
