@@ -632,23 +632,27 @@ button:active {
   font-size: 0.95rem;
 }
 
-.vote-result-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.95rem;
-  margin: 6px 0;   /* balanced top + bottom spacing */
+.vote-result-name {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
-.vote-result-name {
-  flex: 1;               /* fills available space */
-  text-align: left;
+.vote-result-row {
+  display: flex;
+  align-items: flex-start;   /* top-align wrapped rows */
+  gap: 6px;
+  font-size: 0.95rem;
+  margin: 6px 0;
 }
 
 .vote-result-count {
-  min-width: 36px;
+  flex: 0 0 28px;
   text-align: right;
-  margin-right: 16px;     /* pulls numbers away from card edge */
+  margin-right: 16px;
 }
 
 .ui-card-body {
@@ -669,14 +673,12 @@ button:active {
 }
 
 .vote-rank {
-  display: inline-block;
-  width: 1.8em;   /* keeps names aligned */
+  flex: 0 0 2.2em;      /* fixed ranking column */
   text-align: right;
-  margin-right: 6px;
+  font-weight: bold;
 }
 
-.vote-result-header,
-.vote-result-row {
+.vote-result-header {
   padding-left: 2px;
 }
 
@@ -730,6 +732,17 @@ button:active {
   color: #666;
   font-style: italic;
   margin-top: 2px;   /* 🔥 THIS is what makes it visible */
+}
+
+/* Selected vendor name / <None Selected> */
+.vote-card .ui-card-body {
+  font-size: 1.08rem;     /* larger */
+  font-weight: bold;      /* bold */
+}
+
+.vote-card .placeholder {
+  font-size: 1.08rem;     /* same size */
+  font-weight: bold;
 }
 
 .vote-card {
@@ -875,10 +888,8 @@ button:active {
   width: 80%;
   padding: 10px;
   margin: 10px auto 6px auto;
-
   border-radius: 10px;
   border: 1px solid #ccc;
-
   font-size: 16px;
 }
 
@@ -896,7 +907,6 @@ button:active {
   font-size: 1rem;
   font-weight: bold;
   color: #8b5a2b;
-
   margin-top: 4px;
   margin-bottom: 6px;
 }
@@ -908,16 +918,11 @@ button:active {
 /* ---------------- FEATURED MENU ROW ---------------- */
 
 .featured-row {
-
   grid-column: 1 / -1;
-
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-
   gap: 20px;
-
   padding: 8px 4px 8px 6px;
-
   border-radius: 20px;
 
   /* slightly darker for outdoor sunlight visibility */
@@ -929,7 +934,6 @@ button:active {
     0 1px 4px rgba(0,0,0,0.06);
 
   border: 1px solid rgba(0,0,0,0.04);
-
   margin-bottom: 0px;
 }
 
@@ -962,28 +966,20 @@ button:active {
     display: flex;
     justify-content: center;
     align-items: center;
-
     overflow: hidden;
-
     border-radius: 20px;
-
     border: 3px solid #9a6b23;
-
     box-shadow:
         0 3px 8px rgba(0,0,0,0.18);
-
     background: #f5f5f5;
 }
 
 /* Actual image */
 .parade-map {
     display: block;
-
     width: 100%;
     max-width: 900px;
-
     height: auto;
-
     object-fit: contain;
 }
 
@@ -1004,18 +1000,13 @@ button:active {
 .ticket-btn {
   width: 60%;
   max-width: 320px;
-
   background: #9c6b10;
   color: white;
-
   border: none;
   border-radius: 8px;
-
   padding: 10px 14px;
-
   font-size: 1rem;
   font-weight: bold;
-
   cursor: pointer;
 }
 
@@ -1027,156 +1018,102 @@ button:active {
 /* INSTALL APP BUTTON */
 
 #installContainer {
-
   position: absolute;
-
   top: 10px;
   right: 2px;
-
   width: 72px;
-
   text-align: center;
-
   z-index: 100;
-
   -webkit-user-select: none;
   user-select: none;
 }
 
 #installButton {
-
   width: 44px;
   height: 44px;
-
   margin: 0 auto;
-
   padding: 0;
-
   border: none;
-
   background: transparent;
-
   box-shadow: none;
 }
 
 #installButton img {
-
   width: 44px;
   height: 44px;
-
   display: block;
 }
 
 #installLabel {
-
   font-size: 11px;
   font-weight: bold;
-
   color: #5b4636;
-
   line-height: 1.0;
-
   margin-top: 4px;
 }
 
 /* iOS INSTALL OVERLAY */
 
 #iosInstallOverlay {
-
   position: fixed;
-
   inset: 0;
-
   background: rgba(0,0,0,0.35);
-
   z-index: 99999;
-
   display: flex;
-
   align-items: flex-start;
-
   justify-content: center;
-
   padding-top: calc(env(safe-area-inset-top) + 12px);
-
 }
 
 .ios-install-sheet {
-
   width: 100%;
-
   max-width: 420px;
-
   background: #f3efe6;
-
   border-top-left-radius: 22px;
   border-top-right-radius: 22px;
-
   padding: 22px 20px 28px;
-
   text-align: center;
-
   box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
 }
 
 .ios-install-title {
-
   font-size: 24px;
   font-weight: bold;
-
   margin-bottom: 18px;
-
   color: #5b4636;
 }
 
 .ios-install-step {
-
   font-size: 18px;
-
   margin-top: 14px;
-
   color: #333;
 }
 
 .ios-install-share {
-
   font-size: 48px;
-
   margin: 10px 0;
 }
 
 .ios-install-close {
-
   margin-top: 24px;
-
   padding: 12px 24px;
-
   border: none;
-
   border-radius: 12px;
-
   background: #8b5a2b;
-
   color: white;
-
   font-size: 18px;
 }
 
 .map-poi-icon {
   background: #f5c400;
   border: 2px solid #8b5a2b;
-
   border-radius: 8px;
-
   width: 28px;
   height: 28px;
-
   line-height: 24px;
   text-align: center;
-
   font-weight: bold;
   color: black;
-
   box-shadow:
     0 2px 5px rgba(0,0,0,0.35);
 }
@@ -1186,130 +1123,90 @@ button:active {
    ========================================== */
 
 .ticket-header {
-
   position: relative;
-
   width: 100%;
-
   margin: 10px 0 30px 0;
-
   aspect-ratio: 3.57 / 1;
-
   overflow: hidden;
 }
 
 /* ticket image */
 
 .ticket-header-bg {
-
   position: absolute;
-
   inset: 0;
-
   width: 100%;
   height: 100%;
   object-fit: fill;
-
   pointer-events: none;
 }
 
 /* content overlay */
 
 .ticket-header-content {
-
   position: absolute;
-
   inset: 0;
-
   display: flex;
-
   align-items: center;
-
   z-index: 2;
 }
 
 /* logo area */
 
 .ticket-header-logo {
-
   width: 80px;
   min-width: 80px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   margin-left: 12px;
 }
 
 .ticket-header-logo img {
-
   width: 80px;
   height: 80px;
-
   object-fit: contain;
 }
 
 /* text area */
 
 .ticket-header-text {
-
   flex: 1;
-
   text-align: left;
-
   padding-left: 14px;
-
   padding-right: 48px;
 }
 
 /* title */
 
 .ticket-header-title {
-
   font-size: 1.8rem;
-
   font-weight: bold;
-
   line-height: 1.0;
-
   color: #9a6b23;
 }
 
 /* subtitle */
 
 .ticket-header-subtitle {
-
   margin-top: 4px;
-
   font-size: 1.05rem;
-
   font-weight: bold;
-
   line-height: 1.1;
-
   color: #000;
 }
 
 /* vertical date */
 
 .ticket-header-date {
-
   position: absolute;
-
   right: 16px;
-
   top: 50%;
-
   transform: translateY(-50%) rotate(180deg);
-
   writing-mode: vertical-rl;
-
-  font-size: 0.90rem;
-
+  font-size: 0.92rem;
   font-weight: normal;
-
   color: #333;
-
   white-space: nowrap;
 }
+

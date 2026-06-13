@@ -449,7 +449,7 @@ async def add_alert(sub_id: int, event_id: int):
     select
         {sub_id},
         e.event_id,
-        date_sub(e.start_time, interval 10 minute),
+        date_sub(e.start_time, interval 15 minute),
         concat(e.name, ' starts soon')
     from events e
     where e.event_id = {event_id}
@@ -720,6 +720,15 @@ async def log_event(request: Request):
 async def get_tasting():
 
     qry = "select * from tasting order by featured desc, name;"
+    result = await get_data(qry)
+
+    return json_response(result)
+
+# ---------- RESOURCE VERSIONS -------------
+@app.get("/api/resource")
+async def get_resource():
+
+    qry = "select resource, version, updated from resource;"
     result = await get_data(qry)
 
     return json_response(result)

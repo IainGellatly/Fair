@@ -125,9 +125,23 @@ create table survey_answers (
 
 drop table if exists app_config;
 create table app_config (
-  config_key varchar(50) primary key,
-  config_value varchar(50)
+  config_key     varchar(50) primary key,
+  config_value   varchar(50)
 );
 
 insert into app_config (config_key, config_value)
 values ('static_version', '1');
+
+drop table if exists resource;
+create table resource (
+  resource_id    int auto_increment primary key,
+  resource       varchar(32),
+  version        int not null default 0,
+  updated        datetime default current_timestamp
+                   on update current_timestamp
+);
+
+insert into resource (resource) values
+("event"), ("tenant"), ("sponsor"),("parade"),("tasting"),
+("about"), ("ticket"), ("facility"),("first_aid"),("faq"),
+("exhibit"),("midway"),("parking");

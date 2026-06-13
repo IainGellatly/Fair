@@ -396,7 +396,7 @@ async function loadStatic(page){
       tickets: "Buy Online or at the Fair",
       exhibits: "Agriculture, Domestics, Animals and Much More",
       parade: 'Saturday, August 15th 4PM',
-      tasting: 'Gourmet Food and Drink from Across the Finger Lakes'
+      tasting: 'Gourmet Food & Drink from Across the Finger Lakes'
     };
 
     let subTitle = subTitleMap[page] || '';
@@ -662,7 +662,7 @@ async function loadEvents(type){
     let subTitleMap = {
       today: "Happening Today. Get Reminder Notifications for Your Favorites",
       music: "All Music Shows are Free",
-      grandstand: "Buy Online or at the Grandstand",
+      grandstand: "Buy Tickets Online or at the Grandstand",
       calendar: "A Full Week of Shows and Events"
     };
 
@@ -971,7 +971,7 @@ async function loadVotePage(){
             class="alert-btn ${selected ? 'active' : ''}"
             onclick="openVotePicker('${category}')"
           >
-            ${selected ? 'Change' : 'Select'}
+            ${selected ? 'Change' : 'Pick'}
           </button>
         </div>
 
@@ -1001,7 +1001,7 @@ async function loadVotePage(){
       </div>
 
       <div class="ticket-header-subtitle">
-        Vote Once Per Day to See Results
+        Vote Once a Day to See Results
       </div>
 
     </div>
@@ -1014,11 +1014,11 @@ async function loadVotePage(){
 
 </div>
 
-    ${renderCard("Best Food Vendor", "food", "food")}
-    ${renderCard("Best Indoor Vendor Booth", "indoor", "indoor")}
-    ${renderCard("Best Outdoor Vendor Display", "outdoor", "outdoor")}
+    ${renderCard("Pick Best Food Vendor", "food", "food")}
+    ${renderCard("Pick Best Indoor Vendor", "indoor", "indoor")}
+    ${renderCard("Pick Best Outdoor Vendor", "outdoor", "outdoor")}
 
-    <button class="vote-submit-btn" onclick="submitVote()">Submit Ballot</button>
+    <button class="vote-submit-btn" onclick="submitVote()">Submit Your Votes</button>
   `;
 
   scrollToContent();
@@ -1052,7 +1052,7 @@ async function submitVote(){
     voteSelection.outdoor;
 
   if (!hasSelection){
-    alert("Please select at least one category");
+    alert("Please pick at least one category");
     return;
   }
 
@@ -1106,14 +1106,21 @@ async function loadVoteResults(){
           </div>
 
           ${list.map((x,i)=>`
-            <div class="vote-result-row">
-              <div class="vote-result-name">
-                <span class="vote-rank">${ordinal(i+1)}</span> ${x.tenant_name}
-              </div>
-              <div class="vote-result-count">
-                ${x.vote_count}
-              </div>
-            </div>
+<div class="vote-result-row">
+
+  <div class="vote-rank">
+    ${ordinal(i+1)}
+  </div>
+
+  <div class="vote-result-name">
+    ${x.tenant_name}
+  </div>
+
+  <div class="vote-result-count">
+    ${x.vote_count}
+  </div>
+
+</div>
           `).join('')}
 
         </div>
@@ -1164,8 +1171,8 @@ content.innerHTML = `
   <h2 class="vote-results-heading">Ranking at ${ts}</h2>
 
   ${renderCard("Best Food Vendor", "food", data.food)}
-  ${renderCard("Best Indoor Vendor Booth", "indoor", data.indoor)}
-  ${renderCard("Best Outdoor Vendor Display", "outdoor", data.outdoor)}
+  ${renderCard("Best Indoor Vendor", "indoor", data.indoor)}
+  ${renderCard("Best Outdoor Vendor", "outdoor", data.outdoor)}
 
 `;
 
@@ -1201,14 +1208,21 @@ async function refreshVoteResults(){
           </div>
 
           ${list.map((x,i)=>`
-            <div class="vote-result-row">
-              <div class="vote-result-name">
-                <span class="vote-rank">${ordinal(i+1)}</span> ${x.tenant_name}
-              </div>
-              <div class="vote-result-count">
-                ${x.vote_count}
-              </div>
-            </div>
+<div class="vote-result-row">
+
+  <div class="vote-rank">
+    ${ordinal(i+1)}
+  </div>
+
+  <div class="vote-result-name">
+    ${x.tenant_name}
+  </div>
+
+  <div class="vote-result-count">
+    ${x.vote_count}
+  </div>
+
+</div>
           `).join('')}
 
         </div>
@@ -1297,7 +1311,7 @@ let h = `
     <div class="ticket-header-text">
 
       <div class="ticket-header-title">
-        Quick Fair Survey
+        Quick Survey
       </div>
 
       <div class="ticket-header-subtitle">
@@ -1611,7 +1625,7 @@ function showMap(){
 const IMAGES = {
 
   fair:
-    '/static/maps/fair_map.webp',
+    '/static/maps/fair_map4.webp',
 
   floral:
     '/static/maps/floral_plan.webp',
@@ -2452,7 +2466,7 @@ let h = `
 
       if (
           pushAuthorized &&
-          diffMin > 10 &&
+          diffMin > 15 &&
           now < start &&
           item.status !== 'cancelled'
       ){
