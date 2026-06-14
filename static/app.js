@@ -372,10 +372,56 @@ async function loadStatic(page){
 
   const content = document.getElementById("content");
 
+  console.log("loadStatic()", page);
+
   try {
-    const version = window.APP_VERSION;
-    const res = await fetch(`/static/pages/${page}.html?v=${version}`);
-    const html = await res.text();
+
+let html = null;
+
+const cachedPages = [
+  "facilities",
+  "midway",
+  "tickets",
+  "firstaid",
+  "parade",
+  "tasting",
+  "exhibits",
+  "about",
+  "faqs"
+];
+
+if (cachedPages.includes(page)) {
+
+  html = await CacheManager.getResourceHtml(
+    page
+  );
+
+  if (!html) {
+
+    content.innerHTML =
+      `<div class="card">${page} page is not yet cached. Please try again in a few seconds.</div>`;
+
+    return;
+  }
+
+  console.log(
+    `Loading ${page} from IndexedDB`
+  );
+
+} else {
+
+  const version = window.APP_VERSION;
+
+  const res = await fetch(
+    `/static/pages/${page}.html?v=${version}`
+  );
+
+  html = await res.text();
+
+  console.log(
+    `Loading ${page} from server`
+  );
+}
 
     let titleMap = {
       midway: "Midway Rides & Entertainment",
@@ -455,9 +501,17 @@ async function loadStatic(page){
 
     scrollToContent();
 
-  } catch {
-    content.innerHTML = `<div class="card">Not available. Try refresh page.</div>`;
-  }
+  } catch (err) {
+
+  console.error(
+    "loadStatic failed:",
+    page,
+    err
+  );
+
+  content.innerHTML =
+    `<div class="card">Not available. Try refresh page.</div>`;
+}
 }
 
 // ---------------- TENANT LIST LOADER ----------------
@@ -2669,6 +2723,13 @@ async function toggleAlert(eventId, btn){
 initSubscription().catch(() => {});
 
 window.addEventListener("load", async () => {
+
+  // Initialize cache system
+  try {
+    await CacheManager.init();
+  } catch (err) {
+    console.warn("CacheManager init failed", err);
+  }
 
   const params = new URLSearchParams(window.location.search);
   const page = params.get("page");
