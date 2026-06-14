@@ -357,6 +357,7 @@ async def get_events(event_type: str | None = None):
                 event_id, 
                 name, 
                 description, 
+                type,
                 location, 
                 icon, 
                 price,

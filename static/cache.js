@@ -17,7 +17,8 @@ const CACHED_RESOURCES = [
   "food",
   "vendor",
   "community",
-  "animal"
+  "animal",
+  "events"
 ];
 
 class CacheManagerClass {
@@ -163,6 +164,12 @@ if (resource.resource === "sponsors") {
 ) {
 
   await this.syncTenant(resource);
+
+} else if (
+  resource.resource === "events"
+) {
+
+  await this.syncEvents(resource);
 
 } else {
 
@@ -325,6 +332,52 @@ async syncTenant(serverInfo) {
   }
 }
 
+async syncEvents(serverInfo) {
+
+  try {
+
+    const local = await this.getResource(
+      "events"
+    );
+
+    const needsUpdate =
+      !local ||
+      local.version !== serverInfo.version;
+
+    if (!needsUpdate) {
+      return;
+    }
+
+    console.log(
+      "Updating events cache"
+    );
+
+    const res = await fetch(
+      `/api/events?v=${serverInfo.version}`
+    );
+
+    const data = await res.json();
+
+    await this.putResource({
+      resource: "events",
+      version: serverInfo.version,
+      updated: serverInfo.updated,
+      data
+    });
+
+    console.log(
+      "Events cache updated"
+    );
+
+  } catch (err) {
+
+    console.warn(
+      "Events update failed",
+      err
+    );
+
+  }
+}
 
 }
 

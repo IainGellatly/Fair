@@ -733,12 +733,62 @@ async function loadEvents(type){
 
   try {
 
-    const url = type
-      ? `/api/events/${type}`
-      : `/api/events`;
+const eventRecord =
+  await CacheManager.getResource(
+    "events"
+  );
 
-    const res = await fetch(url);
-    const data = await res.json();
+const eventVersion =
+  eventRecord?.version || 1;
+
+const allEvents =
+  eventRecord?.data;
+
+if (!allEvents) {
+
+  content.innerHTML =
+    `<div class="card">Events are not yet cached. Please try again in a few seconds.</div>`;
+
+  return;
+}
+
+let data = allEvents;
+if (!type || type === "calendar") {
+
+  data = allEvents;
+
+}
+else if (type === "music") {
+
+  data = allEvents.filter(
+    item => item.type === "Music"
+  );
+
+}
+else if (type === "grandstand") {
+
+  data = allEvents.filter(
+    item => item.type === "Grandstand"
+  );
+
+}
+else if (type === "today") {
+
+  const todayString =
+    new Date().toISOString().slice(0, 10);
+
+  data = allEvents.filter(item => {
+
+    if (!item.start_datetime) {
+      return false;
+    }
+
+    return item.start_datetime
+      .slice(0, 10) === todayString;
+
+  });
+
+}
 
     let titleMap = {
       today: "Today's Events",
@@ -830,9 +880,9 @@ let h = `
     }
 
       // ---------------- ICON ----------------
-      const iconPath = item.icon
-        ? `/static/icons/${item.icon}`
-        : null;
+const iconPath = item.icon
+  ? `/static/icons/${item.icon}?v=${eventVersion}`
+  : null;
 
       // ---------------- CARD COLOR LOGIC ----------------
         let bgStyle = '';
