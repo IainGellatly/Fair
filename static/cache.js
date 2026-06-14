@@ -12,7 +12,12 @@ const CACHED_RESOURCES = [
   "tasting",
   "exhibits",
   "about",
-  "faqs"
+  "faqs",
+  "sponsors",
+  "food",
+  "vendor",
+  "community",
+  "animal"
 ];
 
 class CacheManagerClass {
@@ -101,6 +106,13 @@ async getResourceHtml(resource) {
   return record?.html || null;
 }
 
+async getResourceData(resource) {
+
+  const record = await this.getResource(resource);
+
+  return record?.data || null;
+}
+
   async putResource(record) {
 
     return new Promise((resolve, reject) => {
@@ -139,9 +151,24 @@ async getResourceHtml(resource) {
         )
       ) {
 
-        await this.syncStaticResource(
-          resource
-        );
+if (resource.resource === "sponsors") {
+
+  await this.syncSponsors(resource);
+
+} else if (
+  resource.resource === "food" ||
+  resource.resource === "vendor" ||
+  resource.resource === "community" ||
+  resource.resource === "animal"
+) {
+
+  await this.syncTenant(resource);
+
+} else {
+
+  await this.syncStaticResource(resource);
+
+}
 
       }
     }
@@ -204,6 +231,100 @@ async getResourceHtml(resource) {
       // keep running
     }
   }
+
+async syncSponsors(serverInfo) {
+
+  try {
+
+    const local = await this.getResource(
+      "sponsors"
+    );
+
+    const needsUpdate =
+      !local ||
+      local.version !== serverInfo.version;
+
+    if (!needsUpdate) {
+      return;
+    }
+
+    console.log(
+      "Updating sponsors cache"
+    );
+
+    const res = await fetch(
+      `/api/sponsors?v=${serverInfo.version}`
+    );
+
+    const data = await res.json();
+
+    await this.putResource({
+      resource: "sponsors",
+      version: serverInfo.version,
+      updated: serverInfo.updated,
+      data
+    });
+
+    console.log(
+      "Sponsors cache updated"
+    );
+
+  } catch (err) {
+
+    console.warn(
+      "Sponsors update failed",
+      err
+    );
+  }
+}
+
+async syncTenant(serverInfo) {
+
+  try {
+
+    const local = await this.getResource(
+      serverInfo.resource
+    );
+
+    const needsUpdate =
+      !local ||
+      local.version !== serverInfo.version;
+
+    if (!needsUpdate) {
+      return;
+    }
+
+    console.log(
+      `Updating ${serverInfo.resource} cache`
+    );
+
+    const res = await fetch(
+      `/api/tenants/${serverInfo.resource}?v=${serverInfo.version}`
+    );
+
+    const data = await res.json();
+
+    await this.putResource({
+      resource: serverInfo.resource,
+      version: serverInfo.version,
+      updated: serverInfo.updated,
+      data
+    });
+
+    console.log(
+      `${serverInfo.resource} cache updated`
+    );
+
+  } catch (err) {
+
+    console.warn(
+      `${serverInfo.resource} update failed`,
+      err
+    );
+
+  }
+}
+
 
 }
 

@@ -520,8 +520,22 @@ async function loadTenants(type){
   const content = document.getElementById("content");
 
   try {
-    const res = await fetch(`/api/tenants/${type}`);
-    const data = await res.json();
+    const tenantRecord =
+      await CacheManager.getResource(type);
+
+    const tenantVersion =
+      tenantRecord?.version || 1;
+
+    const data =
+      tenantRecord?.data;
+
+    if (!data) {
+
+      content.innerHTML =
+        `<div class="card">Data is not yet cached. Please try again in a few seconds.</div>`;
+
+      return;
+    }
 
     let titleMap = {
       food: "Food Vendors",
@@ -574,9 +588,9 @@ let h = `
 
     data.forEach(item => {
 
-      const iconPath = item.icon
-        ? `/static/icons/${item.icon}`
-        : null;
+    const iconPath = item.icon
+      ? `/static/icons/${item.icon}?v=${tenantVersion}`
+      : null;
 
       const featuredClass = item.featured == 1
         ? 'style="background:#f4e7d3; border:2px solid #8b5a2b;"'
@@ -616,8 +630,28 @@ async function loadSponsors(){
   const content = document.getElementById("content");
 
   try {
-    const res = await fetch(`/api/sponsors`);
-    const data = await res.json();
+const sponsorRecord =
+  await CacheManager.getResource(
+    "sponsors"
+  );
+
+const sponsorVersion =
+  sponsorRecord?.version || 1;
+
+const data =
+  sponsorRecord?.data;
+
+if (!data) {
+
+  content.innerHTML =
+    `<div class="card">Sponsors are not yet cached. Please try again in a few seconds.</div>`;
+
+  return;
+}
+
+console.log(
+  "Loading sponsors from IndexedDB"
+);
 
 let h = `
 <div class="ticket-header">
@@ -656,9 +690,9 @@ let h = `
 
     data.forEach(item => {
 
-      const iconPath = item.icon
-        ? `/static/icons/${item.icon}`
-        : null;
+        const iconPath = item.icon
+            ? `/static/icons/${item.icon}?v=${sponsorVersion}`
+            : null;
 
       h += `
         <div class="ui-card">
