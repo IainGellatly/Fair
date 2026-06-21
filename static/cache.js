@@ -1,7 +1,7 @@
 // cache.js
 
 const CACHE_DB_NAME = "fairapp";
-const CACHE_DB_VERSION = 1;
+const CACHE_DB_VERSION = 2;
 
 const CACHED_RESOURCES = [
   "facilities",
@@ -34,13 +34,45 @@ class CacheManagerClass {
 
     console.log("CacheManager initialized");
 
-    // immediate sync on startup
-    await this.syncResources();
+// only sync if we haven't checked recently
+
+    const lastCheck =
+      await this.getMetadata(
+        "last_resource_check"
+      );
+
+    const now = Date.now();
+
+    if (
+      !lastCheck ||
+      (now - lastCheck) > 120000
+    ) {
+
+      console.log(
+        "Running startup resource sync"
+      );
+
+      await this.syncResources();
+
+    } else {
+
+      console.log(
+        "Skipping startup resource sync"
+      );
+    }
+
+    await this.syncAnalytics();
 
     // every 2 minutes
     this.syncTimer = setInterval(() => {
       this.syncResources();
     }, 120000);
+
+    this.analyticsTimer =
+  setInterval(() => {
+    this.syncAnalytics();
+  }, 300000);
+
   }
 
   openDB() {
@@ -71,6 +103,18 @@ class CacheManagerClass {
             { keyPath: "key" }
           );
         }
+
+        if (!db.objectStoreNames.contains("analytics")) {
+
+          db.createObjectStore(
+            "analytics",
+            {
+              keyPath: "id",
+              autoIncrement: true
+            }
+          );
+        }
+
       };
 
       request.onsuccess = () => resolve(request.result);
@@ -134,6 +178,56 @@ async getResourceData(resource) {
     });
   }
 
+    async getMetadata(key) {
+
+      return new Promise((resolve, reject) => {
+
+        const tx = this.db.transaction(
+          "metadata",
+          "readonly"
+        );
+
+        const store = tx.objectStore(
+          "metadata"
+        );
+
+        const req = store.get(key);
+
+        req.onsuccess = () =>
+          resolve(req.result?.value);
+
+        req.onerror = () =>
+          reject(req.error);
+
+      });
+    }
+
+    async setMetadata(key, value) {
+
+      return new Promise((resolve, reject) => {
+
+        const tx = this.db.transaction(
+          "metadata",
+          "readwrite"
+        );
+
+        const store = tx.objectStore(
+          "metadata"
+        );
+
+        const req = store.put({
+          key,
+          value
+        });
+
+        req.onsuccess = () => resolve();
+
+        req.onerror = () =>
+          reject(req.error);
+
+      });
+    }
+
   async syncResources() {
 
     try {
@@ -179,6 +273,12 @@ if (resource.resource === "sponsors") {
 
       }
     }
+
+    await this.setMetadata(
+      "last_resource_check",
+      Date.now()
+    );
+
 
     } catch (err) {
 
@@ -373,6 +473,128 @@ async syncEvents(serverInfo) {
 
     console.warn(
       "Events update failed",
+      err
+    );
+
+  }
+}
+
+async queueAnalytics(event) {
+
+  return new Promise((resolve, reject) => {
+
+    const tx = this.db.transaction(
+      "analytics",
+      "readwrite"
+    );
+
+    const store = tx.objectStore(
+      "analytics"
+    );
+
+    const req = store.add(event);
+
+    req.onsuccess = () => resolve();
+
+    req.onerror = () => reject(req.error);
+
+  });
+}
+
+async getAnalyticsBatch() {
+
+  return new Promise((resolve, reject) => {
+
+    const tx = this.db.transaction(
+      "analytics",
+      "readonly"
+    );
+
+    const store = tx.objectStore(
+      "analytics"
+    );
+
+    const req = store.getAll();
+
+    req.onsuccess = () =>
+      resolve(req.result);
+
+    req.onerror = () =>
+      reject(req.error);
+
+  });
+}
+
+async clearAnalytics(ids) {
+
+  return new Promise((resolve, reject) => {
+
+    const tx = this.db.transaction(
+      "analytics",
+      "readwrite"
+    );
+
+    const store = tx.objectStore(
+      "analytics"
+    );
+
+    ids.forEach(id => store.delete(id));
+
+    tx.oncomplete = () => resolve();
+
+    tx.onerror = () =>
+      reject(tx.error);
+
+  });
+}
+
+async syncAnalytics() {
+
+  try {
+
+    const batch =
+      await this.getAnalyticsBatch();
+
+    if (!batch.length) {
+      return;
+    }
+
+    console.log(
+      `Uploading ${batch.length} analytics events`
+    );
+
+    const res = await fetch(
+      "/api/analytics",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+        body: JSON.stringify({
+          events: batch
+        })
+      }
+    );
+
+    const result =
+      await res.json();
+
+    if (result.status === "ok") {
+
+      await this.clearAnalytics(
+        batch.map(x => x.id)
+      );
+
+      console.log(
+        "Analytics upload complete"
+      );
+    }
+
+  } catch (err) {
+
+    console.warn(
+      "Analytics upload failed",
       err
     );
 

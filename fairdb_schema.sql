@@ -33,6 +33,7 @@ create table tenants (
     location        varchar(64),
     times           varchar(64),
     icon            varchar(128),
+    icon_version    integer not null default 0,
     type            varchar(32),
     outdoor         integer default 0,
     featured        integer default 0
@@ -45,6 +46,7 @@ create table sponsors (
     name            varchar(64),
     description     varchar(128),
     icon            varchar(128),
+    icon_version    integer not null default 0,
     tier            varchar(32)
 );
 
@@ -57,6 +59,7 @@ create table tasting (
     about           varchar(256),
     website         varchar(128),
     icon            varchar(128),
+    icon_version    integer not null default 0,
     featured        integer
 );
 
@@ -67,6 +70,7 @@ create table events (
     name            varchar(64),
     description     varchar(128),
     icon            varchar(128),
+    icon_version    integer not null default 0,
     location        varchar(64),
     price           varchar(64),
     start_time      datetime,

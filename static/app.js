@@ -589,7 +589,7 @@ let h = `
     data.forEach(item => {
 
     const iconPath = item.icon
-      ? `/static/icons/${item.icon}?v=${tenantVersion}`
+      ? `/static/icons/${item.icon}?v=${item.icon_version}`
       : null;
 
       const featuredClass = item.featured == 1
@@ -691,7 +691,7 @@ let h = `
     data.forEach(item => {
 
         const iconPath = item.icon
-            ? `/static/icons/${item.icon}?v=${sponsorVersion}`
+            ? `/static/icons/${item.icon}?v=${item.icon_version}`
             : null;
 
       h += `
@@ -881,7 +881,7 @@ let h = `
 
       // ---------------- ICON ----------------
 const iconPath = item.icon
-  ? `/static/icons/${item.icon}?v=${eventVersion}`
+  ? `/static/icons/${item.icon}?v=${item.icon_version}`
   : null;
 
       // ---------------- CARD COLOR LOGIC ----------------
@@ -2306,16 +2306,12 @@ document.querySelectorAll(".icon-card").forEach(card => {
 
 card.addEventListener("click", () => {
 
-  // 🔥 fire-and-forget analytics
-  fetch("/api/analytics", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      event: "menu_click",
-      value: page,
-      device_id: deviceId
-    })
-  }).catch(()=>{}); // ignore errors
+CacheManager.queueAnalytics({
+  event: "menu_click",
+  value: page,
+  device_id: deviceId,
+  timestamp: Date.now()
+});
 
   loadPage(page);
 });

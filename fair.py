@@ -359,7 +359,8 @@ async def get_events(event_type: str | None = None):
                 description, 
                 type,
                 location, 
-                icon, 
+                icon,
+                icon_version, 
                 price,
                 status, 
                 featured,
@@ -708,12 +709,21 @@ async def analytics_worker():
 async def log_event(request: Request):
 
     try:
+
         data = await request.json()
-        analytics_buffer.append(data)
+
+        events = data.get("events", [])
+
+        analytics_buffer.extend(events)
+
         return {"status": "ok"}
 
     except Exception as err:
-        log.error(f"analytics error: {err}")
+
+        log.error(
+            f"analytics error: {err}"
+        )
+
         return {"status": "error"}
 
 # ------------- TASTING EVENT ---------------
