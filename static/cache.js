@@ -1,7 +1,7 @@
 // cache.js
 
 const CACHE_DB_NAME = "fairapp";
-const CACHE_DB_VERSION = 2;
+const CACHE_DB_VERSION = 3;
 
 const CACHED_RESOURCES = [
   "facilities",
@@ -62,6 +62,7 @@ class CacheManagerClass {
     }
 
     await this.syncAnalytics();
+    await this.syncSurveys();
 
     // every 2 minutes
     this.syncTimer = setInterval(() => {
@@ -71,7 +72,10 @@ class CacheManagerClass {
     this.analyticsTimer =
   setInterval(() => {
     this.syncAnalytics();
+    this.syncSurveys();
   }, 300000);
+
+
 
   }
 
@@ -108,6 +112,17 @@ class CacheManagerClass {
 
           db.createObjectStore(
             "analytics",
+            {
+              keyPath: "id",
+              autoIncrement: true
+            }
+          );
+        }
+
+        if (!db.objectStoreNames.contains("surveys")) {
+
+          db.createObjectStore(
+            "surveys",
             {
               keyPath: "id",
               autoIncrement: true
@@ -595,6 +610,131 @@ async syncAnalytics() {
 
     console.warn(
       "Analytics upload failed",
+      err
+    );
+
+  }
+}
+
+async queueSurvey(survey) {
+
+  return new Promise((resolve, reject) => {
+
+    const tx = this.db.transaction(
+      "surveys",
+      "readwrite"
+    );
+
+    const store =
+      tx.objectStore("surveys");
+
+    const req = store.add(survey);
+
+    req.onsuccess = () => resolve();
+
+    req.onerror = () =>
+      reject(req.error);
+
+  });
+}
+
+async getSurveyBatch() {
+
+  return new Promise((resolve, reject) => {
+
+    const tx = this.db.transaction(
+      "surveys",
+      "readonly"
+    );
+
+    const store =
+      tx.objectStore("surveys");
+
+    const req = store.getAll();
+
+    req.onsuccess = () =>
+      resolve(req.result);
+
+    req.onerror = () =>
+      reject(req.error);
+
+  });
+}
+
+async clearSurveys(ids) {
+
+  return new Promise((resolve, reject) => {
+
+    const tx = this.db.transaction(
+      "surveys",
+      "readwrite"
+    );
+
+    const store =
+      tx.objectStore("surveys");
+
+    ids.forEach(id =>
+      store.delete(id)
+    );
+
+    tx.oncomplete = () =>
+      resolve();
+
+    tx.onerror = () =>
+      reject(tx.error);
+
+  });
+}
+
+async syncSurveys() {
+
+  try {
+
+    const batch =
+      await this.getSurveyBatch();
+
+    if (!batch.length) {
+      return;
+    }
+
+    console.log(
+      `Uploading ${batch.length} surveys`
+    );
+
+    for (const survey of batch) {
+
+      const res = await fetch(
+        "/api/survey/submit",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+          body: JSON.stringify(
+            survey.payload
+          )
+        }
+      );
+
+      const result =
+        await res.json();
+
+      if (
+        result.status === "ok" ||
+        result.status === "already_submitted"
+      ) {
+
+        await this.clearSurveys([
+          survey.id
+        ]);
+      }
+    }
+
+  } catch (err) {
+
+    console.warn(
+      "Survey upload failed",
       err
     );
 

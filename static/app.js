@@ -1422,15 +1422,17 @@ async function refreshVoteResults(){
 // ---------------- SURVEY -------------
 async function loadSurvey(){
 
-  const content = document.getElementById("content");
+const localSubmitted =
+  await CacheManager.getMetadata(
+    "survey_submitted"
+  );
 
-  const res = await fetch(`/api/survey/status/${deviceId}`);
-  const status = await res.json();
+if (localSubmitted) {
 
-  if (status.submitted){
-    renderSurveyThankYou();
-    return;
-  }
+  renderSurveyThankYou();
+
+  return;
+}
 
 let h = `
 <div class="ticket-header">
@@ -1576,23 +1578,24 @@ async function submitSurvey(){
     });
   });
 
-  const res = await fetch("/api/survey/submit", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
+    const surveyPayload = {
       device_id: deviceId,
       answers: payload,
       comment: surveyComment
-    })
-  });
+    };
 
-  const result = await res.json();
+    await CacheManager.queueSurvey({
+      payload: surveyPayload,
+      created: Date.now()
+    });
 
-  if (result.status === "ok" || result.status === "already_submitted"){
+    await CacheManager.setMetadata(
+      "survey_submitted",
+      true
+    );
+
     renderSurveyThankYou();
-  } else {
-    alert("Submission failed");
-  }
+
 }
 
 function renderSurveyThankYou(){
