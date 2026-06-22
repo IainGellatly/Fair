@@ -1,7 +1,7 @@
 // cache.js
 
 const CACHE_DB_NAME = "fairapp";
-const CACHE_DB_VERSION = 3;
+const CACHE_DB_VERSION = 4;
 
 const CACHED_RESOURCES = [
   "facilities",
@@ -63,6 +63,7 @@ class CacheManagerClass {
 
     await this.syncAnalytics();
     await this.syncSurveys();
+    await this.syncVotes();
 
     // every 2 minutes
     this.syncTimer = setInterval(() => {
@@ -70,12 +71,15 @@ class CacheManagerClass {
     }, 120000);
 
     this.analyticsTimer =
-  setInterval(() => {
-    this.syncAnalytics();
-    this.syncSurveys();
-  }, 300000);
+    setInterval(() => {
 
+      console.log("5 minute sync timer fired");
 
+      this.syncAnalytics();
+      this.syncSurveys();
+      this.syncVotes();
+
+    }, 300000);
 
   }
 
@@ -123,6 +127,17 @@ class CacheManagerClass {
 
           db.createObjectStore(
             "surveys",
+            {
+              keyPath: "id",
+              autoIncrement: true
+            }
+          );
+        }
+
+        if (!db.objectStoreNames.contains("votes")) {
+
+          db.createObjectStore(
+            "votes",
             {
               keyPath: "id",
               autoIncrement: true
@@ -740,6 +755,155 @@ async syncSurveys() {
 
   }
 }
+
+async queueVote(vote) {
+
+  return new Promise((resolve, reject) => {
+
+    const tx = this.db.transaction(
+      "votes",
+      "readwrite"
+    );
+
+    const store =
+      tx.objectStore("votes");
+
+    const req = store.add(vote);
+
+    req.onsuccess = () => resolve();
+
+    req.onerror = () =>
+      reject(req.error);
+
+  });
+}
+
+async getVoteBatch() {
+
+  return new Promise((resolve, reject) => {
+
+    const tx = this.db.transaction(
+      "votes",
+      "readonly"
+    );
+
+    const store =
+      tx.objectStore("votes");
+
+    const req = store.getAll();
+
+    req.onsuccess = () =>
+      resolve(req.result);
+
+    req.onerror = () =>
+      reject(req.error);
+
+  });
+}
+
+async clearVotes(ids) {
+
+  return new Promise((resolve, reject) => {
+
+    const tx = this.db.transaction(
+      "votes",
+      "readwrite"
+    );
+
+    const store =
+      tx.objectStore("votes");
+
+    ids.forEach(id =>
+      store.delete(id)
+    );
+
+    tx.oncomplete = () =>
+      resolve();
+
+    tx.onerror = () =>
+      reject(tx.error);
+
+  });
+}
+
+async syncVotes() {
+
+  try {
+
+    const batch =
+      await this.getVoteBatch();
+
+    if (!batch.length) {
+      return;
+    }
+
+    console.log(
+      `Uploading ${batch.length} votes`
+    );
+
+    for (const vote of batch) {
+
+      const res = await fetch(
+        "/api/vote",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+          body: JSON.stringify(
+            vote.payload
+          )
+        }
+      );
+
+      const result =
+        await res.json();
+
+      if (
+        result.status === "ok" ||
+        result.status === "already_voted"
+      ) {
+
+        await this.clearVotes([
+          vote.id
+        ]);
+      }
+    }
+
+    await this.refreshVoteResults();
+
+  } catch (err) {
+
+    console.warn(
+      "Vote upload failed",
+      err
+    );
+  }
+}
+
+async refreshVoteResults() {
+
+  const res = await fetch(
+    "/api/vote/results"
+  );
+
+  const data = await res.json();
+
+  await this.setMetadata(
+    "vote_results",
+    data
+  );
+
+  await this.setMetadata(
+    "vote_results_time",
+    Date.now()
+  );
+}
+
+
+
+
 
 }
 

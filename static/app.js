@@ -1054,19 +1054,49 @@ async function loadVotePage(){
 
   const content = document.getElementById("content");
 
-  const votedRes = await fetch(`/api/vote/status/${deviceId}`);
-  const voted = await votedRes.json();
+    const today =
+      new Date().toISOString().slice(0,10);
 
-  if (voted.length > 0){
-    loadVoteResults();
-    return;
-  }
+    const voteKey =
+      `vote_submitted_${deviceId}_${today}`;
 
-  const [food, indoor, outdoor] = await Promise.all([
-    fetch("/api/candidates/food").then(r=>r.json()),
-    fetch("/api/candidates/indoor").then(r=>r.json()),
-    fetch("/api/candidates/outdoor").then(r=>r.json())
-  ]);
+    const voted =
+      await CacheManager.getMetadata(
+        voteKey
+      );
+
+    if (voted) {
+      loadVoteResults();
+      return;
+    }
+
+const food =
+  await CacheManager.getResourceData(
+    "food"
+  ) || [];
+
+const vendors =
+  await CacheManager.getResourceData(
+    "vendor"
+  ) || [];
+
+const community =
+  await CacheManager.getResourceData(
+    "community"
+  ) || [];
+
+const combined =
+  [...vendors, ...community];
+
+const indoor =
+  combined.filter(
+    x => Number(x.outdoor) === 0
+  );
+
+const outdoor =
+  combined.filter(
+    x => Number(x.outdoor) === 1
+  );
 
   // store globally for picker
   window.voteData = { food, indoor, outdoor };
@@ -1139,7 +1169,7 @@ async function loadVotePage(){
       </div>
 
       <div class="ticket-header-subtitle">
-        Vote Once a Day to See Results
+        Vote Once a Day to See Rankings
       </div>
 
     </div>
@@ -1196,33 +1226,77 @@ async function submitVote(){
 
   if (!confirm("Tap OK to submit your vote today.")) return;
 
-  const res = await fetch("/api/vote", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
+    const votePayload = {
       device_id: deviceId,
       votes: voteSelection
-    })
-  });
+    };
 
-  const result = await res.json();
+    await CacheManager.queueVote({
+      payload: votePayload,
+      created: Date.now()
+    });
 
-    if (result.status === "ok" || result.status === "already_voted"){
-      loadVoteResults();
-    } else {
-      alert("Vote failed");
-    }
+    const today =
+      new Date().toISOString().slice(0,10);
+
+    const voteKey =
+      `vote_submitted_${deviceId}_${today}`;
+
+    await CacheManager.setMetadata(
+      voteKey,
+      true
+    );
+
+    loadVoteResults();
+
 }
 
 async function loadVoteResults(){
 
   const content = document.getElementById("content");
 
-  const res = await fetch("/api/vote/results");
-  const data = await res.json();
+let data =
+  await CacheManager.getMetadata(
+    "vote_results"
+  );
 
-  const now = new Date();
-  const ts = now.toLocaleString();
+const resultTime =
+  await CacheManager.getMetadata(
+    "vote_results_time"
+  );
+
+if (
+  !resultTime ||
+  (Date.now() - resultTime) > 300000
+) {
+
+  try {
+
+    await CacheManager.refreshVoteResults();
+
+    data =
+      await CacheManager.getMetadata(
+        "vote_results"
+      );
+
+  } catch (err) {
+
+    console.warn(
+      "Using cached vote results"
+    );
+
+  }
+}
+
+const updatedTime =
+  await CacheManager.getMetadata(
+    "vote_results_time"
+  );
+
+const ts = updatedTime
+  ? new Date(updatedTime)
+      .toLocaleString()
+  : "Not Available";
 
   function renderCard(title, icon, list){
 
@@ -1234,9 +1308,6 @@ async function loadVoteResults(){
         </div>
 
         <div class="ui-card-content">
-
-
-
 
           <div class="vote-result-header">
             <div class="vote-result-title">${title}</div>
@@ -1289,7 +1360,7 @@ content.innerHTML = `
       </div>
 
       <div class="ticket-header-subtitle">
-        Vote Again Tomorrow. <br>Refresh Results Anytime.
+        Vote Again Tomorrow. <br>Rankings Updated Every 5 Minutes.
       </div>
 
     </div>
@@ -1302,11 +1373,7 @@ content.innerHTML = `
 
 </div>
 
-  <button class="vote-submit-btn" onclick="refreshVoteResults()">
-    Refresh
-  </button>
-
-  <h2 class="vote-results-heading">Ranking at ${ts}</h2>
+  <h2 class="vote-results-heading">Rankings Updated <br>${ts}</h2>
 
   ${renderCard("Best Food Vendor", "food", data.food)}
   ${renderCard("Best Indoor Vendor", "indoor", data.indoor)}
@@ -1324,11 +1391,24 @@ async function refreshVoteResults(){
 
   const content = document.getElementById("content");
 
-  const res = await fetch("/api/vote/results");
-  const data = await res.json();
+    const data =
+      await CacheManager.getMetadata(
+        "vote_results"
+      ) || {
+        food: [],
+        indoor: [],
+        outdoor: []
+      };
 
-  const now = new Date();
-  const ts = now.toLocaleString();
+    const resultTime =
+      await CacheManager.getMetadata(
+        "vote_results_time"
+      );
+
+    const ts = resultTime
+      ? new Date(resultTime)
+          .toLocaleString()
+      : "Not Available";
 
   function renderCard(title, icon, list){
     return `
@@ -1391,7 +1471,7 @@ async function refreshVoteResults(){
       </div>
 
       <div class="ticket-header-subtitle">
-        Vote Again Tomorrow. <br>Refresh Results Anytime.
+        Vote Again Tomorrow. <br>Rankings Updated Every 5 Minutes.
       </div>
 
     </div>
@@ -1403,10 +1483,6 @@ async function refreshVoteResults(){
   </div>
 
 </div>
-
-    <button class="vote-submit-btn" onclick="refreshVoteResults()">
-      Refresh
-    </button>
 
     <h2 class="vote-results-heading">Ranking at ${ts}</h2>
 
