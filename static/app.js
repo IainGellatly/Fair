@@ -2427,9 +2427,14 @@ async function initSubscription(){
       subscriptionId = id;
       pushAuthorized = true;
 
-      const a = await fetch(`/api/alerts/${subscriptionId}`);
-      const ids = await a.json();
-      alertSet = new Set(ids);
+    const cached =
+      await CacheManager.getMetadata(
+        `alerts_${subscriptionId}`
+      );
+
+    alertSet =
+      new Set(cached || []);
+
     }
 
   } catch (err){
@@ -2498,6 +2503,10 @@ async function subscribeUser(){
     const a = await fetch(`/api/alerts/${subscriptionId}`);
     const ids = await a.json();
     alertSet = new Set(ids);
+    await CacheManager.setMetadata(
+      `alerts_${subscriptionId}`,
+      ids
+    );
 
     // 🔥 FORCE UI refresh
     loadTodayEvents();
@@ -2577,15 +2586,19 @@ async function loadTodayEvents(preserveScroll = false){
       await initSubscription();
     }
 
-    const res = await fetch('/api/events/today');
+    const eventRecord =
+      await CacheManager.getResource("events");
 
-    if (!res.ok){
-        console.error("Events API failed:", res.status);
-        content.innerHTML = `<div class="card">Error loading today's events</div>`;
-        return;
-    }
+    const allEvents =
+      eventRecord?.data || [];
 
-    const data = await res.json();
+    const todayString =
+      new Date().toISOString().slice(0,10);
+
+    const data =
+      allEvents.filter(item =>
+        item.start_datetime?.slice(0,10) === todayString
+      );
 
 let h = `
 <div class="ticket-header">
@@ -2834,25 +2847,39 @@ async function toggleAlert(eventId, btn){
   // ---------- OPTIMISTIC UI UPDATE ----------
   if (!hasAlert){
     alertSet.add(eventId);
+    await CacheManager.setMetadata(
+      `alerts_${subscriptionId}`,
+      [...alertSet]
+    );
     btn.innerText = "Remove Alert";
     btn.classList.add("active");
   } else {
     alertSet.delete(eventId);
+    await CacheManager.setMetadata(
+      `alerts_${subscriptionId}`,
+      [...alertSet]
+    );
     btn.innerText = "Alert Me";
     btn.classList.remove("active");
   }
 
   try {
     // ---------- BACKGROUND REQUEST ----------
-    const url = !hasAlert
-      ? `/api/alerts/add/${subscriptionId}/${eventId}`
-      : `/api/alerts/remove/${subscriptionId}/${eventId}`;
+    await CacheManager.queueAlert({
 
-    const res = await fetch(url, { method: 'POST' });
+      action:
+        !hasAlert
+          ? "add"
+          : "remove",
 
-    if (!res.ok){
-      throw new Error("Server error");
-    }
+      subscriptionId,
+
+      eventId,
+
+      created:
+        Date.now()
+
+    });
 
   } catch (err){
 
@@ -2879,13 +2906,12 @@ async function toggleAlert(eventId, btn){
   }
 }
 
-initSubscription().catch(() => {});
-
 window.addEventListener("load", async () => {
 
   // Initialize cache system
   try {
     await CacheManager.init();
+    await initSubscription();
   } catch (err) {
     console.warn("CacheManager init failed", err);
   }

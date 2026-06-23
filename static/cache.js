@@ -1,7 +1,7 @@
 // cache.js
 
 const CACHE_DB_NAME = "fairapp";
-const CACHE_DB_VERSION = 4;
+const CACHE_DB_VERSION = 5;
 
 const CACHED_RESOURCES = [
   "facilities",
@@ -64,6 +64,7 @@ class CacheManagerClass {
     await this.syncAnalytics();
     await this.syncSurveys();
     await this.syncVotes();
+    await this.syncAlerts();
 
     // every 2 minutes
     this.syncTimer = setInterval(() => {
@@ -78,6 +79,7 @@ class CacheManagerClass {
       this.syncAnalytics();
       this.syncSurveys();
       this.syncVotes();
+      this.syncAlerts();
 
     }, 300000);
 
@@ -138,6 +140,17 @@ class CacheManagerClass {
 
           db.createObjectStore(
             "votes",
+            {
+              keyPath: "id",
+              autoIncrement: true
+            }
+          );
+        }
+
+        if (!db.objectStoreNames.contains("alerts")) {
+
+          db.createObjectStore(
+            "alerts",
             {
               keyPath: "id",
               autoIncrement: true
@@ -901,9 +914,131 @@ async refreshVoteResults() {
   );
 }
 
+async queueAlert(alert) {
 
+  return new Promise((resolve, reject) => {
 
+    const tx = this.db.transaction(
+      "alerts",
+      "readwrite"
+    );
 
+    const store =
+      tx.objectStore("alerts");
+
+    const req = store.add(alert);
+
+    req.onsuccess = () => resolve();
+
+    req.onerror = () =>
+      reject(req.error);
+
+  });
+}
+
+async getAlertBatch() {
+
+  return new Promise((resolve, reject) => {
+
+    const tx = this.db.transaction(
+      "alerts",
+      "readonly"
+    );
+
+    const store =
+      tx.objectStore("alerts");
+
+    const req = store.getAll();
+
+    req.onsuccess = () =>
+      resolve(req.result);
+
+    req.onerror = () =>
+      reject(req.error);
+
+  });
+}
+
+async clearAlerts(ids) {
+
+  return new Promise((resolve, reject) => {
+
+    const tx = this.db.transaction(
+      "alerts",
+      "readwrite"
+    );
+
+    const store =
+      tx.objectStore("alerts");
+
+    ids.forEach(id =>
+      store.delete(id)
+    );
+
+    tx.oncomplete = () =>
+      resolve();
+
+    tx.onerror = () =>
+      reject(tx.error);
+
+  });
+}
+
+async syncAlerts() {
+
+  try {
+
+    const batch =
+      await this.getAlertBatch();
+
+    if (!batch.length) {
+      return;
+    }
+
+    console.log(
+      `Uploading ${batch.length} alert changes`
+    );
+
+    for (const alert of batch) {
+
+      let url;
+
+      if (alert.action === "add") {
+
+        url =
+          `/api/alerts/add/${alert.subscriptionId}/${alert.eventId}`;
+
+      } else {
+
+        url =
+          `/api/alerts/remove/${alert.subscriptionId}/${alert.eventId}`;
+
+      }
+
+      const res = await fetch(
+        url,
+        {
+          method: "POST"
+        }
+      );
+
+      if (res.ok) {
+
+        await this.clearAlerts([
+          alert.id
+        ]);
+      }
+    }
+
+  } catch (err) {
+
+    console.warn(
+      "Alert sync failed",
+      err
+    );
+
+  }
+}
 
 }
 
