@@ -1758,8 +1758,7 @@ function showMap(){
 
       <div class="ticket-header-subtitle">
       <span style="font-size: 1em;">
-      Pinch/spread to explore. Red dot is your location.
-      Tap ? for info.
+      Pinch/spread to explore. Red dot is your location. Tap ? for info.
       </span>
       </div>
 
@@ -1773,6 +1772,9 @@ function showMap(){
 
 </div>
 
+<div id="gpsStatus" class="gps-status">
+  Location Dot Will Appear When at Fairgrounds
+</div>
 
 <div class="gallery-button-row">
 
@@ -1819,7 +1821,7 @@ function showMap(){
 
     const gpsMarker = L.circleMarker([0,0], {
 
-      radius: 16,
+      radius: 12,
 
       color: '#ffffff',
       weight: 2,
@@ -2183,19 +2185,72 @@ rect.on('click', () => {
 });
     });
 
+const GPS_HIDE_ACCURACY_FT = 200;
+const GPS_LOW_ACCURACY_FT = 150;
+
+function getGpsRadius(accuracyFt){
+
+  if (accuracyFt < 20) return 12;
+  if (accuracyFt < 50) return 18;
+  if (accuracyFt < 100) return 24;
+  if (accuracyFt < 150) return 30;
+
+  return 36;
+}
+
 if ('geolocation' in navigator){
 
   navigator.geolocation.watchPosition(
 
     (pos) => {
 
-      const lat = pos.coords.latitude;
-      const lon = pos.coords.longitude;
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+
+    const accuracyMeters =
+      pos.coords.accuracy || 9999;
+
+    const accuracyFt =
+      Math.round(accuracyMeters * 3.28084);
+
+    const gpsStatus =
+      document.getElementById('gpsStatus');
+
+    if (accuracyFt > GPS_HIDE_ACCURACY_FT) {
+
+      gpsStatus.innerHTML =
+        "GPS Location Not Currently Available";
+
+      if (gpsVisible) {
+
+        map.removeLayer(gpsMarker);
+
+        gpsVisible = false;
+      }
+
+      return;
+    }
+
+    if (accuracyFt >= GPS_LOW_ACCURACY_FT) {
+
+      gpsStatus.textContent =
+        `GPS Accuracy: ±${accuracyFt} ft (Low Accuracy)`;
+
+    } else {
+
+      gpsStatus.textContent =
+        `GPS Accuracy: ±${accuracyFt} ft`;
+    }
 
     if (!isInside(lat, lon)) {
 
+      gpsStatus.innerHTML =
+        "Location Dot Will Appear When at Fairgrounds";
+
       if (gpsVisible) {
+
         map.removeLayer(gpsMarker);
+
         gpsVisible = false;
       }
 
@@ -2217,6 +2272,10 @@ const point =
     smooth.lat,
     smooth.lon
   );
+
+gpsMarker.setRadius(
+  getGpsRadius(accuracyFt)
+);
 
 gpsMarker.setLatLng(point);
 
@@ -2241,7 +2300,25 @@ if (!gpsVisible) {
     },
 
     (err) => {
-      console.log("GPS error:", err);
+
+    console.log("GPS error:", err);
+
+    const gpsStatus =
+      document.getElementById('gpsStatus');
+
+    if (gpsStatus) {
+
+      gpsStatus.innerHTML =
+        "Location Dot Will Appear When at Fairgrounds";
+    }
+
+    if (gpsVisible) {
+
+      map.removeLayer(gpsMarker);
+
+      gpsVisible = false;
+    }
+
     },
 
     {
