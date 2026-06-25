@@ -148,4 +148,15 @@ create table resource (
 insert into resource (resource) values
 ("event"), ("tenant"), ("sponsor"),("parade"),("tasting"),
 ("about"), ("ticket"), ("facility"),("first_aid"),("faq"),
-("exhibit"),("midway"),("parking");
+("exhibit"),("midway"),("parking"),("media"),("app"),("candidates");
+
+drop table if exists media;
+create table media (
+  media_id       int auto_increment primary key,
+  name           varchar(128),
+  version        int not null default 0,
+  media_size     int,
+  updated        datetime default current_timestamp
+                   on update current_timestamp
+);
+

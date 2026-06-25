@@ -743,3 +743,13 @@ async def get_resource():
     result = await get_data(qry)
 
     return json_response(result)
+
+# ---------- MEDIA VERSIONS -------------
+@app.get("/api/media")
+async def get_media():
+
+    qry = "select name, version, media_size, updated from media;"
+    result = await get_data(qry)
+
+    return json_response(result)
+

@@ -1,7 +1,7 @@
 // cache.js
 
 const CACHE_DB_NAME = "fairapp";
-const CACHE_DB_VERSION = 5;
+const CACHE_DB_VERSION = 6;
 
 const CACHED_RESOURCES = [
   "facilities",
@@ -18,7 +18,8 @@ const CACHED_RESOURCES = [
   "vendor",
   "community",
   "animal",
-  "events"
+  "events",
+  "media"
 ];
 
 class CacheManagerClass {
@@ -26,6 +27,7 @@ class CacheManagerClass {
   constructor() {
     this.db = null;
     this.syncTimer = null;
+    this.mediaUrls = new Map();
   }
 
   async init() {
@@ -158,6 +160,14 @@ class CacheManagerClass {
           );
         }
 
+        if (!db.objectStoreNames.contains("media")) {
+
+          db.createObjectStore(
+            "media",
+            { keyPath: "name" }
+          );
+        }
+
       };
 
       request.onsuccess = () => resolve(request.result);
@@ -220,6 +230,191 @@ async getResourceData(resource) {
 
     });
   }
+
+    async getMedia(name) {
+
+      return new Promise((resolve, reject) => {
+
+        const tx = this.db.transaction(
+          "media",
+          "readonly"
+        );
+
+        const store = tx.objectStore(
+          "media"
+        );
+
+        const req = store.get(name);
+
+        req.onsuccess = () =>
+          resolve(req.result);
+
+        req.onerror = () =>
+          reject(req.error);
+
+      });
+    }
+
+    async getMediaUrl(name) {
+
+      // Already have a Blob URL?
+      if (this.mediaUrls.has(name)) {
+        return this.mediaUrls.get(name);
+      }
+
+      const media = await this.getMedia(name);
+
+      if (!media) {
+        return null;
+      }
+
+      const url = URL.createObjectURL(media.blob);
+
+      this.mediaUrls.set(name, url);
+
+      return url;
+    }
+
+
+    async putMedia(record) {
+
+      if (this.mediaUrls.has(record.name)) {
+
+        URL.revokeObjectURL(
+          this.mediaUrls.get(record.name)
+        );
+
+        this.mediaUrls.delete(record.name);
+      }
+
+      return new Promise((resolve, reject) => {
+
+        const tx = this.db.transaction(
+          "media",
+          "readwrite"
+        );
+
+        const store = tx.objectStore(
+          "media"
+        );
+
+        const req = store.put(record);
+
+        req.onsuccess = () =>
+          resolve();
+
+        req.onerror = () =>
+          reject(req.error);
+
+      });
+    }
+
+    async hasMedia(name) {
+
+      const media =
+        await this.getMedia(name);
+
+      return media !== undefined &&
+             media !== null;
+    }
+
+    async setImage(element, mediaName) {
+
+        const url =
+            await this.getMediaUrl(
+                mediaName
+            );
+
+        if (url) {
+            element.src = url;
+        }
+    }
+
+    async localizeImages(root = document) {
+
+        const images =
+            root.querySelectorAll("img");
+
+        for (const img of images) {
+
+            const src =
+                img.getAttribute("src");
+
+            if (!src) {
+                continue;
+            }
+
+            if (!src.startsWith("/static/")) {
+                continue;
+            }
+
+            const mediaName =
+                src
+                    .substring(8)
+                    .split("?")[0];
+
+            const url =
+                await this.getMediaUrl(
+                    mediaName
+                );
+
+            if (url) {
+
+                img.src = url;
+
+            }
+
+        }
+
+    }
+
+    async getMediaStats() {
+
+      return new Promise((resolve, reject) => {
+
+        const tx =
+          this.db.transaction(
+            "media",
+            "readonly"
+          );
+
+        const store =
+          tx.objectStore("media");
+
+        const req = store.getAll();
+
+        req.onsuccess = () => {
+
+          const files = req.result;
+
+          let bytes = 0;
+
+          files.forEach(f => {
+
+            bytes +=
+              f.media_size || 0;
+
+          });
+
+          resolve({
+
+            files: files.length,
+
+            bytes,
+
+            mb:
+              (bytes / 1048576)
+              .toFixed(2)
+
+          });
+
+        };
+
+        req.onerror = () =>
+          reject(req.error);
+
+      });
+    }
 
     async getMetadata(key) {
 
@@ -289,7 +484,14 @@ async getResourceData(resource) {
         )
       ) {
 
-if (resource.resource === "sponsors") {
+if (
+  resource.resource === "media"
+) {
+
+  await this.syncMedia(resource);
+
+}
+else if (resource.resource === "sponsors") {
 
   await this.syncSponsors(resource);
 
@@ -516,6 +718,113 @@ async syncEvents(serverInfo) {
 
     console.warn(
       "Events update failed",
+      err
+    );
+
+  }
+}
+
+async syncMedia(serverInfo) {
+
+  try {
+
+    const local =
+      await this.getResource(
+        "media"
+      );
+
+    const needsUpdate =
+      !local ||
+      local.version !==
+      serverInfo.version;
+
+    if (!needsUpdate) {
+      return;
+    }
+
+    console.log(
+      "Updating media cache"
+    );
+
+    const res =
+      await fetch(
+        `/api/media?v=${serverInfo.version}`
+      );
+
+    const manifest =
+      await res.json();
+
+    for (const file of manifest) {
+
+      const cached =
+        await this.getMedia(
+          file.name
+        );
+
+      const needsFile =
+
+        !cached ||
+
+        cached.version <
+        file.version;
+
+      if (!needsFile) {
+        continue;
+      }
+
+      console.log(
+        `Downloading media ${file.name}`
+      );
+
+      const fileRes =
+        await fetch(
+          `/static/${file.name}`
+        );
+
+      const blob =
+        await fileRes.blob();
+
+      await this.putMedia({
+
+        name:
+          file.name,
+
+        version:
+          file.version,
+
+        media_size:
+          file.media_size,
+
+        updated:
+          file.updated,
+
+        blob
+
+      });
+    }
+
+    await this.putResource({
+
+      resource: "media",
+
+      version:
+        serverInfo.version,
+
+      updated:
+        serverInfo.updated,
+
+      data: manifest
+
+    });
+
+    console.log(
+      "Media cache updated"
+    );
+
+  } catch (err) {
+
+    console.warn(
+      "Media update failed",
       err
     );
 

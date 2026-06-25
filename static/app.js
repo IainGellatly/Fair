@@ -82,6 +82,7 @@ let deferredInstallPrompt = null;
 
 let todayRefreshTimer = null;
 let savedScrollY = 0;
+let gpsWatchId = null;
 
 let subscriptionId = 0;
 let pushAuthorized = false;
@@ -499,6 +500,7 @@ if (cachedPages.includes(page)) {
       ${html}
     `;
 
+    await CacheManager.localizeImages(content);
     scrollToContent();
 
   } catch (err) {
@@ -617,6 +619,7 @@ let h = `
     });
 
     content.innerHTML = h;
+    await CacheManager.localizeImages(content);
     scrollToContent();
 
   } catch (err){
@@ -719,6 +722,7 @@ let h = `
     });
 
     content.innerHTML = h;
+    await CacheManager.localizeImages(content);
     scrollToContent();
 
   } catch (err){
@@ -981,6 +985,7 @@ const iconPath = item.icon
     });
 
     content.innerHTML = h;
+    await CacheManager.localizeImages(content);
 
     // 🔥 SMART CALENDAR SCROLL
     if (!type){
@@ -1189,6 +1194,7 @@ const outdoor =
     <button class="vote-submit-btn" onclick="submitVote()">Submit Your Votes</button>
   `;
 
+  await CacheManager.localizeImages(content);
   scrollToContent();
 }
 
@@ -1381,6 +1387,7 @@ content.innerHTML = `
 
 `;
 
+  await CacheManager.localizeImages(content);
   scrollToContent();
 }
 
@@ -1491,6 +1498,7 @@ async function refreshVoteResults(){
     ${renderCard("Best Outdoor Vendor Display", "outdoor", data.outdoor)}
   `;
 
+  await CacheManager.localizeImages(content);
   // 🔥 restore exact scroll position
   window.scrollTo(0, scrollPos);
 }
@@ -1505,7 +1513,7 @@ const localSubmitted =
 
 if (localSubmitted) {
 
-  renderSurveyThankYou();
+  await renderSurveyThankYou();
 
   return;
 }
@@ -1592,6 +1600,7 @@ let h = `
   `;
 
   content.innerHTML = h;
+  await CacheManager.localizeImages(content);
   scrollToContent();
 }
 
@@ -1670,11 +1679,11 @@ async function submitSurvey(){
       true
     );
 
-    renderSurveyThankYou();
+    await renderSurveyThankYou();
 
 }
 
-function renderSurveyThankYou(){
+async function renderSurveyThankYou(){
 
   const content = document.getElementById("content");
 
@@ -1729,11 +1738,12 @@ function renderSurveyThankYou(){
       </div>
     `;
 
+  await CacheManager.localizeImages(content);
   scrollToContent();
 }
 
 // ---------------- MAP ----------------
-function showMap(){
+async function showMap(){
 
   document.getElementById('content').innerHTML = `
 
@@ -1844,16 +1854,24 @@ function showMap(){
 const IMAGES = {
 
   fair:
-    '/static/maps/fair_map4.webp',
+    await CacheManager.getMediaUrl(
+      "maps/fair_map4.webp"
+    ) || "/static/maps/fair_map4.webp",
 
   floral:
-    '/static/maps/floral_plan.webp',
+    await CacheManager.getMediaUrl(
+      "maps/floral_plan.webp"
+    ) || "/static/maps/floral_plan.webp",
 
   commercial1:
-    '/static/maps/commercial_1_plan.webp',
+    await CacheManager.getMediaUrl(
+      "maps/commercial_1_plan.webp"
+    ) || "/static/maps/commercial_1_plan.webp",
 
   commercial2:
-    '/static/maps/commercial_2_plan.webp'
+    await CacheManager.getMediaUrl(
+      "maps/commercial_2_plan.webp"
+    ) || "/static/maps/commercial_2_plan.webp"
 };
 
 let currentView = 'fair';
@@ -2200,7 +2218,7 @@ function getGpsRadius(accuracyFt){
 
 if ('geolocation' in navigator){
 
-  navigator.geolocation.watchPosition(
+  gpsWatchId = navigator.geolocation.watchPosition(
 
     (pos) => {
 
@@ -2215,6 +2233,10 @@ if ('geolocation' in navigator){
 
     const gpsStatus =
       document.getElementById('gpsStatus');
+
+    if (!gpsStatus) {
+      return;
+    }
 
     if (accuracyFt > GPS_HIDE_ACCURACY_FT) {
 
@@ -2338,6 +2360,12 @@ async function loadPage(page){
       clearInterval(todayRefreshTimer);
       todayRefreshTimer = null;
     }
+
+    if (gpsWatchId !== null) {
+      navigator.geolocation.clearWatch(gpsWatchId);
+      gpsWatchId = null;
+    }
+
 
   // 🔴 Preserve "More row" behavior
 // 🔥 HANDLE MORE ROW VISIBILITY (supports multiple rows)
@@ -2852,6 +2880,7 @@ let h = `
     });
 
     content.innerHTML = h;
+    await CacheManager.localizeImages(content);
 
 // 🔥 SMART SCROLL (only on first load + ONLY if subscribed)
 if (!preserveScroll){
