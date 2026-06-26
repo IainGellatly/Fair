@@ -49,27 +49,26 @@ let surveyComment = "";
 
 const VAPID_PUBLIC_KEY = "BPAr2_PD2PGYvI0EsANa5gCXJ6z_hupiV6Bjdt7jxMaL_0D_QFdF-PbP3wDDNBM8PNzvbWRQegM9WH0yOyDVJ00";
 
-document.addEventListener('DOMContentLoaded', () => {
+function initializeInstallUI() {
 
   const btn =
     document.getElementById('installButton');
 
-  if (btn){
-
+  if (btn) {
     btn.addEventListener('click', installApp);
   }
 
-  // hide if already installed
-  if (isStandalone){
+  // Hide if already installed
+  if (isStandalone) {
 
     const installUI =
       document.getElementById('installContainer');
 
-    if (installUI){
+    if (installUI) {
       installUI.style.display = 'none';
     }
   }
-});
+}
 
 // --------- PLATFORM DETECTION ----------
 const isApple = /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -3014,12 +3013,13 @@ async function toggleAlert(eventId, btn){
 
 window.addEventListener("load", async () => {
 
-  // Initialize cache system
+  initializeInstallUI();
+
+  // CacheManager was already initialized by the bootstrap
   try {
-    await CacheManager.init();
     await initSubscription();
   } catch (err) {
-    console.warn("CacheManager init failed", err);
+    console.warn("Subscription init failed", err);
   }
 
   const params = new URLSearchParams(window.location.search);

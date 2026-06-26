@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta
+  name="viewport"
+  content="
+    width=device-width,
+    initial-scale=1,
+    maximum-scale=1,
+    minimum-scale=1,
+    user-scalable=no,
+    viewport-fit=cover">
+<link rel="stylesheet" href="/static/styles.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="manifest" href="/static/manifest.webmanifest">
+<link rel="apple-touch-icon"
+      href="/static/favicon.png">
+
+    <title>Wayne County Fair</title>
+
+</head>
+<body>
+
+<img src="/static/logo.webp" class="logo" alt="logo"/>
+
+<div id="installContainer" style="display:none;">
+
+  <button id="installButton" aria-label="Install App">
+    <img
+      src="/static/icons/menu/download.webp"
+      alt="Install App"
+    >
+  </button>
+
+  <div id="installLabel">
+    Free Install<br>for Best<br>Experience
+  </div>
+
+</div>
+
+<br>
+
+<!-- GRID -->
+<div class="icon-grid">
+
+  <!-- FEATURED ROW -->
+  <div class="featured-row">
+
+    <div class="icon-card" data-page="today">
+      <img src="/static/icons/menu/today.webp" alt="today">
+      <div>Today</div>
+    </div>
+
+    <div class="icon-card" data-page="map">
+      <img src="/static/icons/menu/map.webp" alt="map">
+      <div>Map</div>
+    </div>
+
+    <div class="icon-card" data-page="vote">
+      <img src="/static/icons/menu/vote.webp" alt="vote">
+      <div>Vote</div>
+    </div>
+  </div>
+
+  <!-- ROW 2 -->
+  <div class="icon-card" data-page="food">
+    <img src="/static/icons/menu/food.webp" alt="food">
+    <div>Food</div>
+  </div>
+
+  <div class="icon-card" data-page="music">
+    <img src="/static/icons/menu/music.webp" alt="music">
+    <div>Music</div>
+  </div>
+
+  <div class="icon-card" data-page="grandstand">
+    <img src="/static/icons/menu/grandstand.webp" alt="grandstand">
+    <div>Grandstand</div>
+  </div>
+
+  <!-- ROW 3 -->
+  <div class="icon-card" data-page="exhibits">
+    <img src="/static/icons/menu/ribbon.webp" alt="exhibits">
+  <div>Exhibits</div>
+  </div>
+
+  <div class="icon-card" data-page="vendors">
+    <img src="/static/icons/menu/vendors.webp" alt="vendors">
+    <div>Vendors</div>
+  </div>
+
+  <div class="icon-card" data-page="community">
+    <img src="/static/icons/menu/community.webp" alt="community">
+    <div>Community</div>
+  </div>
+
+  <!-- ROW 4 -->
+  <div class="icon-card" data-page="animals">
+    <img src="/static/icons/menu/animals.webp" alt="animals">
+    <div>Animals</div>
+  </div>
+
+  <div class="icon-card" data-page="midway">
+    <img src="/static/icons/menu/midway.webp" alt="midway">
+    <div>Midway</div>
+  </div>
+
+  <div class="icon-card" data-page="calendar">
+    <img src="/static/icons/menu/calendar.webp" alt="calendar">
+    <div>Calendar</div>
+  </div>
+
+  <!-- ROW 5 -->
+  <div class="icon-card" data-page="tickets">
+    <img src="/static/icons/menu/tickets.webp" alt="tickets">
+    <div>Tickets</div>
+  </div>
+
+  <div class="icon-card" data-page="more">
+    <img src="/static/icons/menu/more.webp" alt="more">
+    <div>More</div>
+  </div>
+
+  <div class="icon-card" data-page="sponsors">
+    <img src="/static/icons/menu/sponsors.webp" alt="sponsor">
+    <div>Sponsors</div>
+  </div>
+
+  <!-- ROW 6 (HIDDEN BY DEFAULT) -->
+  <div class="icon-card more-row" data-page="firstaid" style="display:none;">
+    <img src="/static/icons/menu/firstaid.webp" alt="first aid">
+    <div>First Aid</div>
+  </div>
+
+  <div class="icon-card more-row" data-page="facilities" style="display:none;">
+    <img src="/static/icons/menu/facilities.webp" alt="facilities">
+    <div>Facilities</div>
+  </div>
+
+  <div class="icon-card more-row" data-page="about" style="display:none;">
+    <img src="/static/icons/menu/about.webp" alt="faqs">
+    <div>About</div>
+  </div>
+
+  <!-- ROW 7 (HIDDEN BY DEFAULT) -->
+  <div class="icon-card more-row" data-page="parade" style="display:none;">
+    <img src="/static/icons/menu/parade.webp" alt="parade">
+  <div>Parade</div>
+  </div>
+
+  <div class="icon-card more-row" style="display:none;" data-page="survey">
+    <img src="/static/icons/menu/survey.webp" alt="survey">
+    <div>Survey</div>
+  </div>
+
+  <div class="icon-card more-row" data-page="tasting" style="display:none;">
+    <img src="/static/icons/menu/taste.webp" alt="tasting">
+  <div>Tasting</div>
+  </div>
+
+<!-- ROW 8 (HIDDEN BY DEFAULT) -->
+  <div class="icon-card more-row" style="display:none;">
+    <img src="/static/logo.webp" alt="Fair Logo" onclick="goHome()" />
+  </div>
+
+  <div class="icon-card more-row" data-page="faqs" style="display:none;">
+    <img src="/static/icons/menu/faqs.webp" alt="about">
+    <div>Help FAQs</div>
+  </div>
+
+  <div class="icon-card more-row" style="display:none;">
+    <img src="/static/logo.webp" alt="Fair Logo" onclick="goHome()" />
+  </div>
+</div>
+
+<!-- CONTENT AREA -->
+<div id="content"></div>
+
+<script src="/static/cache.js"></script>
+
+<script>
+(async () => {
+
+  await CacheManager.init();
+
+})();
+</script>
+
+<script src="/static/app.js"></script>
+
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+<div id="footerLogo">
+
+  <div class="footer-row">
+    <div class="footer-side">Aug 10th-16th, 2026</div>
+
+    <img src="/static/logo.webp" alt="Fair Logo" onclick="goHome()" />
+
+    <div class="footer-side">Palmyra, New York</div>
+  </div>
+
+  <div class="footer-text">
+    Copyright 2026 Retro Gear Laboratories LLC
+  </div>
+
+</div>
+
+
+</body>
+</html>

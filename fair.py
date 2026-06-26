@@ -155,14 +155,10 @@ async def add_cache_headers(request, call_next):
     return response
 
 @app.get("/", response_class=HTMLResponse)
-async def root(request: Request):
+async def root():
 
-    return templates.TemplateResponse(
-        request=request,
-        name="index_template.html",
-        context={
-            "app_version": get_app_version()
-        }
+    return FileResponse(
+        "static/index.html"
     )
 
 # -------------- JSON HELPER ---------------
@@ -752,4 +748,14 @@ async def get_media():
     result = await get_data(qry)
 
     return json_response(result)
+
+# ---------- MEDIA VERSIONS -------------
+@app.get("/api/app")
+async def get_app():
+
+    qry = "select name, version, app_size, updated from app;"
+    result = await get_data(qry)
+
+    return json_response(result)
+
 

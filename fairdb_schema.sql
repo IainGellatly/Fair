@@ -140,7 +140,7 @@ drop table if exists resource;
 create table resource (
   resource_id    int auto_increment primary key,
   resource       varchar(32),
-  version        int not null default 0,
+  version        int not null default 1,
   updated        datetime default current_timestamp
                    on update current_timestamp
 );
@@ -154,9 +154,18 @@ drop table if exists media;
 create table media (
   media_id       int auto_increment primary key,
   name           varchar(128),
-  version        int not null default 0,
+  version        int not null default 1,
   media_size     int,
   updated        datetime default current_timestamp
                    on update current_timestamp
 );
 
+drop table if exists app;
+create table app (
+  app_id         int auto_increment primary key,
+  name           varchar(128),
+  version        int not null default 1,
+  app_size       int,
+  updated        datetime default current_timestamp
+                   on update current_timestamp
+);
