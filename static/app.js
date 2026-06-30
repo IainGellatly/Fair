@@ -1365,7 +1365,7 @@ content.innerHTML = `
       </div>
 
       <div class="ticket-header-subtitle">
-        Vote Again Tomorrow. <br>Rankings Updated Every 5 Minutes.
+        Vote Again Tomorrow. <br>Rankings Updated Every 5 Min
       </div>
 
     </div>
@@ -1477,7 +1477,7 @@ async function refreshVoteResults(){
       </div>
 
       <div class="ticket-header-subtitle">
-        Vote Again Tomorrow. <br>Rankings Updated Every 5 Minutes.
+        Vote Again Tomorrow. <br>Rankings Updated Every 5 Min
       </div>
 
     </div>

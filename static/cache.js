@@ -72,6 +72,15 @@ class CacheManagerClass {
 
             }
 
+            // Download the latest vote results if we are online.
+            // If we are offline, keep whatever is already cached.
+
+            try {
+                await this.refreshVoteResults();
+            } catch (err) {
+                // Offline - cached vote results remain available.
+            }
+
             await this.syncAnalytics();
             await this.syncSurveys();
             await this.syncVotes();

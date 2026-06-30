@@ -27,10 +27,7 @@ class FairUser(HttpUser):
         self.client.get("/api/events")
         for _ in range(11):
             self.client.get("/static/pages/tickets.html")
-        for _ in range(25):
-            self.client.get("/static/icons/menu/about.webp")
-         for _ in range(150):
-             self.client.get("/static/icons/vendor/midway.webp")
+        self.client.get("/static/media.zip")
 
     @task
     def check_resource(self):

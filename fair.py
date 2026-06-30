@@ -14,8 +14,6 @@ from urllib.parse import urlparse
 from py_vapid import Vapid
 from datetime import date
 from fastapi.templating import Jinja2Templates
-import os
-from pathlib import Path
 
 # ---------------- CONFIG ----------------
 VAPID_PUBLIC_KEY = "BPAr2_PD2PGYvI0EsANa5gCXJ6z_hupiV6Bjdt7jxMaL_0D_QFdF-PbP3wDDNBM8PNzvbWRQegM9WH0yOyDVJ00"
@@ -63,42 +61,6 @@ logging.basicConfig(
     level=CLOUD_LOGGING_LEVEL,
     datefmt='%Y-%m-%d %H:%M:%S'
 )
-
-def get_app_version():
-
-    latest = 0
-
-    paths = [
-        "static",
-        "templates",
-        "sw.js"
-    ]
-
-    for base in paths:
-
-        p = Path(base)
-
-        # single file
-        if p.is_file():
-
-            latest = max(
-                latest,
-                p.stat().st_mtime
-            )
-
-        # entire directory tree
-        elif p.is_dir():
-
-            for f in p.rglob("*"):
-
-                if f.is_file():
-
-                    latest = max(
-                        latest,
-                        f.stat().st_mtime
-                    )
-
-    return str(int(latest))
 
 pool: asyncmy.pool.Pool | None = None
 analytics_buffer = []

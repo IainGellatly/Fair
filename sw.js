@@ -1,11 +1,41 @@
-const CACHE_NAME = "fair-cache-v1";
+const CACHE_NAME = "fair-cache-v3";
 
-self.addEventListener('install', event => {
+const APP_SHELL = [
+  "/",
+  "/static/app.js",
+  "/static/cache.js",
+  "/static/styles.css",
+  "/static/manifest.webmanifest"
+];
+
+self.addEventListener("install", event => {
+
   self.skipWaiting();
+
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(APP_SHELL))
+  );
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(self.clients.claim());
+});
+
+self.addEventListener("fetch", event => {
+
+  // Only intercept page navigation.
+  // Let the browser handle everything else normally.
+
+  if (event.request.mode !== "navigate") {
+    return;
+  }
+
+  event.respondWith(
+    fetch(event.request)
+      .catch(() => caches.match("/"))
+  );
+
 });
 
 self.addEventListener('push', function(event) {
