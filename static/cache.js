@@ -380,24 +380,32 @@ async getResourceData(resource) {
             }
 
             const mediaName =
-                src
-                    .substring(8)
-                    .split("?")[0];
+                src.split("?")[0];
 
             const url =
-                await this.getMediaUrl(
-                    mediaName
-                );
+                await this.getMediaUrl(mediaName);
 
             if (url) {
 
                 img.src = url;
+                img.removeAttribute("srcset");
 
             }
 
         }
 
     }
+
+async renderHtml(target, html) {
+
+    const wrapper = document.createElement("div");
+
+    wrapper.innerHTML = html;
+
+    await this.localizeImages(wrapper);
+
+    target.replaceChildren(...wrapper.childNodes);
+}
 
     async getMediaStats() {
 
@@ -700,10 +708,14 @@ else if (resource.resource === "sponsors") {
 
     } catch (err) {
 
-      console.warn(
-        "Resource sync failed",
-        err
-      );
+    if (navigator.onLine) {
+
+        console.warn(
+            "Resource sync failed",
+            err
+        );
+
+}
 
       // keep running
     }
@@ -949,10 +961,8 @@ async syncMedia(serverInfo) {
         `Downloading media ${file.name}`
       );
 
-      const fileRes =
-        await fetch(
-          `/static/${file.name}`
-        );
+        const fileRes =
+            await fetch(file.name);
 
       const blob =
         await fileRes.blob();
@@ -1053,7 +1063,7 @@ async syncApp(serverInfo) {
       );
 
       const fileRes =
-        await fetch(`/${file.name}`);
+        await fetch(`${file.name}`);
 
       const blob =
         await fileRes.blob();

@@ -11,7 +11,7 @@ const surveyConfig = [
       {id:5, label:"Judged Exhibits"},
       {id:6, label:"Vendor Booths"},
       {id:7, label:"Grandstand Events"},
-      {id:8, label:"Entertainment Alley"},
+      {id:8, label:"Community Exhibits"},
       {id:9, label:"Other (add comment below)"}
     ]
   },
@@ -27,7 +27,7 @@ const surveyConfig = [
       {id:5, label:"Judged Exhibits"},
       {id:6, label:"Vendor Booths"},
       {id:7, label:"Grandstand Events"},
-      {id:8, label:"Entertainment Alley"},
+      {id:8, label:"Community Exhibits"},
       {id:9, label:"Other (add comment below)"}
     ]
   },
@@ -36,9 +36,9 @@ const surveyConfig = [
     question: "How long are you staying today?",
     max: 1,
     options: [
-      {id:1, label:"Less than 1 hour"},
-      {id:2, label:"1-2 hours"},
-      {id:3, label:"3-4 hours"},
+      {id:1, label:"1-2 Hours"},
+      {id:2, label:"3-4 Hours"},
+      {id:3, label:"5-6 Hours"},
       {id:4, label:"All Day"}
     ]
   }
@@ -460,7 +460,8 @@ if (cachedPages.includes(page)) {
       `;
     }
 
-    content.innerHTML = `
+await CacheManager.renderHtml(content, `
+
 <div class="ticket-header">
 
   <img
@@ -497,9 +498,8 @@ if (cachedPages.includes(page)) {
       ${searchBox}
 
       ${html}
-    `;
+    `);
 
-    await CacheManager.localizeImages(content);
     scrollToContent();
 
   } catch (err) {
@@ -590,7 +590,7 @@ let h = `
     data.forEach(item => {
 
     const iconPath = item.icon
-      ? `/static/icons/${item.icon}?v=${item.icon_version}`
+      ? `${item.icon}?v=${item.icon_version}`
       : null;
 
       const featuredClass = item.featured == 1
@@ -617,8 +617,7 @@ let h = `
       `;
     });
 
-    content.innerHTML = h;
-    await CacheManager.localizeImages(content);
+    await CacheManager.renderHtml(content, h);
     scrollToContent();
 
   } catch (err){
@@ -690,10 +689,23 @@ let h = `
 </div>
 `;
 
+    let currentTierOrder = 0;
+
     data.forEach(item => {
 
+        if (item.tier_order !== currentTierOrder){
+              currentTierOrder = item.tier_order;
+              h += `
+                <h2
+                  style="margin-top:20px;"
+                >
+                  <b>${item.tier}</b>
+                </h2>
+              `;
+            }
+
         const iconPath = item.icon
-            ? `/static/icons/${item.icon}?v=${item.icon_version}`
+            ? `${item.icon}?v=${item.icon_version}`
             : null;
 
       h += `
@@ -710,18 +722,13 @@ let h = `
 
             ${renderLine(item.description)}
 
-            <div class="ui-card-body"></div>
-
-            <div class="ui-card-body"><b>${item.tier || ''}</b></div>
-
           </div>
 
         </div>
       `;
     });
 
-    content.innerHTML = h;
-    await CacheManager.localizeImages(content);
+    await CacheManager.renderHtml(content, h);
     scrollToContent();
 
   } catch (err){
@@ -884,7 +891,7 @@ let h = `
 
       // ---------------- ICON ----------------
 const iconPath = item.icon
-  ? `/static/icons/${item.icon}?v=${item.icon_version}`
+  ? `${item.icon}?v=${item.icon_version}`
   : null;
 
       // ---------------- CARD COLOR LOGIC ----------------
@@ -983,8 +990,7 @@ const iconPath = item.icon
     `;
     });
 
-    content.innerHTML = h;
-    await CacheManager.localizeImages(content);
+    await CacheManager.renderHtml(content, h);
 
     // 🔥 SMART CALENDAR SCROLL
     if (!type){
@@ -1151,7 +1157,7 @@ const outdoor =
     `;
     }
 
-  content.innerHTML = `
+  await CacheManager.renderHtml(content, `
 
 <div class="ticket-header">
 
@@ -1191,9 +1197,8 @@ const outdoor =
     ${renderCard("Pick Best Outdoor Vendor", "outdoor", "outdoor")}
 
     <button class="vote-submit-btn" onclick="submitVote()">Submit Your Votes</button>
-  `;
+  `);
 
-  await CacheManager.localizeImages(content);
   scrollToContent();
 }
 
@@ -1343,7 +1348,7 @@ const ts = updatedTime
     `;
   }
 
-content.innerHTML = `
+await CacheManager.renderHtml(content, `
 
 <div class="ticket-header">
 
@@ -1384,9 +1389,8 @@ content.innerHTML = `
   ${renderCard("Best Indoor Vendor", "indoor", data.indoor)}
   ${renderCard("Best Outdoor Vendor", "outdoor", data.outdoor)}
 
-`;
+`);
 
-  await CacheManager.localizeImages(content);
   scrollToContent();
 }
 
@@ -1455,7 +1459,7 @@ async function refreshVoteResults(){
     `;
   }
 
-  content.innerHTML = `
+await CacheManager.renderHtml(content, `
 
 <div class="ticket-header">
 
@@ -1495,9 +1499,8 @@ async function refreshVoteResults(){
     ${renderCard("Best Food Vendor", "food", data.food)}
     ${renderCard("Best Indoor Vendor Booth", "indoor", data.indoor)}
     ${renderCard("Best Outdoor Vendor Display", "outdoor", data.outdoor)}
-  `;
+  `);
 
-  await CacheManager.localizeImages(content);
   // 🔥 restore exact scroll position
   window.scrollTo(0, scrollPos);
 }
@@ -1598,8 +1601,7 @@ let h = `
     </button>
   `;
 
-  content.innerHTML = h;
-  await CacheManager.localizeImages(content);
+  await CacheManager.renderHtml(content, h);
   scrollToContent();
 }
 
@@ -1686,7 +1688,7 @@ async function renderSurveyThankYou(){
 
   const content = document.getElementById("content");
 
-    content.innerHTML = `
+  await CacheManager.renderHtml(content, `
 
 <div class="ticket-header">
 
@@ -1735,9 +1737,8 @@ async function renderSurveyThankYou(){
         </div>
 
       </div>
-    `;
+    `);
 
-  await CacheManager.localizeImages(content);
   scrollToContent();
 }
 
@@ -1854,22 +1855,22 @@ const IMAGES = {
 
   fair:
     await CacheManager.getMediaUrl(
-      "maps/fair_map4.webp"
+      "/static/maps/fair_map4.webp"
     ) || "/static/maps/fair_map4.webp",
 
   floral:
     await CacheManager.getMediaUrl(
-      "maps/floral_plan.webp"
+      "/static/maps/floral_plan.webp"
     ) || "/static/maps/floral_plan.webp",
 
   commercial1:
     await CacheManager.getMediaUrl(
-      "maps/commercial_1_plan.webp"
+      "/static/maps/commercial_1_plan.webp"
     ) || "/static/maps/commercial_1_plan.webp",
 
   commercial2:
     await CacheManager.getMediaUrl(
-      "maps/commercial_2_plan.webp"
+      "/static/maps/commercial_2_plan.webp"
     ) || "/static/maps/commercial_2_plan.webp"
 };
 
@@ -2753,8 +2754,8 @@ let h = `
           h += `<h2 style="margin-top:20px;"><b>${currentDay}</b></h2>`;
         }
 
-      const iconPath = item.icon
-        ? `/static/icons/${item.icon}`
+    const iconPath = item.icon
+        ? `${item.icon}?v=${item.icon_version}`
         : null;
 
       let bgStyle = '';
@@ -2878,8 +2879,7 @@ let h = `
         `;
     });
 
-    content.innerHTML = h;
-    await CacheManager.localizeImages(content);
+  await CacheManager.renderHtml(content, h);
 
 // 🔥 SMART SCROLL (only on first load + ONLY if subscribed)
 if (!preserveScroll){

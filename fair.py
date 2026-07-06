@@ -259,7 +259,7 @@ async def alert_scheduler():
 @app.get("/api/sponsors")
 async def get_sponsors():
 
-    qry = "select * from sponsors order by name;"
+    qry = "select * from sponsors order by tier_order, name;"
     result = await get_data(qry)
 
     return json_response(result)
