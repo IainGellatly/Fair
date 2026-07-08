@@ -677,6 +677,7 @@ if (
   resource.resource === "media"
 ) {
 
+  await this.preloadMediaZip(resource);
   await this.syncMedia(resource);
 
 }
@@ -924,6 +925,102 @@ async syncEvents(serverInfo) {
   }
 }
 
+async preloadMediaZip(serverInfo) {
+
+    const loaded =
+        await this.getMetadata("media_zip_version");
+
+    if (loaded === serverInfo.version) {
+
+        console.log("Media ZIP already current.");
+
+        return;
+
+    }
+
+    console.log("Downloading media manifest...");
+
+    const manifestRes =
+        await fetch("/api/media");
+
+    const manifest =
+        await manifestRes.json();
+
+    const versions = new Map();
+
+    for (const file of manifest) {
+
+        versions.set(file.name, file);
+
+    }
+
+    console.log("Downloading media.zip...");
+
+    const zipRes =
+        await fetch(
+            `/static/media/media.zip?v=${serverInfo.version}`,
+            { cache: "reload" }
+        );
+
+    const zip =
+        await JSZip.loadAsync(
+            await zipRes.arrayBuffer()
+        );
+
+    let count = 0;
+
+    for (const filename in zip.files) {
+
+        const entry = zip.files[filename];
+
+        if (entry.dir) {
+            continue;
+        }
+
+        const blob =
+            await entry.async("blob");
+
+        const name =
+            "/static/" + filename;
+
+        const info =
+            versions.get(name);
+
+        if (!info) {
+
+            console.warn(
+                "Missing from manifest:",
+                name
+            );
+
+            continue;
+
+        }
+
+        await this.putMedia({
+
+            name: name,
+            version: info.version,
+            media_size: info.media_size,
+            updated: info.updated,
+            blob: blob
+
+        });
+
+        count++;
+
+    }
+
+    console.log(
+        `Preloaded ${count} media files from ZIP`
+    );
+    await this.setMetadata(
+        "media_zip_version",
+        serverInfo.version
+    );
+
+}
+
 async syncMedia(serverInfo) {
 
   try {
@@ -976,8 +1073,11 @@ async syncMedia(serverInfo) {
         `Downloading media ${file.name}`
       );
 
-        const fileRes =
-            await fetch(file.name);
+    const fileRes =
+        await fetch(
+            `${file.name}?v=${file.version}`,
+            { cache: "reload" }
+        );
 
       const blob =
         await fileRes.blob();
