@@ -248,6 +248,25 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
 }
 
+if ('serviceWorker' in navigator) {
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+
+        // Prevent reload loop
+        if (window.__swReloaded) {
+            return;
+        }
+
+        window.__swReloaded = true;
+
+        console.log("New service worker activated. Reloading...");
+
+        window.location.reload();
+
+    });
+
+}
+
 // ---------------- INSTALL PROMPT ----------------
 
 // iPhone/iPad Safari
@@ -3162,7 +3181,7 @@ async function loadTasting(){
       `;
     });
 
-    content.innerHTML = h;
+    await CacheManager.renderHtml(content, h);
 
     scrollToContent();
 

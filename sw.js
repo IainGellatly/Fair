@@ -1,4 +1,6 @@
-const CACHE_NAME = "fair-cache-v3";
+const APP_VERSION = 17;
+
+const CACHE_NAME = `fair-cache-v${APP_VERSION}`;
 
 const APP_SHELL = [
   "/",
@@ -10,32 +12,92 @@ const APP_SHELL = [
 
 self.addEventListener("install", event => {
 
-  self.skipWaiting();
+    self.skipWaiting();
 
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
-  );
+    event.waitUntil((async () => {
+
+        const cache = await caches.open(CACHE_NAME);
+
+        for (const file of APP_SHELL) {
+
+            const fetchUrl =
+                (file === "/")
+                    ? file
+                    : `${file}?v=${APP_VERSION}`;
+
+            console.log("Caching:", fetchUrl);
+
+            const response = await fetch(fetchUrl, {
+                cache: "reload"
+            });
+
+            await cache.put(file, response.clone());
+
+        }
+
+    })());
+
 });
 
-self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
+self.addEventListener("activate", event => {
+
+    event.waitUntil((async () => {
+
+        const names = await caches.keys();
+
+        await Promise.all(
+            names.map(name => {
+
+                if (name !== CACHE_NAME) {
+                    console.log("Deleting old cache:", name);
+                    return caches.delete(name);
+                }
+
+            })
+        );
+
+        await self.clients.claim();
+
+    })());
+
 });
 
 self.addEventListener("fetch", event => {
 
-  // Only intercept page navigation.
-  // Let the browser handle everything else normally.
+    if (event.request.method !== "GET") {
+        return;
+    }
 
-  if (event.request.mode !== "navigate") {
-    return;
-  }
+    const url = new URL(event.request.url);
 
-  event.respondWith(
-    fetch(event.request)
-      .catch(() => caches.match("/"))
-  );
+    // Serve cached shell files
+    if (
+        url.pathname === "/" ||
+        url.pathname === "/static/app.js" ||
+        url.pathname === "/static/cache.js" ||
+        url.pathname === "/static/styles.css" ||
+        url.pathname === "/static/manifest.webmanifest"
+    ) {
 
+        event.respondWith((async () => {
+
+            const cache = await caches.open(CACHE_NAME);
+
+            const cached = await cache.match(url.pathname);
+
+            if (cached) {
+                console.log("SW serving:", url.pathname);
+                return cached;
+            }
+
+            return fetch(event.request);
+
+        })());
+
+        return;
+    }
+
+    // Everything else unchanged
 });
 
 self.addEventListener('push', function(event) {

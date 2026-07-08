@@ -366,10 +366,11 @@ async getResourceData(resource) {
         const images =
             root.querySelectorAll("img");
 
+        console.log("localizing images!!!");
+
         for (const img of images) {
 
-            const src =
-                img.getAttribute("src");
+            const src = img.dataset.originalSrc;
 
             if (!src) {
                 continue;
@@ -379,17 +380,22 @@ async getResourceData(resource) {
                 continue;
             }
 
-            const mediaName =
-                src.split("?")[0];
+            console.log("Found image:", src);
 
-            const url =
-                await this.getMediaUrl(mediaName);
+            const mediaName = src.split("?")[0];
+
+            const url = await this.getMediaUrl(mediaName);
+
+            console.log("Media:", mediaName);
+            console.log("Blob URL:", url);
 
             if (url) {
-
                 img.src = url;
                 img.removeAttribute("srcset");
-
+                console.log("Replaced with blob");
+            } else {
+                img.src = src;
+                console.warn("NOT FOUND:", mediaName);
             }
 
         }
@@ -398,9 +404,18 @@ async getResourceData(resource) {
 
 async renderHtml(target, html) {
 
+    console.log("renderHtml()", target);
+
     const wrapper = document.createElement("div");
 
     wrapper.innerHTML = html;
+
+    for (const img of wrapper.querySelectorAll("img")) {
+
+        img.dataset.originalSrc = img.getAttribute("src");
+        img.removeAttribute("src");
+
+    }
 
     await this.localizeImages(wrapper);
 
