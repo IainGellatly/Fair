@@ -19,8 +19,7 @@ const CACHED_RESOURCES = [
   "community",
   "animal",
   "events",
-  "media",
-  "app"
+  "media"
 ];
 
 class CacheManagerClass {
@@ -29,7 +28,6 @@ class CacheManagerClass {
     this.db = null;
     this.syncTimer = null;
     this.mediaUrls = new Map();
-    this.appUrls = new Map();
   }
 
   async init() {
@@ -61,7 +59,7 @@ class CacheManagerClass {
                 console.log(
                     "Running startup resource sync"
                 );
-
+                await this.preloadMediaZip()
                 await this.syncResources();
 
             } else {
@@ -189,14 +187,6 @@ class CacheManagerClass {
             "media",
             { keyPath: "name" }
           );
-        }
-
-        if (!db.objectStoreNames.contains("app")) {
-
-            db.createObjectStore(
-              "app",
-              { keyPath: "name" }
-            );
         }
 
       };
@@ -470,141 +460,6 @@ async renderHtml(target, html) {
       });
     }
 
-    async getApp(name) {
-
-      return new Promise((resolve, reject) => {
-
-        const tx = this.db.transaction(
-          "app",
-          "readonly"
-        );
-
-        const store = tx.objectStore("app");
-
-        const req = store.get(name);
-
-        req.onsuccess = () =>
-          resolve(req.result);
-
-        req.onerror = () =>
-          reject(req.error);
-
-      });
-
-    }
-
-    async putApp(record) {
-
-      if (this.appUrls.has(record.name)) {
-
-        URL.revokeObjectURL(
-          this.appUrls.get(record.name)
-        );
-
-        this.appUrls.delete(record.name);
-
-      }
-
-      return new Promise((resolve, reject) => {
-
-        const tx = this.db.transaction(
-          "app",
-          "readwrite"
-        );
-
-        const store = tx.objectStore("app");
-
-        const req = store.put(record);
-
-        req.onsuccess = () => resolve();
-
-        req.onerror = () =>
-          reject(req.error);
-
-      });
-
-    }
-
-    async getAppUrl(name) {
-
-      if (this.appUrls.has(name)) {
-        return this.appUrls.get(name);
-      }
-
-      const file = await this.getApp(name);
-
-      if (!file) {
-        return null;
-      }
-
-      const url =
-        URL.createObjectURL(file.blob);
-
-      this.appUrls.set(name, url);
-
-      return url;
-
-    }
-
-    async hasApp(name) {
-
-      const file =
-        await this.getApp(name);
-
-      return file !== undefined &&
-             file !== null;
-
-    }
-
-    async getAppStats() {
-
-      return new Promise((resolve, reject) => {
-
-        const tx = this.db.transaction(
-          "app",
-          "readonly"
-        );
-
-        const store =
-          tx.objectStore("app");
-
-        const req =
-          store.getAll();
-
-        req.onsuccess = () => {
-
-          const files = req.result;
-
-          let bytes = 0;
-
-          files.forEach(f => {
-
-            bytes +=
-              f.app_size || 0;
-
-          });
-
-          resolve({
-
-            files: files.length,
-
-            bytes,
-
-            mb:
-              (bytes / 1048576)
-              .toFixed(2)
-
-          });
-
-        };
-
-        req.onerror = () =>
-          reject(req.error);
-
-      });
-
-    }
-
     async getMetadata(key) {
 
       return new Promise((resolve, reject) => {
@@ -677,18 +532,9 @@ if (
   resource.resource === "media"
 ) {
 
-  await this.preloadMediaZip(resource);
   await this.syncMedia(resource);
 
-}
-else if (
-  resource.resource === "app"
-) {
-
-  await this.syncApp(resource);
-
-}
-else if (resource.resource === "sponsors") {
+} else if (resource.resource === "sponsors") {
 
   await this.syncSponsors(resource);
 
@@ -925,12 +771,12 @@ async syncEvents(serverInfo) {
   }
 }
 
-async preloadMediaZip(serverInfo) {
+async preloadMediaZip() {
 
     const loaded =
         await this.getMetadata("media_zip_version");
 
-    if (loaded === serverInfo.version) {
+    if (loaded) {
 
         console.log("Media ZIP already current.");
 
@@ -958,7 +804,7 @@ async preloadMediaZip(serverInfo) {
 
     const zipRes =
         await fetch(
-            `/static/media/media.zip?v=${serverInfo.version}`,
+            `/static/media/media.zip`,
             { cache: "reload" }
         );
 
@@ -1016,7 +862,7 @@ async preloadMediaZip(serverInfo) {
     );
     await this.setMetadata(
         "media_zip_version",
-        serverInfo.version
+        true
     );
 
 }
@@ -1062,7 +908,7 @@ async syncMedia(serverInfo) {
 
         !cached ||
 
-        cached.version <
+        cached.version !==
         file.version;
 
       if (!needsFile) {
@@ -1127,187 +973,6 @@ async syncMedia(serverInfo) {
     );
 
   }
-}
-
-async syncApp(serverInfo) {
-
-  try {
-
-    const local =
-      await this.getResource("app");
-
-    const needsUpdate =
-      !local ||
-      local.version !==
-      serverInfo.version;
-
-    if (!needsUpdate) {
-      return;
-    }
-
-    console.log(
-      "Updating app cache"
-    );
-
-    const res =
-      await fetch(
-        `/api/app?v=${serverInfo.version}`
-      );
-
-    const manifest =
-      await res.json();
-
-    for (const file of manifest) {
-
-      const cached =
-        await this.getApp(file.name);
-
-      const needsFile =
-
-        !cached ||
-
-        cached.version <
-        file.version;
-
-      if (!needsFile) {
-        continue;
-      }
-
-      console.log(
-        `Downloading app ${file.name}`
-      );
-
-      const fileRes =
-        await fetch(`${file.name}`);
-
-      const blob =
-        await fileRes.blob();
-
-      await this.putApp({
-
-        name:
-          file.name,
-
-        version:
-          file.version,
-
-        app_size:
-          file.app_size,
-
-        updated:
-          file.updated,
-
-        blob
-
-      });
-
-    }
-
-    await this.putResource({
-
-      resource: "app",
-
-      version:
-        serverInfo.version,
-
-      updated:
-        serverInfo.updated,
-
-      data: manifest
-
-    });
-
-    console.log(
-      "App cache updated"
-    );
-
-  } catch (err) {
-
-    console.warn(
-      "App update failed",
-      err
-    );
-
-  }
-
-}
-
-async getAppText(name) {
-
-    const file = await this.getApp(name);
-
-    if (!file) {
-        return null;
-    }
-
-    return await file.blob.text();
-
-}
-
-async loadCachedStyle() {
-
-    console.log("loadCachedStyle() called");
-
-    const css =
-        await this.getAppText(
-            "static/styles.css"
-        );
-
-    if (!css) {
-
-        console.log(
-            "No cached stylesheet"
-        );
-
-        return false;
-    }
-
-    const style =
-        document.createElement("style");
-
-    style.id = "cached-style";
-
-    style.textContent = css;
-
-    document.head.appendChild(style);
-
-    console.log(
-        "Loaded stylesheet from app cache"
-    );
-
-    return true;
-
-}
-
-async loadCachedScript() {
-
-    const js =
-        await this.getAppText(
-            "static/app.js"
-        );
-
-    if (!js) {
-
-        console.log(
-            "No cached app.js"
-        );
-
-        return false;
-    }
-
-    console.log(
-        "Loaded app.js from app cache"
-    );
-
-    const script =
-        document.createElement("script");
-
-    script.textContent = js;
-
-    document.body.appendChild(script);
-
-    return true;
-
 }
 
 async queueAnalytics(event) {

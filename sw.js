@@ -1,4 +1,4 @@
-const APP_VERSION = 20;
+const APP_VERSION = 22;
 
 const CACHE_NAME = `fair-cache-v${APP_VERSION}`;
 
