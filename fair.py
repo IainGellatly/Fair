@@ -12,7 +12,8 @@ import json
 import orjson
 from urllib.parse import urlparse
 from py_vapid import Vapid
-from datetime import date
+from pathlib import Path
+from datetime import date, datetime
 from fastapi.templating import Jinja2Templates
 
 # ---------------- CONFIG ----------------
@@ -710,6 +711,39 @@ async def get_media():
     result = await get_data(qry)
 
     return json_response(result)
+
+# ------- MEDIA VERSIONS FILE -----------
+@app.get("/api/media2")
+async def get_media2():
+
+    media = []
+
+    roots = [
+        Path("static/icons"),
+        Path("static/maps")
+    ]
+
+    for root in roots:
+
+        if not root.exists():
+            continue
+
+        for path in root.rglob("*"):
+
+            if not path.is_file():
+                continue
+
+            stat = path.stat()
+
+            media.append({
+                "name": "/" + path.as_posix(),
+                "media_size": stat.st_size,
+                "updated": int(stat.st_mtime)
+            })
+
+    media.sort(key=lambda x: x["name"])
+
+    return json_response(media)
 
 # ---------- MEDIA VERSIONS -------------
 @app.get("/api/app")

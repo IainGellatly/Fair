@@ -1,4 +1,20 @@
-const APP_VERSION = 22;
+const APP_VERSION = 47;
+
+self.addEventListener("message", event => {
+
+    if (event.data === "GET_APP_VERSION") {
+
+        event.source.postMessage({
+
+            type: "APP_VERSION",
+
+            version: APP_VERSION
+
+        });
+
+    }
+
+});
 
 const CACHE_NAME = `fair-cache-v${APP_VERSION}`;
 

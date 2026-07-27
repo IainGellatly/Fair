@@ -646,7 +646,7 @@ button:active {
   align-items: flex-start;   /* top-align wrapped rows */
   gap: 6px;
   font-size: 0.95rem;
-  margin: 6px 0;
+  margin: 3px 0;
 }
 
 .vote-result-count {
@@ -1217,4 +1217,25 @@ button:active {
   font-size: 16px;
   font-weight: bold;
   color: #5b4636;
+}
+
+.vote-card .ui-card-title{
+    font-size:1.3rem;
+}
+
+.vote-result-title{
+    font-size:1.25rem;
+}
+
+.vote-result-votes{
+    font-size:1.1rem;
+}
+
+.vote-result-row{
+    font-size:1.1rem;
+}
+
+.vote-card .ui-card-body,
+.vote-card .placeholder{
+    font-size:1.15rem;
 }

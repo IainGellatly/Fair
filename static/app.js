@@ -261,7 +261,8 @@ if ('serviceWorker' in navigator) {
 
         console.log("New service worker activated. Reloading...");
 
-        window.location.reload();
+        console.warn("**** PAGE RELOAD FROM controller change ****");
+//        window.location.reload();
 
     });
 
@@ -384,6 +385,88 @@ function toggleVoteSection(id){
       block: 'start'
     });
   }
+}
+
+function formatDate(value) {
+
+    if (!value)
+        return "Never";
+
+    return new Date(value)
+        .toLocaleString();
+
+}
+
+async function loadDiagnostics() {
+
+    const info =
+        await CacheManager.getDiagnostics();
+
+    let version = "Unknown";
+
+    if (
+        navigator.serviceWorker &&
+        navigator.serviceWorker.controller
+    ) {
+
+        version = await new Promise(resolve => {
+
+            const sw =
+                navigator.serviceWorker.controller;
+
+            function handler(event) {
+
+                if (
+                    event.data &&
+                    event.data.type === "APP_VERSION"
+                ) {
+
+                    navigator.serviceWorker.removeEventListener(
+                        "message",
+                        handler
+                    );
+
+                    resolve(event.data.version);
+
+                }
+
+            }
+
+            navigator.serviceWorker.addEventListener(
+                "message",
+                handler
+            );
+
+            sw.postMessage(
+                "GET_APP_VERSION"
+            );
+
+        });
+
+    }
+
+    document.getElementById(
+        "appDiagnostics"
+    ).innerHTML =
+
+        "<b>App Version:</b> " +
+        version +
+
+        "<br><b>Installed:</b> " +
+        formatDate(
+            info.installTime
+        ) +
+
+        "<br><b>Last Check:</b> " +
+        formatDate(
+            info.lastResourceCheck
+        ) +
+
+        "<br><b>Last Sync:</b> " +
+        formatDate(
+            info.lastSuccessfulSync
+        );
+
 }
 
 // ---------------- STATIC PAGE LOADER ----------------
@@ -519,6 +602,10 @@ await CacheManager.renderHtml(content, `
       ${html}
     `);
 
+    if (page === "about") {
+        await loadDiagnostics();
+    }
+
     scrollToContent();
 
   } catch (err) {
@@ -566,7 +653,7 @@ async function loadTenants(type){
 
     let subTitleMap = {
       food: "Snacks, Drinks and Delicious Meals for All Tastes",
-      community: "Organizations Helping Our Community",
+      community: "Organizations Helping Us All",
       vendor: "Home, Farm and Personal Products and Services",
       animal: "Displays, Judging and Fun for the Whole Family"
     };
@@ -823,7 +910,7 @@ else if (type === "today") {
       today: "Today's Events",
       music: "Music Entertainment",
       grandstand: "Grandstand Events",
-      calendar: "Full Fair Calendar"
+      calendar: "Fair Calendar"
     };
 
     let subTitleMap = {
@@ -1083,8 +1170,13 @@ async function loadVotePage(){
 
   const content = document.getElementById("content");
 
+    const todayNow = new Date();
     const today =
-      new Date().toISOString().slice(0,10);
+        `${todayNow.getFullYear()}-${
+            String(todayNow.getMonth()+1).padStart(2,'0')
+        }-${
+            String(todayNow.getDate()).padStart(2,'0')
+        }`;
 
     const voteKey =
       `vote_submitted_${deviceId}_${today}`;
@@ -1265,8 +1357,13 @@ async function submitVote(){
       created: Date.now()
     });
 
+    const todayNow = new Date();
     const today =
-      new Date().toISOString().slice(0,10);
+        `${todayNow.getFullYear()}-${
+            String(todayNow.getMonth()+1).padStart(2,'0')
+        }-${
+            String(todayNow.getDate()).padStart(2,'0')
+        }`;
 
     const voteKey =
       `vote_submitted_${deviceId}_${today}`;
@@ -1389,7 +1486,7 @@ await CacheManager.renderHtml(content, `
       </div>
 
       <div class="ticket-header-subtitle">
-        Vote Again Tomorrow. <br>Rankings Updated Every 5 Min
+        Vote Again Tomorrow. <br>Ranking Updated Every 5 Min
       </div>
 
     </div>
@@ -1500,7 +1597,7 @@ await CacheManager.renderHtml(content, `
       </div>
 
       <div class="ticket-header-subtitle">
-        Vote Again Tomorrow. <br>Rankings Updated Every 5 Min
+        Vote Again Tomorrow. <br>Ranking Updated Every 5 Min
       </div>
 
     </div>
@@ -2172,10 +2269,13 @@ function smoothPosition(lat, lon) {
         text: "Horse stables and tack displays" },
     { id: "Weekly Events",
         left: 41.39, top: 3.43, width: 7.52, height: 9.82,
-        text: "Weekly show tent, Sunshine shed and greased pole contest" },
-    { id: "Track Area",
-        left: 56.28, top: 29.45, width: 13.94, height: 19.80,
-        text: "Antiques, Livestock judging and exhibition ring" }
+        text: "Weekly show tent and greased pole contest" },
+    { id: "Infield Area",
+        left: 50.15, top: 29.45, width: 21.17, height: 16.85,
+        text: "Blue Ribbon Ag Center, antiques, livestock ring & sensory friendly tent" },
+    { id: "Horse Ring",
+        left: 50.15, top: 46.73, width: 21.17, height: 11.59,
+        text: "Horse riding and judging ring" }
   ];
 
     POIS.forEach(poi => {
@@ -2716,8 +2816,21 @@ async function loadTodayEvents(preserveScroll = false){
     const allEvents =
       eventRecord?.data || [];
 
+    const todayNow = new Date();
+
+    // Opening day of the fair
+    const openingDay = new Date(2026, 7, 10);   // August 10, 2026 (month is 0-based)
+
+    // Use opening day until the fair actually begins
+    const displayDate =
+        (todayNow < openingDay) ? openingDay : todayNow;
+
     const todayString =
-      new Date().toISOString().slice(0,10);
+        `${displayDate.getFullYear()}-${
+            String(displayDate.getMonth() + 1).padStart(2, '0')
+        }-${
+            String(displayDate.getDate()).padStart(2, '0')
+        }`;
 
     const data =
       allEvents.filter(item =>

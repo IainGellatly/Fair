@@ -30,17 +30,29 @@ class CacheManagerClass {
     this.mediaUrls = new Map();
   }
 
-  async init() {
+    async init() {
 
-    this.db = await this.openDB();
+        console.count("CacheManager.init");
 
-    console.log("CacheManager initialized");
+        this.db = await this.openDB();
 
-    this.startBackgroundSync();
+        if (!await this.getMetadata("install_time")) {
 
-  }
+            await this.setMetadata(
+                "install_time",
+                Date.now()
+            );
+
+        }
+        console.log("CacheManager initialized");
+
+        this.startBackgroundSync();
+
+    }
 
     async startBackgroundSync() {
+
+        console.count("startBackgroundSync");
 
         try {
 
@@ -59,8 +71,50 @@ class CacheManagerClass {
                 console.log(
                     "Running startup resource sync"
                 );
-                await this.preloadMediaZip()
+                await this.preloadMediaZip();
+
+                console.log("Checking for media updates...");
+
+                await this.syncMediaManifest();
+
+                console.log("Saving current media resource version...");
+
+                const res = await fetch("/api/resource");
+                const resources = await res.json();
+
+                await this.setMetadata(
+                    "last_resource_check",
+                    Date.now()
+                );
+
+                const mediaInfo =
+                    resources.find(r => r.resource === "media");
+
+                if (mediaInfo) {
+
+                    await this.putResource({
+
+                        resource: "media",
+                        version: mediaInfo.version,
+                        updated: mediaInfo.updated
+
+                    });
+
+                    console.log(
+                        `Media resource version ${mediaInfo.version} saved`
+                    );
+                }
+
+                console.log("Downloading initial app resources...");
+
                 await this.syncResources();
+
+                await this.setMetadata(
+                    "last_successful_sync",
+                    Date.now()
+                );
+
+                console.log("Initial resource download complete.");
 
             } else {
 
@@ -93,8 +147,15 @@ class CacheManagerClass {
 
         }
 
-        this.syncTimer = setInterval(() => {
-            this.syncResources();
+        this.syncTimer = setInterval(async () => {
+
+            await this.syncResources();
+
+            await this.setMetadata(
+                "last_successful_sync",
+                Date.now()
+            );
+
         }, 120000);
 
         this.analyticsTimer = setInterval(() => {
@@ -510,6 +571,29 @@ async renderHtml(target, html) {
       });
     }
 
+    async getDiagnostics() {
+
+        return {
+
+            installTime:
+                await this.getMetadata(
+                    "install_time"
+                ),
+
+            lastResourceCheck:
+                await this.getMetadata(
+                    "last_resource_check"
+                ),
+
+            lastSuccessfulSync:
+                await this.getMetadata(
+                    "last_successful_sync"
+                )
+
+        };
+
+    }
+
   async syncResources() {
 
     try {
@@ -561,11 +645,6 @@ if (
 
       }
     }
-
-    await this.setMetadata(
-      "last_resource_check",
-      Date.now()
-    );
 
 
     } catch (err) {
@@ -773,38 +852,23 @@ async syncEvents(serverInfo) {
 
 async preloadMediaZip() {
 
+    console.count("preloadMediaZip");
+
     const loaded =
         await this.getMetadata("media_zip_version");
 
     if (loaded) {
 
-        console.log("Media ZIP already current.");
+        console.log("Media ZIP already installed.");
 
         return;
-
-    }
-
-    console.log("Downloading media manifest...");
-
-    const manifestRes =
-        await fetch("/api/media");
-
-    const manifest =
-        await manifestRes.json();
-
-    const versions = new Map();
-
-    for (const file of manifest) {
-
-        versions.set(file.name, file);
-
     }
 
     console.log("Downloading media.zip...");
 
     const zipRes =
         await fetch(
-            `/static/media/media.zip`,
+            "/static/media/media.zip",
             { cache: "reload" }
         );
 
@@ -819,47 +883,31 @@ async preloadMediaZip() {
 
         const entry = zip.files[filename];
 
-        if (entry.dir) {
+        if (entry.dir)
             continue;
-        }
 
         const blob =
             await entry.async("blob");
 
-        const name =
-            "/static/" + filename;
-
-        const info =
-            versions.get(name);
-
-        if (!info) {
-
-            console.warn(
-                "Missing from manifest:",
-                name
-            );
-
-            continue;
-
-        }
-
         await this.putMedia({
 
-            name: name,
-            version: info.version,
-            media_size: info.media_size,
-            updated: info.updated,
-            blob: blob
+            name: "/static/" + filename,
+
+            media_size: blob.size,
+
+            updated: 0,
+
+            blob
 
         });
 
         count++;
-
     }
 
     console.log(
-        `Preloaded ${count} media files from ZIP`
+        `Installed ${count} media files from ZIP`
     );
+
     await this.setMetadata(
         "media_zip_version",
         true
@@ -867,112 +915,108 @@ async preloadMediaZip() {
 
 }
 
-async syncMedia(serverInfo) {
-
-  try {
-
-    const local =
-      await this.getResource(
-        "media"
-      );
-
-    const needsUpdate =
-      !local ||
-      local.version !==
-      serverInfo.version;
-
-    if (!needsUpdate) {
-      return;
-    }
-
-    console.log(
-      "Updating media cache"
-    );
+async syncMediaManifest() {
 
     const res =
-      await fetch(
-        `/api/media?v=${serverInfo.version}`
-      );
+        await fetch("/api/media2");
 
     const manifest =
-      await res.json();
+        await res.json();
+
+    let updated = 0;
 
     for (const file of manifest) {
 
-      const cached =
-        await this.getMedia(
-          file.name
+        const cached =
+            await this.getMedia(file.name);
+
+        if (
+            cached &&
+            cached.media_size === file.media_size
+        ) {
+            continue;
+        }
+
+        console.log(
+            `Downloading ${file.name}`
         );
 
-      const needsFile =
+        const fileRes =
+            await fetch(
+                `${file.name}?v=${file.media_size}`,
+                { cache: "reload" }
+            );
 
-        !cached ||
+        const blob =
+            await fileRes.blob();
 
-        cached.version !==
-        file.version;
+        await this.putMedia({
 
-      if (!needsFile) {
-        continue;
-      }
+            name: file.name,
 
-      console.log(
-        `Downloading media ${file.name}`
-      );
+            media_size: blob.size,
 
-    const fileRes =
-        await fetch(
-            `${file.name}?v=${file.version}`,
-            { cache: "reload" }
-        );
+            updated: file.updated,
 
-      const blob =
-        await fileRes.blob();
+            blob
 
-      await this.putMedia({
+        });
 
-        name:
-          file.name,
-
-        version:
-          file.version,
-
-        media_size:
-          file.media_size,
-
-        updated:
-          file.updated,
-
-        blob
-
-      });
+        updated++;
     }
 
-    await this.putResource({
-
-      resource: "media",
-
-      version:
-        serverInfo.version,
-
-      updated:
-        serverInfo.updated,
-
-      data: manifest
-
-    });
-
     console.log(
-      "Media cache updated"
+        `Media sync complete (${updated} files updated)`
     );
 
-  } catch (err) {
+}
 
-    console.warn(
-      "Media update failed",
-      err
-    );
+async syncMedia(serverInfo) {
 
-  }
+    try {
+
+        const local =
+            await this.getResource("media");
+
+        if (
+            local &&
+            local.version === serverInfo.version
+        ) {
+
+            console.log("Media resource unchanged.");
+
+            return;
+        }
+
+        console.log(
+            `Media resource changed (${local ? local.version : "none"} -> ${serverInfo.version})`
+        );
+
+        await this.syncMediaManifest();
+
+        await this.putResource({
+
+            resource: "media",
+
+            version: serverInfo.version,
+
+            updated: serverInfo.updated
+
+        });
+
+        console.log(
+            `Media resource updated to version ${serverInfo.version}`
+        );
+
+    } catch (err) {
+
+        console.warn(
+            "Media update failed",
+            err
+        );
+
+    }
+
 }
 
 async queueAnalytics(event) {
