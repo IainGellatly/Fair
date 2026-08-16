@@ -11,7 +11,6 @@ const surveyConfig = [
       {id:5, label:"Judged Exhibits"},
       {id:6, label:"Vendor Booths"},
       {id:7, label:"Grandstand Events"},
-      {id:8, label:"Community Exhibits"},
       {id:9, label:"Other (add comment below)"}
     ]
   },
@@ -27,7 +26,6 @@ const surveyConfig = [
       {id:5, label:"Judged Exhibits"},
       {id:6, label:"Vendor Booths"},
       {id:7, label:"Grandstand Events"},
-      {id:8, label:"Community Exhibits"},
       {id:9, label:"Other (add comment below)"}
     ]
   },
@@ -74,6 +72,71 @@ function initializeInstallUI() {
 const isApple = /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isStandalone = window.matchMedia('(display-mode: standalone)').matches
   || window.navigator.standalone === true;
+
+// --------- FACEBOOK BROWSER DETECTION ----------
+const ua = navigator.userAgent;
+
+const isFacebookBrowser =
+    ua.includes("FB")
+    || ua.includes("FBAN")
+    || ua.includes("FBAV")
+    || ua.includes("FB_IAB");
+
+function showFacebookBrowserMessage() {
+
+    if (!isFacebookBrowser)
+        return;
+
+    const overlay = document.createElement("div");
+    overlay.className = "vote-modal";
+
+    overlay.innerHTML = `
+
+        <div class="vote-modal-content">
+
+            <div class="vote-modal-header">
+                Open in External Browser
+            </div>
+
+            <div style="
+                text-align:left;
+                padding:10px;
+                font-size:18px;
+                line-height:1.5;
+            ">
+
+                Facebook's built-in browser prevents
+                App installation.
+
+                <br><br>
+
+                Tap the corner menu (⋮ or ⋯)<br>
+                Select "Open in external browser"</b>
+
+                <br><br>
+
+                for the best Fair App experience.
+
+            </div>
+
+            <button onclick="closeFacebookBrowserMessage()">
+                Continue
+            </button>
+
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+}
+
+function closeFacebookBrowserMessage(){
+
+    const modal =
+        document.querySelector(".vote-modal");
+
+    if (modal)
+        modal.remove();
+}
 
 // ---------- INSTALL APP ----------
 
@@ -208,15 +271,14 @@ function showInstallInstructions(){
       </div>
 
       <div class="ios-install-step">
-        1. Tap ⋯ below and tap "Share".
+        1. Tap ⋯ and "Share".<br><br>
+        2. Scroll down and tap "Add to Home Screen" <br><br>
+        (Dont see it? Scroll to bottom, tap "Edit Actions", then "Add to Home Screen")<br><br>
+        3. Tap "Add" in top corner
       </div>
 
       <div class="ios-install-step">
-        2. Find and tap "Add to Home Screen" <br>(may be under "View More").
-      </div>
-
-      <div class="ios-install-step">
-        3. Open app using Fair icon.
+        Open the app using the Fair icon.
       </div>
 
       <button
@@ -501,7 +563,7 @@ if (cachedPages.includes(page)) {
   if (!html) {
 
     content.innerHTML =
-      `<div class="card">${page} page is not yet cached. Please try again in a few seconds.</div>`;
+      `<div class="card">${page} page is loading. Drag down to refresh.</div>`;
 
     return;
   }
@@ -639,7 +701,7 @@ async function loadTenants(type){
     if (!data) {
 
       content.innerHTML =
-        `<div class="card">Data is not yet cached. Please try again in a few seconds.</div>`;
+        `<div class="card">Data is loading. Drag down to refresh.</div>`;
 
       return;
     }
@@ -727,7 +789,7 @@ let h = `
     scrollToContent();
 
   } catch (err){
-    content.innerHTML = `<div class="card">Error loading data</div>`;
+    content.innerHTML = `<div class="card">Updating info. Drag down to refresh.</div>`;
   }
 }
 
@@ -751,7 +813,7 @@ const data =
 if (!data) {
 
   content.innerHTML =
-    `<div class="card">Sponsors are not yet cached. Please try again in a few seconds.</div>`;
+    `<div class="card">Sponsors info is loading. Drag down to refresh.</div>`;
 
   return;
 }
@@ -838,7 +900,7 @@ let h = `
     scrollToContent();
 
   } catch (err){
-    content.innerHTML = `<div class="card">Error loading sponsors</div>`;
+    content.innerHTML = `<div class="card">Updating info. Drag down to refresh.</div>`;
   }
 }
 
@@ -863,7 +925,7 @@ const allEvents =
 if (!allEvents) {
 
   content.innerHTML =
-    `<div class="card">Events are not yet cached. Please try again in a few seconds.</div>`;
+    `<div class="card">Events data is loading. Drag down to refresh.</div>`;
 
   return;
 }
@@ -1161,7 +1223,7 @@ const iconPath = item.icon
     }
 
   } catch (err){
-    content.innerHTML = `<div class="card">Error loading events</div>`;
+    content.innerHTML = `<div class="card">Updating info. Drag down to refresh.</div>`;
   }
 }
 
@@ -1653,12 +1715,11 @@ let h = `
     <div class="ticket-header-text">
 
       <div class="ticket-header-title">
-        Quick Survey
+        Free Fair Coin
       </div>
 
       <div class="ticket-header-subtitle">
-        Get a Free Commemorative Pin
-        at the Wayne County Fair Store
+        Click a Few Answers and Get Your Free Commemorative Coin
       </div>
 
     </div>
@@ -1713,7 +1774,7 @@ let h = `
     </div>
 
     <button id="surveySubmitBtn" class="vote-submit-btn" disabled onclick="submitSurvey()">
-      Submit Survey
+      Get Your Free Coin
     </button>
   `;
 
@@ -1767,7 +1828,7 @@ function updateSurveySubmit(){
 
 async function submitSurvey(){
 
-  if (!confirm("Tap OK to submit your survey.")) return;
+  if (!confirm("Tap OK to confirm.")) return;
 
   let payload = [];
 
@@ -1843,13 +1904,13 @@ async function renderSurveyThankYou(){
 
         <img src="/static/icons/fair.webp" class="coupon-logo" />
 
-        <div class="coupon-amount">FREE COMMEMORATIVE PIN</div>
+        <div class="coupon-amount">FREE COMMEMORATIVE COIN</div>
 
         <div class="coupon-location">Wayne County Fair Store</div>
         <div class="coupon-location">Inside Floral Hall</div>
 
         <div class="coupon-note">
-          Show screen to redeem. One pin per person.
+          Show screen to redeem. One coin per person.
         </div>
 
       </div>
@@ -2272,7 +2333,7 @@ function smoothPosition(lat, lon) {
         text: "Weekly show tent and greased pole contest" },
     { id: "Infield Area",
         left: 50.15, top: 29.45, width: 21.17, height: 16.85,
-        text: "Blue Ribbon Ag Center, antiques, livestock ring & sensory friendly tent" },
+        text: "Blue Ribbon Ag Center, antiques, lego, duck races, livestock ring & sensory friendly tent" },
     { id: "Horse Ring",
         left: 50.15, top: 46.73, width: 21.17, height: 11.59,
         text: "Horse riding and judging ring" }
@@ -3054,7 +3115,7 @@ if (!preserveScroll){
 
   } catch (err) {
     console.error("loadTodayEvents error:", err);
-    content.innerHTML = `<div class="card">Error loading today's events</div>`;
+    content.innerHTML = `<div class="card">Updating info. Drag down to refresh.</div>`;
   }
 
 // start auto refresh (once per minute)
@@ -3146,6 +3207,7 @@ async function toggleAlert(eventId, btn){
 window.addEventListener("load", async () => {
 
   initializeInstallUI();
+  showFacebookBrowserMessage();
 
   // CacheManager was already initialized by the bootstrap
   try {
@@ -3179,6 +3241,13 @@ function filterFAQs(text){
 }
 
 async function installApp(){
+
+  CacheManager.queueAnalytics({
+    event: "install_tap",
+    value: "install",
+    device_id: deviceId,
+    timestamp: Date.now()
+  });
 
   // iPhone/iPad
   if (isApple){

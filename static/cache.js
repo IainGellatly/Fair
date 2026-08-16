@@ -165,7 +165,7 @@ class CacheManagerClass {
             this.syncVotes();
             this.syncAlerts();
 
-        }, 300000);
+        }, 60000);
 
     }
 

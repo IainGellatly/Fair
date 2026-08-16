@@ -1239,3 +1239,48 @@ button:active {
 .vote-card .placeholder{
     font-size:1.15rem;
 }
+
+.facebook-browser-sheet{
+
+    width:90%;
+    max-width:390px;
+
+    background:white;
+
+    border-radius:14px;
+
+    padding:22px;
+
+    box-sizing:border-box;
+
+    text-align:center;
+
+    animation:fadeIn .2s ease;
+}
+
+.facebook-browser-title{
+
+    font-size:1.5rem;
+
+    font-weight:bold;
+
+    color:#8b5a2b;
+
+    margin-bottom:18px;
+}
+
+.facebook-browser-text{
+
+    font-size:1.05rem;
+
+    line-height:1.45;
+
+    color:#333;
+
+    margin-bottom:22px;
+}
+
+.facebook-browser-close{
+
+    width:70%;
+}
