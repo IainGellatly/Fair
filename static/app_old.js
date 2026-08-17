@@ -1243,12 +1243,10 @@ async function loadVotePage(){
     const voteKey =
       `vote_submitted_${deviceId}_${today}`;
 
-    let voted =
+    const voted =
       await CacheManager.getMetadata(
         voteKey
       );
-
-    voted = true;
 
     if (voted) {
       loadVoteResults();
@@ -1550,7 +1548,7 @@ await CacheManager.renderHtml(content, `
       </div>
 
       <div class="ticket-header-subtitle">
-        Voting is closed.<br>Thank you everyone!
+        Vote Again Tomorrow. <br>Ranking Updated Every 5 Min
       </div>
 
     </div>
@@ -1661,7 +1659,7 @@ await CacheManager.renderHtml(content, `
       </div>
 
       <div class="ticket-header-subtitle">
-        Voting has closed<br>Thank you to everyone!
+        Vote Again Tomorrow. <br>Ranking Updated Every 5 Min
       </div>
 
     </div>
